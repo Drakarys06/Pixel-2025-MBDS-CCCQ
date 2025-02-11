@@ -1,0 +1,25 @@
+{
+	"name": "2025-project-xxxx",
+	"version": "0.0.1",
+	"description": "MBDS project 2025",
+	"main": "index.js",
+	"repository": "https://github.com/ACOUNT/2025-project-xxxx",
+	"author": "xxx xxx xxx xxx",
+	"license": "MIT",
+	"private": true,
+	"devDependencies": {
+		"eslint": "^9.19.0",
+		"@eslint/js": "^9.19.0"
+	},
+	"workspaces": [
+		"packages/*"
+	],
+	"scripts": {
+		"start:client": "yarn workspace client dev",
+		"start:api": "yarn workspace api start"
+	},
+	"packageManager": "yarn@1.22.19",
+	"engines": {
+		"node": ">=18.0.0"
+	}
+}
