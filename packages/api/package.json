@@ -12,6 +12,7 @@
 	"scripts": {
 		"start": "ts-node-dev --respawn --transpile-only src/index.ts",
 		"build": "tsc",
+		"lint": "eslint .",
 		"serve": "node dist/index.js"
 	},
 	"devDependencies": {
