@@ -1,0 +1,26 @@
+node_modules
+# testing
+coverage
+
+# TypeScript
+*.tsbuildinfo
+
+# production
+build/
+dist/
+
+# ide
+.vscode
+
+# misc
+.DS_Store
+.env*.local
+*-debug.log*
+
+# Serverless directories
+.serverless
+.cdk.staging
+cdk.out
+
+*.private.md
+.vscode/
