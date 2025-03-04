@@ -2,6 +2,9 @@ node_modules
 # testing
 coverage
 
+# TypeScript
+*.tsbuildinfo
+
 # production
 build/
 dist/
