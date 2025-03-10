@@ -14,6 +14,7 @@ import LoginPage from './components/LoginPage';
 import SignupPage from './components/SignUpPage';
 import ProfilePage from './components/ProfilePage';
 import { ThemeProvider } from './components/ThemeContext';
+import PixelBoardView from "./components/PixelBoardView.tsx";
 import { AuthProvider } from './components/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -29,6 +30,7 @@ function App() {
               <Route path="/explore" element={<ExploreBoards />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
+              <Route path="/board/:id" element={<PixelBoardView />} />
               
               {/* Routes protégées */}
               <Route path="/create" element={
