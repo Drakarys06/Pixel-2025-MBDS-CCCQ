@@ -12,36 +12,11 @@ You have to edit the root package.json file :
 
 
 ## Installation
-To install the project, you need to clone the repository and install the dependencies. You can do this by running the following commands in the root directory of the project:
+
+To lauch the project, you need to do the following commands in the root directory of the project:
 ``` js
-yarn
+npm run all
 ```
 
-## Usage
-To start the project, you need to run the following commands in the root directory of the project (in two separate terminals):
-``` js
-yarn start:client 
-```
-*call start script in ./packages/client package.json (to start the react client)*  
-
-``` js
-yarn start:api 
-```
-*call start script in ./packages/api package.json (to start the api)*
-
-
-## Adding libraries
-
-If you want to add library you can use the following commands (in the root directory of the project) :
-``` js
-yarn workspace <client|api> add <package-name> 
-```
-For example to add `express` to the api package you can run:
-``` js
-yarn workspace api add express
-```
-
-For example to add a librairy for devDependencies to the client package you can run:
-``` js
-yarn workspace client add -D <package-name>
-```
+When the project is launched, you can access the frontend at the following url:
+- http://localhost:5173/
