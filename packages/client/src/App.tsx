@@ -9,6 +9,7 @@ import HomePage from './components/HomePage';
 import PixelBoardContainer from './components/PixelBoardContainer';
 import ExploreBoards from './components/ExploreBoards';
 import { ThemeProvider } from './components/ThemeContext';
+import PixelBoardView from "./components/PixelBoardView.tsx";
 
 function App() {
   return (
@@ -22,7 +23,7 @@ function App() {
             <Route path="/boards" element={<div className="page-placeholder">My Boards page coming soon</div>} />
             <Route path="/login" element={<div className="page-placeholder">Login page coming soon</div>} />
             <Route path="/signup" element={<div className="page-placeholder">Signup page coming soon</div>} />
-            <Route path="/board/:id" element={<div className="page-placeholder">Board detail page coming soon</div>} />
+            <Route path="/board/:id" element={<PixelBoardView />} />
             <Route path="*" element={<div className="page-placeholder">Page not found</div>} />
           </Routes>
         </div>
