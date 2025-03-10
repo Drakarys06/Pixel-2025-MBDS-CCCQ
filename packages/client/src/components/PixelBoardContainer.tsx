@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PixelBoardForm, { PixelBoardData } from './PixelBoardForm';
 import PixelBoardList from './PixelBoardList';
 import { Link, NavLink } from 'react-router-dom';
+import ThemeToggle from './ThemeToggle';
 
 interface PixelBoard {
     _id: string;
@@ -142,9 +143,12 @@ const PixelBoardContainer: React.FC = () => {
                         </NavLink>
                     </div>
                     
-                    <div className="nav-auth">
-                        <Link to="/login" className="btn-login">Log in</Link>
-                        <Link to="/signup" className="btn-signup">Sign up</Link>
+                    <div className="nav-actions">
+                        <div className="nav-auth">
+                            <Link to="/login" className="btn-login">Log in</Link>
+                            <Link to="/signup" className="btn-signup">Sign up</Link>
+                        </div>
+                        <ThemeToggle />
                     </div>
                 </nav>
             </header>
@@ -157,7 +161,10 @@ const PixelBoardContainer: React.FC = () => {
 
                 <div className="container-layout">
                     <div className="form-section">
-                        <PixelBoardForm onSubmit={createPixelBoard} loading={formLoading} />
+                        <div className="pixel-board-form">
+                            <h2>Create New Pixel Board</h2>
+                            <PixelBoardForm onSubmit={createPixelBoard} loading={formLoading} />
+                        </div>
                     </div>
 
                     <div className="list-section">

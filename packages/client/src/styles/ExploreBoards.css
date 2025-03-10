@@ -2,10 +2,11 @@
 .explore-container {
   width: 100%;
   min-height: 100vh;
-  background-color: #F5F7FA;
+  background-color: var(--bg-primary);
   padding: 20px;
   box-sizing: border-box;
   overflow-x: hidden;
+  color: var(--text-primary);
 }
 
 /* Header with navigation and auth */
@@ -15,13 +16,22 @@
   align-items: center;
   padding: 10px 0;
   margin-bottom: 30px;
+  background-color: var(--header-bg);
+  border-radius: 8px;
+  padding: 10px 20px;
+  box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .explore-logo {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #4285f4;
+  color: var(--accent-color);
   text-decoration: none;
+  transition: color 0.2s;
+}
+
+.explore-logo:hover {
+  color: var(--accent-hover);
 }
 
 .explore-nav {
@@ -37,20 +47,26 @@
 }
 
 .nav-link {
-  color: #444;
+  color: var(--text-primary);
   text-decoration: none;
   padding: 8px 15px;
   border-radius: 4px;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .nav-link:hover {
-  background-color: #f1f3f4;
+  background-color: var(--hover-color);
 }
 
 .nav-link.active {
-  color: #4285f4;
+  color: var(--accent-color);
   font-weight: 600;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .nav-auth {
@@ -59,22 +75,22 @@
 }
 
 .btn-login {
-  background-color: white;
-  color: #4285f4;
+  background-color: var(--bg-secondary);
+  color: var(--accent-color);
   padding: 8px 16px;
   border-radius: 6px;
   text-decoration: none;
   font-weight: 600;
-  border: 1px solid #4285f4;
+  border: 1px solid var(--accent-color);
   transition: background-color 0.2s;
 }
 
 .btn-login:hover {
-  background-color: #f8f9fa;
+  background-color: var(--hover-color);
 }
 
 .btn-signup {
-  background-color: #4285f4;
+  background-color: var(--accent-color);
   color: white;
   padding: 8px 16px;
   border-radius: 6px;
@@ -84,7 +100,7 @@
 }
 
 .btn-signup:hover {
-  background-color: #3367d6;
+  background-color: var(--accent-hover);
 }
 
 /* Main Content */
@@ -97,10 +113,10 @@
 }
 
 .explore-title {
-  color: #333;
+  color: var(--text-primary);
   margin-bottom: 20px;
   padding-bottom: 10px;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 2px solid var(--border-color);
 }
 
 /* Filter controls */
@@ -110,9 +126,9 @@
   align-items: center;
   margin-bottom: 20px;
   padding: 15px;
-  background-color: white;
+  background-color: var(--bg-secondary);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px var(--shadow-color);
 }
 
 .filter-options {
@@ -124,8 +140,10 @@
 .filter-select {
   padding: 8px;
   border-radius: 4px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--input-border);
   font-size: 14px;
+  background-color: var(--input-bg);
+  color: var(--text-primary);
 }
 
 .search-box {
@@ -135,10 +153,12 @@
 
 .search-input {
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--input-border);
   border-radius: 4px;
   font-size: 14px;
   width: 250px;
+  background-color: var(--input-bg);
+  color: var(--text-primary);
 }
 
 /* Board Grid */
@@ -151,21 +171,21 @@
 }
 
 .board-card {
-  background-color: white;
+  background-color: var(--bg-secondary);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .board-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 15px var(--shadow-color);
 }
 
 .board-preview {
   height: 180px;
-  background-color: #f8f8f8;
+  background-color: var(--bg-tertiary);
   position: relative;
   display: flex;
   align-items: center;
@@ -188,13 +208,13 @@
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 8px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .board-meta {
   display: flex;
   justify-content: space-between;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
   margin-bottom: 12px;
 }
@@ -204,17 +224,17 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 15px;
-  background-color: #fafafa;
-  border-top: 1px solid #eee;
+  background-color: var(--bg-tertiary);
+  border-top: 1px solid var(--border-color);
 }
 
 .board-creator {
   font-size: 14px;
-  color: #444;
+  color: var(--text-secondary);
 }
 
 .btn-join {
-  background-color: #4285f4;
+  background-color: var(--accent-color);
   color: white;
   padding: 6px 12px;
   border-radius: 4px;
@@ -225,18 +245,18 @@
 }
 
 .btn-join:hover {
-  background-color: #3367d6;
+  background-color: var(--accent-hover);
 }
 
 /* Loading state */
 .loading-boards {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .shimmer {
-  background: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+  background: linear-gradient(to right, var(--bg-tertiary) 0%, var(--bg-secondary) 20%, var(--bg-tertiary) 40%, var(--bg-tertiary) 100%);
   background-size: 800px 104px;
   animation: shimmer 1.5s infinite linear;
   border-radius: 4px;
@@ -249,6 +269,34 @@
   100% {
     background-position: 468px 0;
   }
+}
+
+/* Error and success messages */
+.error-message {
+  background-color: var(--error-bg);
+  color: var(--error-color);
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  border-left: 4px solid var(--error-color);
+}
+
+.success-message {
+  background-color: var(--success-bg);
+  color: var(--success-color);
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  border-left: 4px solid var(--success-color);
+}
+
+.no-data {
+  text-align: center;
+  padding: 30px;
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-radius: 8px;
+  margin-top: 20px;
 }
 
 /* Responsive adjustments */
@@ -272,6 +320,11 @@
     width: 100%;
     margin: 15px 0;
     display: flex;
+    justify-content: space-between;
+  }
+  
+  .nav-actions {
+    width: 100%;
     justify-content: space-between;
   }
   
@@ -322,12 +375,14 @@
     height: 160px;
   }
   
-  .home-text h1 {
-    font-size: 2rem;
+  .theme-toggle {
+    margin-top: 10px;
   }
   
-  .home-text p {
-    font-size: 1rem;
+  .nav-auth {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 10px;
   }
 }
 

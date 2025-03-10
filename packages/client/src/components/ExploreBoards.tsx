@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import '../styles/ExploreBoards.css';
+import ThemeToggle from './ThemeToggle';
 
 interface PixelBoard {
   _id: string;
@@ -121,9 +122,12 @@ const ExploreBoards: React.FC = () => {
             </NavLink>
           </div>
           
-          <div className="nav-auth">
-            <Link to="/login" className="btn-login">Log in</Link>
-            <Link to="/signup" className="btn-signup">Sign up</Link>
+          <div className="nav-actions">
+            <div className="nav-auth">
+              <Link to="/login" className="btn-login">Log in</Link>
+              <Link to="/signup" className="btn-signup">Sign up</Link>
+            </div>
+            <ThemeToggle />
           </div>
         </nav>
       </header>

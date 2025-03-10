@@ -1,10 +1,37 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import '../styles/HomePage.css';
+import ThemeToggle from './ThemeToggle';
 
 const HomePage: React.FC = () => {
   return (
     <div className="home-container">
+      <header className="explore-header home-header">
+        <nav className="explore-nav">
+          <Link to="/" className="explore-logo">PixelBoard</Link>
+          
+          <div className="nav-links">
+            <NavLink to="/explore" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
+              Explore
+            </NavLink>
+            <NavLink to="/create" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
+              Create
+            </NavLink>
+            <NavLink to="/boards" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
+              My Boards
+            </NavLink>
+          </div>
+          
+          <div className="nav-actions">
+            <div className="nav-auth">
+              <Link to="/login" className="btn-login">Log in</Link>
+              <Link to="/signup" className="btn-signup">Sign up</Link>
+            </div>
+            <ThemeToggle />
+          </div>
+        </nav>
+      </header>
+      
       <div className="home-content">
         <div className="home-text">
           <h1>Welcome to PixelBoard</h1>

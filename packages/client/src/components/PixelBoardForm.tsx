@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
 
 interface PixelBoardFormProps {
   onSubmit: (pixelBoardData: PixelBoardData) => void;
@@ -42,129 +41,103 @@ const PixelBoardForm: React.FC<PixelBoardFormProps> = ({ onSubmit, loading }) =>
   };
 
   return (
-    <div className="pixel-board-form">
-      <header className="explore-header">
-        <nav className="explore-nav">
-          <Link to="/" className="explore-logo">PixelBoard</Link>
-          
-          <div className="nav-links">
-            <NavLink to="/explore" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
-              Explore
-            </NavLink>
-            <NavLink to="/create" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
-              Create
-            </NavLink>
-            <NavLink to="/boards" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
-              My Boards
-            </NavLink>
-          </div>
-          
-          <div className="nav-auth">
-            <Link to="/login" className="btn-login">Log in</Link>
-            <Link to="/signup" className="btn-signup">Sign up</Link>
-          </div>
-        </nav>
-      </header>
+    <form onSubmit={handleSubmit} className="board-form">
+      <div className="form-group">
+        <label htmlFor="title">Title:</label>
+        <input
+          type="text"
+          id="title"
+          name="title"
+          value={formData.title}
+          onChange={handleChange}
+          required
+          maxLength={100}
+        />
+      </div>
 
-      <h2>Create New Pixel Board</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="title">Title:</label>
+      <div className="form-group">
+        <label htmlFor="length">Length:</label>
+        <input
+          type="number"
+          id="length"
+          name="length"
+          value={formData.length}
+          onChange={handleChange}
+          required
+          min={1}
+          max={1000}
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="width">Width:</label>
+        <input
+          type="number"
+          id="width"
+          name="width"
+          value={formData.width}
+          onChange={handleChange}
+          required
+          min={1}
+          max={1000}
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="time">Time (minutes):</label>
+        <input
+          type="number"
+          id="time"
+          name="time"
+          value={formData.time}
+          onChange={handleChange}
+          required
+          min={0}
+        />
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="creator">Creator:</label>
+        <input
+          type="text"
+          id="creator"
+          name="creator"
+          value={formData.creator}
+          onChange={handleChange}
+          required
+        />
+      </div>
+
+      <div className="form-group checkbox">
+        <label htmlFor="redraw">
           <input
-            type="text"
-            id="title"
-            name="title"
-            value={formData.title}
+            type="checkbox"
+            id="redraw"
+            name="redraw"
+            checked={formData.redraw}
             onChange={handleChange}
-            required
-            maxLength={100}
           />
-        </div>
+          Allow Redraw
+        </label>
+      </div>
 
-        <div className="form-group">
-          <label htmlFor="length">Length:</label>
+      <div className="form-group checkbox">
+        <label htmlFor="visitor">
           <input
-            type="number"
-            id="length"
-            name="length"
-            value={formData.length}
+            type="checkbox"
+            id="visitor"
+            name="visitor"
+            checked={formData.visitor}
             onChange={handleChange}
-            required
-            min={1}
-            max={1000}
           />
-        </div>
+          Visitor Mode
+        </label>
+      </div>
 
-        <div className="form-group">
-          <label htmlFor="width">Width:</label>
-          <input
-            type="number"
-            id="width"
-            name="width"
-            value={formData.width}
-            onChange={handleChange}
-            required
-            min={1}
-            max={1000}
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="time">Time (minutes):</label>
-          <input
-            type="number"
-            id="time"
-            name="time"
-            value={formData.time}
-            onChange={handleChange}
-            required
-            min={0}
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="creator">Creator:</label>
-          <input
-            type="text"
-            id="creator"
-            name="creator"
-            value={formData.creator}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="form-group checkbox">
-          <label htmlFor="redraw">
-            <input
-              type="checkbox"
-              id="redraw"
-              name="redraw"
-              checked={formData.redraw}
-              onChange={handleChange}
-            />
-            Allow Redraw
-          </label>
-        </div>
-
-        <div className="form-group checkbox">
-          <label htmlFor="visitor">
-            <input
-              type="checkbox"
-              id="visitor"
-              name="visitor"
-              checked={formData.visitor}
-              onChange={handleChange}
-            />
-            Visitor Mode
-          </label>
-        </div>
-
-        <button type="submit" disabled={loading} className="btn-primary">
-          {loading ? 'Creating...' : 'Create Pixel Board'}
-        </button>
-      </form>
-    </div>
+      <button type="submit" disabled={loading} className="btn-primary">
+        {loading ? 'Creating...' : 'Create Pixel Board'}
+      </button>
+    </form>
   );
 };
 
