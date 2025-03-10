@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PixelBoardForm, { PixelBoardData } from './PixelBoardForm';
 import PixelBoardList from './PixelBoardList';
+import { Link, NavLink } from 'react-router-dom';
 
 interface PixelBoard {
     _id: string;
@@ -124,23 +125,48 @@ const PixelBoardContainer: React.FC = () => {
     }, []);
 
     return (
-        <div className="pixel-board-container">
-            <h1>PixelBoard Management</h1>
+        <div className="explore-container">
+            <header className="explore-header">
+                <nav className="explore-nav">
+                    <Link to="/" className="explore-logo">PixelBoard</Link>
+                    
+                    <div className="nav-links">
+                        <NavLink to="/explore" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
+                            Explore
+                        </NavLink>
+                        <NavLink to="/create" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
+                            Create
+                        </NavLink>
+                        <NavLink to="/boards" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
+                            My Boards
+                        </NavLink>
+                    </div>
+                    
+                    <div className="nav-auth">
+                        <Link to="/login" className="btn-login">Log in</Link>
+                        <Link to="/signup" className="btn-signup">Sign up</Link>
+                    </div>
+                </nav>
+            </header>
 
-            {error && <div className="error-message">{error}</div>}
-            {successMessage && <div className="success-message">{successMessage}</div>}
+            <div className="explore-content">
+                <h1 className="explore-title">PixelBoard Management</h1>
 
-            <div className="container-layout">
-                <div className="form-section">
-                    <PixelBoardForm onSubmit={createPixelBoard} loading={formLoading} />
-                </div>
+                {error && <div className="error-message">{error}</div>}
+                {successMessage && <div className="success-message">{successMessage}</div>}
 
-                <div className="list-section">
-                    <PixelBoardList
-                        pixelBoards={pixelBoards}
-                        loading={loading}
-                        onDelete={deletePixelBoard}
-                    />
+                <div className="container-layout">
+                    <div className="form-section">
+                        <PixelBoardForm onSubmit={createPixelBoard} loading={formLoading} />
+                    </div>
+
+                    <div className="list-section">
+                        <PixelBoardList
+                            pixelBoards={pixelBoards}
+                            loading={loading}
+                            onDelete={deletePixelBoard}
+                        />
+                    </div>
                 </div>
             </div>
         </div>

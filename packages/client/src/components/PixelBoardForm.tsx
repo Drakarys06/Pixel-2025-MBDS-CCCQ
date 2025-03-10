@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link, NavLink } from 'react-router-dom';
 
 interface PixelBoardFormProps {
   onSubmit: (pixelBoardData: PixelBoardData) => void;
@@ -42,6 +43,29 @@ const PixelBoardForm: React.FC<PixelBoardFormProps> = ({ onSubmit, loading }) =>
 
   return (
     <div className="pixel-board-form">
+      <header className="explore-header">
+        <nav className="explore-nav">
+          <Link to="/" className="explore-logo">PixelBoard</Link>
+          
+          <div className="nav-links">
+            <NavLink to="/explore" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
+              Explore
+            </NavLink>
+            <NavLink to="/create" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
+              Create
+            </NavLink>
+            <NavLink to="/boards" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
+              My Boards
+            </NavLink>
+          </div>
+          
+          <div className="nav-auth">
+            <Link to="/login" className="btn-login">Log in</Link>
+            <Link to="/signup" className="btn-signup">Sign up</Link>
+          </div>
+        </nav>
+      </header>
+
       <h2>Create New Pixel Board</h2>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
@@ -136,7 +160,7 @@ const PixelBoardForm: React.FC<PixelBoardFormProps> = ({ onSubmit, loading }) =>
           </label>
         </div>
 
-        <button type="submit" disabled={loading}>
+        <button type="submit" disabled={loading} className="btn-primary">
           {loading ? 'Creating...' : 'Create Pixel Board'}
         </button>
       </form>

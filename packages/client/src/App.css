@@ -1,71 +1,9 @@
-.App {
-	text-align: center;
-  }
-  
-  .App-header {
-	background-color: #282c34;
-	min-height: 100vh;
+.page-placeholder {
 	display: flex;
-	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	font-size: calc(10px + 2vmin);
-	color: white;
-  }
-  
-  .primary-button {
-	background-color: #61dafb;
-	color: #282c34;
-	font-size: 1.2rem;
-	font-weight: bold;
-	padding: 12px 24px;
-	border: none;
-	border-radius: 4px;
-	cursor: pointer;
-	transition: all 0.3s ease;
-	margin-top: 20px;
-  }
-  
-  .primary-button:hover {
-	background-color: #4dc6e6;
-	transform: translateY(-2px);
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  }
-  
-  .app-content {
-	position: relative;
-	min-height: 100vh;
-	padding: 20px;
-	background-color: #f5f5f5;
-  }
-  
-  .back-button {
-	position: absolute;
-	top: 20px;
-	left: 20px;
-	background-color: #f0f0f0;
-	color: #333;
-	padding: 8px 15px;
-	border: none;
-	border-radius: 4px;
-	cursor: pointer;
-	font-size: 16px;
-	display: flex;
-	align-items: center;
-	transition: background-color 0.3s;
-  }
-  
-  .back-button:hover {
-	background-color: #e0e0e0;
-  }
-  
-  @media (max-width: 768px) {
-	.App-header {
-	  font-size: calc(10px + 1.5vmin);
-	}
-	
-	.primary-button {
-	  font-size: 1rem;
-	  padding: 10px 20px;
-	}
+	height: 100vh;
+	background-color: #f5f7fa;
+	font-size: 1.5rem;
+	color: #666;
   }
