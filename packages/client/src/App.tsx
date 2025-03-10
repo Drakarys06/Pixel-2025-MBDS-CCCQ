@@ -1,48 +1,35 @@
 import { useState } from 'react';
-import logo from './logo.svg';
 import './App.css';
-
-interface Response {
-  response?: string;
-}
+import './styles/PixelBoard.css';
+import PixelBoardContainer from './components/PixelBoardContainer';
 
 function App() {
-  const [resp, setResp] = useState<Response | null>(null);
-  const [error, setError] = useState<Error | null>(null);
-  const [loading, setLoading] = useState<boolean | null>(null);
+  const [showPixelBoard, setShowPixelBoard] = useState(false);
 
-  const handleClickTest = async () => {
-    console.log('VITE_API_URL', import.meta.env.VITE_API_URL);
-    setError(null);
-    setResp(null);
-    setLoading(true);
-
-    await fetch(import.meta.env.VITE_API_URL)
-      .then((response) => response.json())
-      .then((data: Response) => {
-        console.log(data);
-        setResp(data);
-      })
-      .catch((err: Error) => {
-        console.error('err:', err);
-        setError(err);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-  
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>Project MBDS 2025 - SKELETON</p>
-        <br />
-        <button type="button" onClick={handleClickTest}>Call API for test</button>
-        {loading && <p>loading...</p>}
-        {resp && <p>ok = {resp.response}</p>}
-        {error && <p>error = {error.message}</p>}
-      </header>
+      {!showPixelBoard ? (
+        <header className="App-header">
+          <h1>PixelBoard Project</h1>
+          <p>MBDS 2025 - Welcome to the PixelBoard application</p>
+          <button 
+            className="primary-button"
+            onClick={() => setShowPixelBoard(true)}
+          >
+            Go to PixelBoard Management
+          </button>
+        </header>
+      ) : (
+        <div className="app-content">
+          <button 
+            className="back-button"
+            onClick={() => setShowPixelBoard(false)}
+          >
+            ← Back to Home
+          </button>
+          <PixelBoardContainer />
+        </div>
+      )}
     </div>
   );
 }
