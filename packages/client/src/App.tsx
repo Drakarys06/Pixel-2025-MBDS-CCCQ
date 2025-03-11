@@ -4,29 +4,55 @@ import './styles/PixelBoard.css';
 import './styles/HomePage.css';
 import './styles/ExploreBoards.css';
 import './styles/ThemeToggle.css';
+import './styles/LoginPage.css';
+import './styles/Profile.css';
 import './styles/colors.css';
 import HomePage from './components/HomePage';
 import PixelBoardContainer from './components/PixelBoardContainer';
 import ExploreBoards from './components/ExploreBoards';
+import LoginPage from './components/LoginPage';
+import SignupPage from './components/SignUpPage';
+import ProfilePage from './components/ProfilePage';
 import { ThemeProvider } from './components/ThemeContext';
+import { AuthProvider } from './components/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
     <ThemeProvider>
-      <Router>
-        <div className="App">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/create" element={<PixelBoardContainer />} />
-            <Route path="/explore" element={<ExploreBoards />} />
-            <Route path="/boards" element={<div className="page-placeholder">My Boards page coming soon</div>} />
-            <Route path="/login" element={<div className="page-placeholder">Login page coming soon</div>} />
-            <Route path="/signup" element={<div className="page-placeholder">Signup page coming soon</div>} />
-            <Route path="/board/:id" element={<div className="page-placeholder">Board detail page coming soon</div>} />
-            <Route path="*" element={<div className="page-placeholder">Page not found</div>} />
-          </Routes>
-        </div>
-      </Router>
+      <AuthProvider>
+        <Router>
+          <div className="App">
+            <Routes>
+              {/* Routes publiques */}
+              <Route path="/" element={<HomePage />} />
+              <Route path="/explore" element={<ExploreBoards />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+              
+              {/* Routes protégées */}
+              <Route path="/create" element={
+                <ProtectedRoute>
+                  <PixelBoardContainer />
+                </ProtectedRoute>
+              } />
+              <Route path="/boards" element={
+                <ProtectedRoute>
+                  <div className="page-placeholder">My Boards page coming soon</div>
+                </ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } />
+              
+              {/* Route 404 */}
+              <Route path="*" element={<div className="page-placeholder">Page not found</div>} />
+            </Routes>
+          </div>
+        </Router>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

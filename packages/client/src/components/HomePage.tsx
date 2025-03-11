@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import '../styles/HomePage.css';
 import ThemeToggle from './ThemeToggle';
+import AuthNavStatus from './AuthNavStatus';
 
 const HomePage: React.FC = () => {
   return (
@@ -23,10 +24,7 @@ const HomePage: React.FC = () => {
           </div>
           
           <div className="nav-actions">
-            <div className="nav-auth">
-              <Link to="/login" className="btn-login">Log in</Link>
-              <Link to="/signup" className="btn-signup">Sign up</Link>
-            </div>
+            <AuthNavStatus />
             <ThemeToggle />
           </div>
         </nav>

@@ -1,22 +1,32 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
+import ThemeToggle from './ThemeToggle';
+import AuthNavStatus from './AuthNavStatus';
 
 const Navbar: React.FC = () => {
   return (
-    <nav className="main-nav">
-      <Link to="/" className="logo">PixelBoard</Link>
-      
-      <div className="nav-links">
-        <Link to="/explore" className="nav-link">Explore</Link>
-        <Link to="/boards" className="nav-link">My Boards</Link>
-        <Link to="/create" className="nav-link">Create</Link>
-      </div>
-      
-      <div className="nav-auth">
-        <Link to="/login" className="btn btn-login">Log in</Link>
-        <Link to="/signup" className="btn btn-signup">Sign up</Link>
-      </div>
-    </nav>
+    <header className="explore-header">
+      <nav className="explore-nav">
+        <Link to="/" className="explore-logo">PixelBoard</Link>
+        
+        <div className="nav-links">
+          <NavLink to="/explore" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
+            Explore
+          </NavLink>
+          <NavLink to="/create" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
+            Create
+          </NavLink>
+          <NavLink to="/boards" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
+            My Boards
+          </NavLink>
+        </div>
+        
+        <div className="nav-actions">
+          <AuthNavStatus />
+          <ThemeToggle />
+        </div>
+      </nav>
+    </header>
   );
 };
 
