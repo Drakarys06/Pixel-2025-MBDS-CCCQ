@@ -1,36 +1,33 @@
-import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import './styles/PixelBoard.css';
+import './styles/HomePage.css';
+import './styles/ExploreBoards.css';
+import './styles/ThemeToggle.css';
+import './styles/colors.css';
+import HomePage from './components/HomePage';
 import PixelBoardContainer from './components/PixelBoardContainer';
+import ExploreBoards from './components/ExploreBoards';
+import { ThemeProvider } from './components/ThemeContext';
 
 function App() {
-  const [showPixelBoard, setShowPixelBoard] = useState(false);
-
   return (
-    <div className="App">
-      {!showPixelBoard ? (
-        <header className="App-header">
-          <h1>PixelBoard Project</h1>
-          <p>MBDS 2025 - Welcome to the PixelBoard application</p>
-          <button 
-            className="primary-button"
-            onClick={() => setShowPixelBoard(true)}
-          >
-            Go to PixelBoard Management
-          </button>
-        </header>
-      ) : (
-        <div className="app-content">
-          <button 
-            className="back-button"
-            onClick={() => setShowPixelBoard(false)}
-          >
-            ← Back to Home
-          </button>
-          <PixelBoardContainer />
+    <ThemeProvider>
+      <Router>
+        <div className="App">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/create" element={<PixelBoardContainer />} />
+            <Route path="/explore" element={<ExploreBoards />} />
+            <Route path="/boards" element={<div className="page-placeholder">My Boards page coming soon</div>} />
+            <Route path="/login" element={<div className="page-placeholder">Login page coming soon</div>} />
+            <Route path="/signup" element={<div className="page-placeholder">Signup page coming soon</div>} />
+            <Route path="/board/:id" element={<div className="page-placeholder">Board detail page coming soon</div>} />
+            <Route path="*" element={<div className="page-placeholder">Page not found</div>} />
+          </Routes>
         </div>
-      )}
-    </div>
+      </Router>
+    </ThemeProvider>
   );
 }
 
