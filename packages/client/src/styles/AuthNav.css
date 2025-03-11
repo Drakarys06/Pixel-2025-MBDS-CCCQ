@@ -1,0 +1,67 @@
+/* Styles for auth navigation */
+.auth-user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .user-profile-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: color 0.3s ease;
+  }
+  
+  .user-profile-link:hover {
+    color: var(--accent-color);
+  }
+  
+  .username {
+    font-weight: 500;
+    margin-right: 0.5rem;
+  }
+  
+  .btn-logout {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+  }
+  
+  .btn-logout:hover {
+    background-color: rgba(255, 0, 0, 0.1);
+    border-color: #e53935;
+    color: #e53935;
+  }
+  
+  /* Existant - à ajuster si nécessaire */
+  .btn-login, .btn-signup {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-login {
+    color: var(--text-primary);
+    margin-right: 0.75rem;
+  }
+  
+  .btn-login:hover {
+    color: var(--accent-color);
+  }
+  
+  .btn-signup {
+    background-color: var(--accent-color);
+    color: white;
+  }
+  
+  .btn-signup:hover {
+    background-color: var(--accent-hover);
+  }

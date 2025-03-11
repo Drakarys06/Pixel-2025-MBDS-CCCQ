@@ -6,7 +6,19 @@ import ExplorePage from './components/pages/ExplorePage';
 import CreateBoardPage from './components/pages/CreateBoardPage';
 import BoardViewPage from './components/pages/BoardViewPage';
 import NotFoundPage from './components/pages/NotFoundPage';
+import LoginPage from './components/LoginPage';
+import SignupPage from './components/SignUpPage';
+import ProfilePage from './components/ProfilePage';
+import { AuthProvider } from './components/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import './styles/App.css';
+import './styles/PixelBoard.css';
+import './styles/HomePage.css';
+import './styles/ExploreBoards.css';
+import './styles/ThemeToggle.css';
+import './styles/LoginPage.css';
+import './styles/Profile.css';
+import './styles/colors.css';
 
 // Import global stylesheets
 import './styles/index.css';
@@ -15,22 +27,44 @@ import './styles/colors.css';
 const App: React.FC = () => {
   return (
     <ThemeProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/explore" element={<ExplorePage />} />
-          <Route path="/create" element={<CreateBoardPage />} />
-          <Route path="/board/:id" element={<BoardViewPage />} />
-          
-          {/* Placeholder routes with simple not-found */}
-          <Route path="/boards" element={<NotFoundPage message="My Boards page coming soon" />} />
-          <Route path="/login" element={<NotFoundPage message="Login page coming soon" />} />
-          <Route path="/signup" element={<NotFoundPage message="Signup page coming soon" />} />
-          
-          {/* 404 route */}
-          <Route path="*" element={<NotFoundPage message="Page not found" />} />
-        </Routes>
-      </Router>
+      <AuthProvider>
+        <Router>
+          <div className="App">
+            <Routes>
+              {/* Routes publiques */}
+              <Route path="/" element={<HomePage />} />
+              <Route path="/explore" element={<ExplorePage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+              
+              {/* Routes protégées */}
+              <Route path="/create" element={
+                <ProtectedRoute>
+                  <CreateBoardPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/board/:id" element={
+                <ProtectedRoute>
+                  <BoardViewPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/boards" element={
+                <ProtectedRoute>
+                  <div className="page-placeholder">My Boards page coming soon</div>
+                </ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } />
+              
+              {/* Route 404 */}
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </div>
+        </Router>
+      </AuthProvider>
     </ThemeProvider>
   );
 };

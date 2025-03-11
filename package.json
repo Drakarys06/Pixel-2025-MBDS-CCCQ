@@ -11,9 +11,9 @@
 		"@eslint/js": "^9.19.0",
 		"@types/node": "^22.13.9",
 		"@typescript-eslint/eslint-plugin": "^8.26.0",
+		"concurrently": "^8.2.2",
 		"eslint": "^9.19.0",
-		"typescript": "^5.8.2",
-		"concurrently": "^8.2.2"
+		"typescript": "^5.8.2"
 	},
 	"workspaces": [
 		"packages/*"
@@ -25,5 +25,8 @@
 	},
 	"engines": {
 		"node": ">=18.0.0"
+	},
+	"dependencies": {
+		"jsonwebtoken": "^9.0.2"
 	}
 }
