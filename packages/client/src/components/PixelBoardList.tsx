@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { calculateRemainingTime } from '../utils/timeUtils';
 
 interface PixelBoard {
   _id: string;
@@ -13,6 +14,14 @@ interface PixelBoard {
   visitor: boolean;
 }
 
+interface TimeData {
+  [key: string]: {
+    timeRemaining: string;
+    isExpired: boolean;
+    percentRemaining: number;
+  }
+}
+
 interface PixelBoardListProps {
   pixelBoards: PixelBoard[];
   loading: boolean;
@@ -20,6 +29,34 @@ interface PixelBoardListProps {
 }
 
 const PixelBoardList: React.FC<PixelBoardListProps> = ({ pixelBoards, loading, onDelete }) => {
+  const [timeData, setTimeData] = useState<TimeData>({});
+  const pixelBoardsRef = useRef(pixelBoards);
+  
+  useEffect(() => {
+    pixelBoardsRef.current = pixelBoards;
+    
+    updateTimeData();
+    
+    const timer = setInterval(() => {
+      updateTimeData();
+    }, 10000); 
+    return () => clearInterval(timer);
+  }, [pixelBoards]);
+  
+  const updateTimeData = () => {
+    const newTimeData: TimeData = {};
+    
+    pixelBoardsRef.current.forEach(board => {
+      newTimeData[board._id] = calculateRemainingTime(
+        board.creationTime,
+        board.time,
+        board.closeTime
+      );
+    });
+    
+    setTimeData(newTimeData);
+  };
+
   if (loading) {
     return <div className="loading">Loading pixel boards...</div>;
   }
@@ -43,26 +80,55 @@ const PixelBoardList: React.FC<PixelBoardListProps> = ({ pixelBoards, loading, o
             <th>Creator</th>
             <th>Created</th>
             <th>Settings</th>
+            <th>Time Remaining</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {pixelBoards.map((board) => (
-            <tr key={board._id}>
-              <td>{board.title}</td>
-              <td>{board.width} x {board.length}</td>
-              <td>{board.creator}</td>
-              <td>{formatDate(board.creationTime)}</td>
-              <td>
-                <span>Time: {board.time} min</span><br />
-                <span>Redraw: {board.redraw ? 'Yes' : 'No'}</span><br />
-                <span>Visitor Mode: {board.visitor ? 'Yes' : 'No'}</span>
-              </td>
-              <td>
-                <button onClick={() => onDelete(board._id)}>Delete</button>
-              </td>
-            </tr>
-          ))}
+          {pixelBoards.map((board) => {
+            const boardTimeData = timeData[board._id] || {
+              timeRemaining: "Calculating...",
+              isExpired: false,
+              percentRemaining: 100
+            };
+            
+            const { timeRemaining, isExpired, percentRemaining } = boardTimeData;
+            
+            return (
+              <tr key={board._id}>
+                <td>{board.title}</td>
+                <td>{board.width} x {board.length}</td>
+                <td>{board.creator}</td>
+                <td>{formatDate(board.creationTime)}</td>
+                <td>
+                  <span>Time: {board.time} min</span><br />
+                  <span>Redraw: {board.redraw ? 'Yes' : 'No'}</span><br />
+                  <span>Visitor Mode: {board.visitor ? 'Yes' : 'No'}</span>
+                </td>
+                <td>
+                  <div className="time-remaining">
+                    <div className="time-text" style={{ color: isExpired ? 'var(--error-color)' : percentRemaining < 25 ? 'orange' : 'var(--text-primary)' }}>
+                      {timeRemaining}
+                    </div>
+                    {!isExpired && (
+                      <div className="progress-bar">
+                        <div 
+                          className="progress-fill" 
+                          style={{ 
+                            width: `${percentRemaining}%`,
+                            backgroundColor: percentRemaining < 25 ? 'orange' : 'var(--accent-color)'
+                          }} 
+                        />
+                      </div>
+                    )}
+                  </div>
+                </td>
+                <td>
+                  <button onClick={() => onDelete(board._id)}>Delete</button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

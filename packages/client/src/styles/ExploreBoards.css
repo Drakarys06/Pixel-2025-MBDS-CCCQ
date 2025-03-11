@@ -396,3 +396,51 @@
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   }
 }
+
+* Add to ExploreBoards.css for the enhanced filters */
+
+.filter-options {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-right: 5px;
+}
+
+.filter-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  margin-left: 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.filter-badge.joinable {
+  background-color: var(--accent-color);
+}
+
+.filter-badge.viewable {
+  background-color: var(--text-secondary);
+}
+
+/* For mobile devices */
+@media (max-width: 768px) {
+  .filter-options {
+    width: 100%;
+    margin-bottom: 15px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+  }
+
+  .filter-select {
+    flex: 1;
+    min-width: 120px;
+  }
+}

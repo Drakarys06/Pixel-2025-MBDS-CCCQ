@@ -224,3 +224,72 @@ tr:hover {
     margin-top: 10px;
   }
 }
+/* Add to PixelBoard.css for the table view */
+
+/* Time Remaining Styles */
+.time-remaining {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.time-text {
+  font-weight: 600;
+  text-align: center;
+}
+
+.progress-bar {
+  height: 8px;
+  width: 100%;
+  background-color: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--accent-color);
+  transition: width 0.3s ease-in-out;
+}
+
+/* Add to ExploreBoards.css for the card view */
+
+/* Time badge in board preview */
+.time-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: var(--accent-color);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 2;
+}
+
+.time-badge.expired {
+  background-color: var(--error-color);
+}
+
+.time-badge.ending-soon {
+  background-color: orange;
+}
+
+/* Time progress bar in board info */
+.time-progress {
+  margin-top: 8px;
+}
+
+.board-card .progress-bar {
+  height: 6px;
+  width: 100%;
+  background-color: var(--border-color);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.board-card .progress-fill {
+  height: 100%;
+  transition: width 0.3s ease-in-out;
+}
