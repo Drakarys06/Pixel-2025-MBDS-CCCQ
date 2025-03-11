@@ -1,9 +1,9 @@
 {
-	"name": "2025-project-xxxx",
+	"name": "Pixel-2025-MBDS-CCCQ",
 	"version": "0.0.1",
-	"description": "MBDS project 2025",
+	"description": "Pixel-2025-MBDS-CCCQ",
 	"main": "index.js",
-	"repository": "https://github.com/ACOUNT/2025-project-xxxx",
+	"repository": "https://github.com/Drakarys06/Pixel-2025-MBDS-CCCQ",
 	"author": "xxx xxx xxx xxx",
 	"license": "MIT",
 	"private": true,
@@ -12,16 +12,17 @@
 		"@types/node": "^22.13.9",
 		"@typescript-eslint/eslint-plugin": "^8.26.0",
 		"eslint": "^9.19.0",
-		"typescript": "^5.8.2"
+		"typescript": "^5.8.2",
+		"concurrently": "^8.2.2"
 	},
 	"workspaces": [
 		"packages/*"
 	],
 	"scripts": {
-		"start:client": "yarn workspace client dev",
-		"start:api": "yarn workspace api start"
+		"start:client": "npm run dev --workspace=client",
+		"start:api": "npm run start --workspace=api",
+		"all": "npm install && concurrently \"npm run start:api\" \"npm run start:client\""
 	},
-	"packageManager": "yarn@1.22.19",
 	"engines": {
 		"node": ">=18.0.0"
 	}
