@@ -1,0 +1,35 @@
+.create-board-form {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .create-board-title {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .form-row > div {
+    flex: 1;
+  }
+  
+  .form-checkboxes {
+    margin-bottom: 20px;
+  }
+  
+  .form-actions {
+    margin-top: 30px;
+  }
+  
+  @media (max-width: 480px) {
+    .form-row {
+      flex-direction: column;
+      gap: 0;
+    }
+  }

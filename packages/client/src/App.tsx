@@ -1,35 +1,38 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import './App.css';
-import './styles/PixelBoard.css';
-import './styles/HomePage.css';
-import './styles/ExploreBoards.css';
-import './styles/ThemeToggle.css';
-import './styles/colors.css';
-import HomePage from './components/HomePage';
-import PixelBoardContainer from './components/PixelBoardContainer';
-import ExploreBoards from './components/ExploreBoards';
-import { ThemeProvider } from './components/ThemeContext';
-import PixelBoardView from "./components/PixelBoardView.tsx";
+import { ThemeProvider } from './components/ui/ThemeContext';
+import HomePage from './components/pages/HomePage';
+import ExplorePage from './components/pages/ExplorePage';
+import CreateBoardPage from './components/pages/CreateBoardPage';
+import BoardViewPage from './components/pages/BoardViewPage';
+import NotFoundPage from './components/pages/NotFoundPage';
+import './styles/App.css';
 
-function App() {
+// Import global stylesheets
+import './styles/index.css';
+import './styles/colors.css';
+
+const App: React.FC = () => {
   return (
     <ThemeProvider>
       <Router>
-        <div className="App">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/create" element={<PixelBoardContainer />} />
-            <Route path="/explore" element={<ExploreBoards />} />
-            <Route path="/boards" element={<div className="page-placeholder">My Boards page coming soon</div>} />
-            <Route path="/login" element={<div className="page-placeholder">Login page coming soon</div>} />
-            <Route path="/signup" element={<div className="page-placeholder">Signup page coming soon</div>} />
-            <Route path="/board/:id" element={<PixelBoardView />} />
-            <Route path="*" element={<div className="page-placeholder">Page not found</div>} />
-          </Routes>
-        </div>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/explore" element={<ExplorePage />} />
+          <Route path="/create" element={<CreateBoardPage />} />
+          <Route path="/board/:id" element={<BoardViewPage />} />
+          
+          {/* Placeholder routes with simple not-found */}
+          <Route path="/boards" element={<NotFoundPage message="My Boards page coming soon" />} />
+          <Route path="/login" element={<NotFoundPage message="Login page coming soon" />} />
+          <Route path="/signup" element={<NotFoundPage message="Signup page coming soon" />} />
+          
+          {/* 404 route */}
+          <Route path="*" element={<NotFoundPage message="Page not found" />} />
+        </Routes>
       </Router>
     </ThemeProvider>
   );
-}
+};
 
-export default App;
+export default App; 
