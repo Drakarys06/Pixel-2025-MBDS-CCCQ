@@ -1,0 +1,41 @@
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.layout-main {
+  flex: 1;
+  padding: 20px 0;
+}
+
+.page-title {
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .layout-main {
+    padding: 10px 0;
+  }
+  
+  .page-title {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .layout-main {
+    padding: 5px 0;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+}

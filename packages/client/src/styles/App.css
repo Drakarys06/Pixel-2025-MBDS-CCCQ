@@ -1,0 +1,9 @@
+.page-placeholder {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+	background-color: var(--bg-primary);
+	font-size: 1.5rem;
+	color: var(--text-secondary);
+  }
