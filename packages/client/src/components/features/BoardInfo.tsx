@@ -49,7 +49,11 @@ const BoardInfo: React.FC<BoardInfoProps> = ({
         <h1 className="board-title">{title}</h1>
       </div>
       
-      <div className="board-meta">
+      <div className="board-time-status">
+        <span className={`board-status ${isExpired ? 'status-expired' : 'status-active'}`}>
+          {isExpired ? 'Board Expired - View Only' : 'Board Active'}
+        </span>
+
         <div className="board-meta-item">
           <span className="meta-label">Created by:</span>
           <span className="meta-value">{creator}</span>
@@ -74,12 +78,6 @@ const BoardInfo: React.FC<BoardInfoProps> = ({
           <span className="meta-label">Pixels placed:</span>
           <span className="meta-value">{pixelCount}</span>
         </div>
-      </div>
-      
-      <div className="board-time-status">
-        <span className={`board-status ${isExpired ? 'status-expired' : 'status-active'}`}>
-          {isExpired ? 'Board Expired - View Only' : 'Board Active'}
-        </span>
         
         <TimeRemaining
           creationTime={creationTime}
