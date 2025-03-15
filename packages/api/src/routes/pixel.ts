@@ -95,7 +95,7 @@ router.post('/board/:boardId/place', async (req: Request, res: Response) => {
 		const { boardId } = req.params;
 		const { x, y, color, userId } = req.body;
 
-		if (!x || !y || !color || !userId) {
+		if (x === undefined || y === undefined || !color || !userId) {
 			return res.status(400).json({ message: 'Position (x, y), color, and userId are required' });
 		}
 
