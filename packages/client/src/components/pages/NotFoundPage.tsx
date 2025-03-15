@@ -17,7 +17,7 @@ const NotFoundPage: React.FC<NotFoundPageProps> = ({
         <div className="not-found-content">
           <h1 className="not-found-title">{message}</h1>
           <p className="not-found-text">
-            The page you're looking for is not available or is under development.
+            The page you&apos;re looking for is not available or is under development.
           </p>
           <Link to="/">
             <Button variant="primary">Return to Home</Button>

@@ -138,7 +138,6 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
   label,
   error,
   showHexInput = true,
-  className = '',
   id,
   value,
   onChange,

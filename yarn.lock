@@ -721,7 +721,7 @@ anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-"api@file:C:\\Users\\thoma\\Code\\Pixel-2025-MBDS-CCCQ\\packages\\api":
+"api@file:C:\\Users\\Duck\\Documents\\Cours\\M2 MBDS\\JavaScript\\Pixel-2025-MBDS-CCCQ\\packages\\api":
   version "0.0.1"
   resolved "file:packages/api"
   dependencies:
@@ -986,7 +986,7 @@ chokidar@^3.5.1:
   optionalDependencies:
     fsevents "~2.3.2"
 
-"client@file:C:\\Users\\thoma\\Code\\Pixel-2025-MBDS-CCCQ\\packages\\client":
+"client@file:C:\\Users\\Duck\\Documents\\Cours\\M2 MBDS\\JavaScript\\Pixel-2025-MBDS-CCCQ\\packages\\client":
   version "0.0.1"
   resolved "file:packages/client"
   dependencies:

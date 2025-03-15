@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ProgressBar from './ProgressBar';
 import './TimeRemaining.css';
 
@@ -33,19 +33,7 @@ const TimeRemaining: React.FC<TimeRemainingProps> = ({
     percentRemaining: 100
   });
 
-  useEffect(() => {
-    // Calculate time data initially
-    calculateTime();
-    
-    // Update every 10 seconds
-    const timer = setInterval(() => {
-      calculateTime();
-    }, 10000);
-    
-    return () => clearInterval(timer);
-  }, [creationTime, durationMinutes, closeTime]);
-
-  const calculateTime = () => {
+  const calculateTime = useCallback(() => {
     const now = new Date();
     const creation = new Date(creationTime);
     const durationMs = durationMinutes * 60 * 1000;
@@ -89,7 +77,19 @@ const TimeRemaining: React.FC<TimeRemainingProps> = ({
       isExpired: false,
       percentRemaining
     });
-  };
+  }, [creationTime, durationMinutes, closeTime, onTimeExpired]);
+
+  useEffect(() => {
+    // Calculate time data initially
+    calculateTime();
+    
+    // Update every 10 seconds
+    const timer = setInterval(() => {
+      calculateTime();
+    }, 10000);
+    
+    return () => clearInterval(timer);
+  }, [calculateTime]);
 
   const { timeRemaining, isExpired, percentRemaining } = timeData;
   

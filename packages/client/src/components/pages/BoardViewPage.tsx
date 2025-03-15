@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '../layout/Layout';
 import PixelGrid from '../features/PixelGrid';
@@ -42,9 +42,25 @@ const BoardViewPage: React.FC = () => {
   const [selectedColor, setSelectedColor] = useState<string>('#000000');
   const [placingPixel, setPlacingPixel] = useState<boolean>(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
-  const [showGridLines, setShowGridLines] = useState<boolean>(true); // New state for grid lines
+  const [showGridLines, setShowGridLines] = useState<boolean>(false);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+  // Fetch pixels for this board
+  const fetchPixels = useCallback(async (boardId: string) => {
+    if (!boardId) return;
+
+    try {
+      const response = await fetch(`${API_URL}/api/pixels?boardId=${boardId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch pixels');
+      }
+      const data = await response.json();
+      setPixels(data);
+    } catch (err) {
+      console.error('Error fetching pixels:', err);
+    }
+  }, [API_URL]);
 
   // Fetch board details
   useEffect(() => {
@@ -72,23 +88,7 @@ const BoardViewPage: React.FC = () => {
     };
 
     fetchBoardDetails();
-  }, [id, API_URL]);
-
-  // Fetch pixels for this board
-  const fetchPixels = async (boardId: string) => {
-    if (!boardId) return;
-
-    try {
-      const response = await fetch(`${API_URL}/api/pixels?boardId=${boardId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch pixels');
-      }
-      const data = await response.json();
-      setPixels(data);
-    } catch (err) {
-      console.error('Error fetching pixels:', err);
-    }
-  };
+  }, [id, API_URL, fetchPixels]);
 
   // Set up polling for real-time updates (every 10 seconds)
   useEffect(() => {
@@ -96,7 +96,7 @@ const BoardViewPage: React.FC = () => {
 
     const interval = setInterval(() => fetchPixels(board._id), 10000);
     return () => clearInterval(interval);
-  }, [board]);
+  }, [board, fetchPixels]);
 
   // Handle user ID input
   const handleUserIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
