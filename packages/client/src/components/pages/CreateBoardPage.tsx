@@ -33,10 +33,14 @@ const CreateBoardPage: React.FC = () => {
     setSuccess(null);
     
     try {
+      // Ajouter le token d'authentification
+      const token = localStorage.getItem('token');
+      
       const response = await fetch(`${API_URL}/api/pixelboards`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
         },
         body: JSON.stringify(formData),
       });
@@ -65,19 +69,19 @@ const CreateBoardPage: React.FC = () => {
     <Layout title="Create Pixel Board">
       {error && (
         <Alert 
-          variant="error" 
-          message={error} 
-          dismissible 
-          onClose={() => setError(null)} 
+          variant="error"
+          message={error}
+          dismissible
+          onClose={() => setError(null)}
         />
       )}
       
       {success && (
         <Alert 
-          variant="success" 
-          message={success} 
-          dismissible 
-          onClose={() => setSuccess(null)} 
+          variant="success"
+          message={success}
+          dismissible
+          onClose={() => setSuccess(null)}
         />
       )}
       
@@ -88,17 +92,17 @@ const CreateBoardPage: React.FC = () => {
         
         <div className="create-board-info">
           <Card>
-            <Card.Header>
+            <div className="card-header">
               <h3 className="info-title">Board Guidelines</h3>
-            </Card.Header>
-            <Card.Body>
+            </div>
+            <div className="card-body">
               <ul className="guidelines-list">
                 <li>Choose dimensions that suit your artistic vision but consider that larger boards may take longer to fill.</li>
                 <li>Set an appropriate time limit - we recommend 30 minutes for small boards and longer for larger ones.</li>
                 <li>The &quot;Allow Redraw&quot; option lets users place pixels over existing ones.</li>
                 <li>Visitor mode allows viewing after the board&apos;s active time has expired.</li>
               </ul>
-            </Card.Body>
+            </div>
           </Card>
         </div>
       </div>
