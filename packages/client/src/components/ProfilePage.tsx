@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import '../styles/Profile.css';
-import ThemeToggle from './ThemeToggle';
+import ThemeToggle from './ui/ThemeToggle';
 
 interface UserProfile {
   username: string;

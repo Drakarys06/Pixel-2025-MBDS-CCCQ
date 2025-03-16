@@ -11,15 +11,6 @@ import SignupPage from './components/SignUpPage';
 import ProfilePage from './components/ProfilePage';
 import { AuthProvider } from './components/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
-import './styles/App.css';
-import './styles/PixelBoard.css';
-import './styles/HomePage.css';
-import './styles/ExploreBoards.css';
-import './styles/ThemeToggle.css';
-import './styles/LoginPage.css';
-import './styles/Profile.css';
-import './styles/colors.css';
-
 // Import global stylesheets
 import './styles/index.css';
 import './styles/colors.css';
