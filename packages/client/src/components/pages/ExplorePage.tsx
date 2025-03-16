@@ -35,7 +35,15 @@ const ExplorePage: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${API_URL}/api/pixelboards`);
+        // Récupérer le token d'authentification depuis localStorage
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch(`${API_URL}/api/pixelboards`, {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : ''
+          }
+        });
+        
         if (!response.ok) {
           throw new Error('Failed to fetch pixel boards');
         }

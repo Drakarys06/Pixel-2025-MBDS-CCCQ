@@ -16,16 +16,17 @@ declare global {
 }
 
 // Middleware d'authentification
-export const auth = async (req: Request, res: Response, next: NextFunction) => {
+export const auth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // Récupérer le token depuis l'en-tête Authorization
     const authHeader = req.header('Authorization');
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: 'Accès refusé. Aucun token fourni'
       });
+      return; // Assurez-vous de retourner après avoir envoyé une réponse
     }
     
     const token = authHeader.replace('Bearer ', '');
@@ -37,10 +38,11 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
     const user = await User.findById(decoded.id).select('-password');
     
     if (!user) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Utilisateur non trouvé'
       });
+      return; // Assurez-vous de retourner après avoir envoyé une réponse
     }
     
     // Ajouter l'utilisateur et le token à la requête
@@ -54,17 +56,19 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
       success: false,
       message: 'Accès refusé. Token invalide'
     });
+    // Ne pas appeler next() ici, car nous avons déjà envoyé une réponse
   }
 };
 
 // Middleware d'authentification optionnel (pour les routes accessibles aux visiteurs)
-export const optionalAuth = async (req: Request, res: Response, next: NextFunction) => {
+export const optionalAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const authHeader = req.header('Authorization');
     
     // Si aucun token n'est fourni, continuer sans définir l'utilisateur
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return next();
+      next();
+      return; // Retournez après avoir appelé next()
     }
     
     const token = authHeader.replace('Bearer ', '');
@@ -83,6 +87,7 @@ export const optionalAuth = async (req: Request, res: Response, next: NextFuncti
     next();
   } catch (error) {
     // En cas d'erreur, continuer sans définir l'utilisateur
+    console.error('Erreur d\'authentification optionnelle:', error);
     next();
   }
 };

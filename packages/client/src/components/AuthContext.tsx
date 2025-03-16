@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import authService from '../services/authService';
 
 // Types pour notre contexte
 type UserType = {
@@ -23,22 +24,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
+  // Configurer les intercepteurs axios pour la gestion automatique des tokens
+  useEffect(() => {
+    authService.setupAxiosInterceptors();
+  }, []);
+
   // Vérifier si l'utilisateur est connecté au chargement initial
   useEffect(() => {
-    const checkLoggedIn = () => {
-      const token = localStorage.getItem('token');
-      const userId = localStorage.getItem('userId');
-      const username = localStorage.getItem('username');
-
-      if (token && userId && username) {
-        setCurrentUser({
-          id: userId,
-          username: username
-        });
-        setIsLoggedIn(true);
-      }
+    const checkLoggedIn = async () => {
+      setLoading(true);
       
-      setLoading(false);
+      try {
+        // Vérifier le token stocké dans localStorage
+        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+        const username = localStorage.getItem('username');
+  
+        if (token && userId && username) {
+          // Vérifier auprès du serveur si le token est valide
+          const response = await authService.checkAuthStatus();
+          
+          if (response.success && response.user) {
+            setCurrentUser({
+              id: response.user.id,
+              username: response.user.username
+            });
+            setIsLoggedIn(true);
+          } else {
+            // Token invalide ou expiré
+            logout();
+          }
+        } else {
+          setIsLoggedIn(false);
+          setCurrentUser(null);
+        }
+      } catch (err) {
+        console.error('Erreur lors de la vérification de l\'authentification:', err);
+        setIsLoggedIn(false);
+        setCurrentUser(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
     checkLoggedIn();
@@ -46,8 +72,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Fonction de connexion
   const login = (token: string, userId: string, username: string) => {
-    console.log('Login called with:', { token, userId, username });
+    console.log('Login called with:', { token: token.substring(0, 10) + '...', userId, username });
     
+    // Utiliser localStorage pour stocker les informations d'authentification
     localStorage.setItem('token', token);
     localStorage.setItem('userId', userId);
     localStorage.setItem('username', username);
@@ -57,22 +84,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       username: username
     });
     setIsLoggedIn(true);
-    
-    console.log('Auth state after login:', { isLoggedIn: true, currentUser: { id: userId, username } });
   };
 
   // Fonction de déconnexion
   const logout = () => {
+    console.log('Déconnexion de l\'utilisateur');
+    
+    // Supprimer les données de localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     localStorage.removeItem('username');
     
+    // Mettre à jour l'état du contexte
     setCurrentUser(null);
     setIsLoggedIn(false);
+    
+    // Rediriger vers la page d'accueil ou de connexion
+    window.location.href = '/login';
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, isLoggedIn, login, logout, loading }}>
+    <AuthContext.Provider value={{ 
+      currentUser, 
+      isLoggedIn, 
+      login, 
+      logout, 
+      loading
+    }}>
       {children}
     </AuthContext.Provider>
   );

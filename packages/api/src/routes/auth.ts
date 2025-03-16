@@ -61,6 +61,7 @@ router.post('/signup', async (req: Request, res: Response) => {
 router.post('/login', async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
+    console.log('Tentative de connexion avec:', { email });
 
     // Trouver l'utilisateur par email
     const user = await User.findOne({ email });
