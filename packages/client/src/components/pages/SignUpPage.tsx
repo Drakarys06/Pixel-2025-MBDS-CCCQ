@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import ThemeToggle from './ui/ThemeToggle';
-import { useAuth } from './AuthContext';
-import '../styles/LoginPage.css'; // Reusing same styles
+import ThemeToggle from '../ui/ThemeToggle';
+import { useAuth } from '../auth/AuthContext';
+import '../../styles/pages/LoginPage.css';
 
 const SignupPage: React.FC = () => {
   const [username, setUsername] = useState('');

@@ -5,7 +5,7 @@ import PixelBoardCard from '../ui/PixelBoardCard';
 import { Input, Select } from '../ui/FormComponents';
 import Alert from '../ui/Alert';
 import Loader from '../ui/Loader';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../auth/AuthContext';
 import '../../styles/pages/ExplorePage.css';
 
 interface PixelBoard {

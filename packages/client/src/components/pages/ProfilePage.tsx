@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import '../styles/Profile.css'; // Assuming you have this CSS file
+import '../../styles/pages/Profile.css';
 
 // A completely standalone component with no dependencies
 const TemporaryProfilePage: React.FC = () => {
