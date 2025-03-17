@@ -8,7 +8,8 @@ import BoardViewPage from './components/pages/BoardViewPage';
 import NotFoundPage from './components/pages/NotFoundPage';
 import LoginPage from './components/LoginPage';
 import SignupPage from './components/SignUpPage';
-import ProfilePage from './components/ProfilePage';
+// Import the temporary profile page
+import TemporaryProfilePage from './components/ProfilePage';
 import { AuthProvider } from './components/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 // Import global stylesheets
@@ -65,11 +66,9 @@ const App: React.FC = () => {
                   <div className="page-placeholder">My Boards page coming soon</div>
                 </ProtectedRoute>
               } />
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              } />
+              
+              {/* Use temporary profile page directly, not wrapped in ProtectedRoute */}
+              <Route path="/profile" element={<TemporaryProfilePage />} />
               
               {/* Route 404 */}
               <Route path="*" element={<NotFoundPage />} />
