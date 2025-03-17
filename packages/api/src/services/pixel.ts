@@ -122,6 +122,13 @@ export const placePixel = async (boardId: string, x: number, y: number, color: s
 			let pixel = await Pixel.findOne({ boardId, x, y }).session(session);
 
 			if (pixel) {
+				// Check if redraw is allowed on this board
+				if (!board.redraw) {
+					await session.abortTransaction();
+					session.endSession();
+					throw new Error('Redrawing over existing pixels is not allowed on this board');
+				}
+
 				// Update existing pixel
 				if (!pixel.modifiedBy.includes(userId)) {
 					pixel.modifiedBy.push(userId);

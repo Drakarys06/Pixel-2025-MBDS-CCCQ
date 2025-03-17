@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '../layout/Layout';
-import PixelGrid from '../ui/PixelGrid';
+import PixelGrid from '../features/PixelGrid';
 import BoardInfo from '../features/BoardInfo';
 import BoardControls from '../features/BoardControls';
 import Alert from '../ui/Alert';
@@ -33,7 +33,7 @@ interface PixelBoard {
 
 const BoardViewPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  
+
   const [board, setBoard] = useState<PixelBoard | null>(null);
   const [pixels, setPixels] = useState<Pixel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -42,39 +42,12 @@ const BoardViewPage: React.FC = () => {
   const [selectedColor, setSelectedColor] = useState<string>('#000000');
   const [placingPixel, setPlacingPixel] = useState<boolean>(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
-  
+  const [showGridLines, setShowGridLines] = useState<boolean>(false);
+
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-  // Fetch board details
-  useEffect(() => {
-    const fetchBoardDetails = async () => {
-      if (!id) return;
-      
-      setLoading(true);
-      try {
-        const response = await fetch(`${API_URL}/api/pixelboards/${id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch board details');
-        }
-        
-        const data = await response.json();
-        setBoard(data);
-        
-        // Fetch pixels after board is loaded
-        fetchPixels(id);
-      } catch (err) {
-        console.error('Error fetching board details:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load board. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBoardDetails();
-  }, [id, API_URL]);
-
   // Fetch pixels for this board
-  const fetchPixels = async (boardId: string) => {
+  const fetchPixels = useCallback(async (boardId: string) => {
     if (!boardId) return;
 
     try {
@@ -87,7 +60,35 @@ const BoardViewPage: React.FC = () => {
     } catch (err) {
       console.error('Error fetching pixels:', err);
     }
-  };
+  }, [API_URL]);
+
+  // Fetch board details
+  useEffect(() => {
+    const fetchBoardDetails = async () => {
+      if (!id) return;
+
+      setLoading(true);
+      try {
+        const response = await fetch(`${API_URL}/api/pixelboards/${id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch board details');
+        }
+
+        const data = await response.json();
+        setBoard(data);
+
+        // Fetch pixels after board is loaded
+        fetchPixels(id);
+      } catch (err) {
+        console.error('Error fetching board details:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load board. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBoardDetails();
+  }, [id, API_URL, fetchPixels]);
 
   // Set up polling for real-time updates (every 10 seconds)
   useEffect(() => {
@@ -95,7 +96,7 @@ const BoardViewPage: React.FC = () => {
 
     const interval = setInterval(() => fetchPixels(board._id), 10000);
     return () => clearInterval(interval);
-  }, [board]);
+  }, [board, fetchPixels]);
 
   // Handle user ID input
   const handleUserIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -115,6 +116,15 @@ const BoardViewPage: React.FC = () => {
     }
 
     if (!id || !board) return;
+
+    const existingPixel = pixels.find(p => p.x === x && p.y === y);
+    if (existingPixel && !board.redraw) {
+      setMessage({
+        text: 'Redrawing over existing pixels is not allowed on this board',
+        type: 'error'
+      });
+      return;
+    }
 
     setPlacingPixel(true);
     try {
@@ -138,24 +148,21 @@ const BoardViewPage: React.FC = () => {
 
       const newPixel = await response.json();
 
-      // Update the pixels array
       setPixels(prev => {
-        // Check if this pixel already exists at this position
         const existingIndex = prev.findIndex(p => p.x === x && p.y === y);
         if (existingIndex >= 0) {
-          // Replace the existing pixel
+
           const newPixels = [...prev];
           newPixels[existingIndex] = newPixel;
+
           return newPixels;
         } else {
-          // Add the new pixel
           return [...prev, newPixel];
         }
       });
 
       setMessage({ text: 'Pixel placed successfully!', type: 'success' });
 
-      // Clear success message after 3 seconds
       setTimeout(() => {
         setMessage(null);
       }, 3000);
@@ -173,13 +180,13 @@ const BoardViewPage: React.FC = () => {
   // Check if board is expired
   const isBoardExpired = (): boolean => {
     if (!board) return false;
-    
+
     if (board.closeTime) return true;
-    
+
     const creation = new Date(board.creationTime);
     const durationMs = board.time * 60 * 1000;
     const endTime = new Date(creation.getTime() + durationMs);
-    
+
     return new Date() > endTime;
   };
 
@@ -196,14 +203,14 @@ const BoardViewPage: React.FC = () => {
   if (error || !board) {
     return (
       <Layout>
-        <Alert 
-          variant="error" 
-          message={error || 'Board not found'} 
-          className="board-error" 
+        <Alert
+          variant="error"
+          message={error || 'Board not found'}
+          className="board-error"
         />
         <div className="board-error-actions">
-          <button 
-            className="board-retry-button" 
+          <button
+            className="board-retry-button"
             onClick={() => window.location.reload()}
           >
             Try Again
@@ -226,7 +233,7 @@ const BoardViewPage: React.FC = () => {
         redraw={board.redraw}
         pixelCount={pixels.length}
       />
-      
+
       <div className="board-view-content">
         <div className="board-controls-container">
           <BoardControls
@@ -236,18 +243,21 @@ const BoardViewPage: React.FC = () => {
             onColorChange={handleColorChange}
             message={message}
             disabled={isBoardExpired() || placingPixel}
+            showGridLines={showGridLines}
+            onToggleGridLines={() => setShowGridLines(!showGridLines)}
           />
+
         </div>
-        
+
         <div className="board-grid-container">
           <PixelGrid
             width={board.width}
             height={board.length}
             pixels={pixels}
-            cellSize={25}
             editable={!isBoardExpired()}
             onPixelClick={handlePlacePixel}
             loading={placingPixel}
+            showGridLines={showGridLines}
           />
         </div>
       </div>

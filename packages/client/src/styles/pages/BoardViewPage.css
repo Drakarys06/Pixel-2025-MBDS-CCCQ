@@ -1,69 +1,70 @@
 .board-loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 400px;
-  }
-  
-  .board-error {
-    margin-bottom: 20px;
-  }
-  
-  .board-error-actions {
-    display: flex;
-    justify-content: center;
-  }
-  
-  .board-retry-button {
-    background-color: var(--accent-color);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s;
-  }
-  
-  .board-retry-button:hover {
-    background-color: var(--accent-hover);
-  }
-  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.board-error {
+  margin-bottom: 20px;
+}
+
+.board-error-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.board-retry-button {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.board-retry-button:hover {
+  background-color: var(--accent-hover);
+}
+
+.board-view-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.board-controls-container {
+  width: 100%;
+}
+
+.board-grid-container {
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+  max-width: 100%;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  flex-grow: 1;
+}
+
+@media (min-width: 768px) {
   .board-view-content {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    flex-direction: row;
   }
-  
+
   .board-controls-container {
-    width: 100%;
+    width: 300px;
+    flex-shrink: 0;
   }
-  
+
   .board-grid-container {
-    background-color: var(--bg-secondary);
-    border-radius: 8px;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: auto;
-    max-width: 100%;
-    box-shadow: 0 2px 4px var(--shadow-color);
+    flex-grow: 1;
+    min-height: 500px;
+    align-items: flex-start;
   }
-  
-  @media (min-width: 768px) {
-    .board-view-content {
-      flex-direction: row;
-    }
-  
-    .board-controls-container {
-      width: 300px;
-      flex-shrink: 0;
-    }
-  
-    .board-grid-container {
-      flex-grow: 1;
-      min-height: 500px;
-      align-items: flex-start;
-    }
-  }
+}

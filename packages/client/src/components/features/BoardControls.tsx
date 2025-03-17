@@ -12,6 +12,8 @@ interface BoardControlsProps {
   onColorChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   message: { text: string; type: 'success' | 'error' } | null;
   disabled: boolean;
+  showGridLines: boolean;
+  onToggleGridLines: () => void;
 }
 
 const BoardControls: React.FC<BoardControlsProps> = ({
@@ -20,7 +22,9 @@ const BoardControls: React.FC<BoardControlsProps> = ({
   selectedColor,
   onColorChange,
   message,
-  disabled
+  disabled,
+  showGridLines,
+  onToggleGridLines
 }) => {
   return (
     <Card className="board-controls">
@@ -56,6 +60,15 @@ const BoardControls: React.FC<BoardControlsProps> = ({
             <li>Click on any cell in the grid to place your pixel</li>
           </ol>
         </div>
+
+        <label className="toggle-grid-lines">
+          <input
+            type="checkbox"
+            checked={showGridLines}
+            onChange={onToggleGridLines}
+          />
+          Show Grid Lines
+        </label>
         
         {message && (
           <Alert
