@@ -6,12 +6,12 @@ import ExplorePage from './components/pages/ExplorePage';
 import CreateBoardPage from './components/pages/CreateBoardPage';
 import BoardViewPage from './components/pages/BoardViewPage';
 import NotFoundPage from './components/pages/NotFoundPage';
-import LoginPage from './components/LoginPage';
-import SignupPage from './components/SignUpPage';
+import LoginPage from './components/pages/LoginPage';
+import SignupPage from './components/pages/SignUpPage';
 // Import the temporary profile page
-import TemporaryProfilePage from './components/ProfilePage';
-import { AuthProvider } from './components/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
+import TemporaryProfilePage from './components/pages/ProfilePage';
+import { AuthProvider } from './components/auth/AuthContext';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 // Import global stylesheets
 import './styles/index.css';
 import './styles/colors.css';

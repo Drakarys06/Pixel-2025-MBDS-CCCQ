@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import ThemeToggle from '../ui/ThemeToggle';
 import Button from '../ui/Button';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../auth/AuthContext';
 import '../../styles/layout/Navbar.css';
 
 interface NavbarProps {

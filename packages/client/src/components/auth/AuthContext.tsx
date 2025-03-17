@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import authService from '../services/authService';
+import authService from '../../services/authService';
 
 // Types pour notre contexte
 type UserType = {
