@@ -19,6 +19,7 @@ export interface AuthCheckResponse {
     email: string;
     pixelsPlaced: number;
     boardsCreated: number;
+    isGuest?: boolean;
   };
 }
 
@@ -72,6 +73,30 @@ const authService = {
       }
       throw new Error('Erreur de connexion au serveur');
     }
+  },
+
+  /**
+   * Connecte l'utilisateur en tant que visiteur
+   */
+  guestLogin: async (): Promise<LoginResponse> => {
+    const guestToken = 'guest-' + Math.random().toString(36).substring(2, 15);
+    const guestId = guestToken;
+    
+    return {
+      success: true,
+      message: 'Connecté en tant que visiteur',
+      token: guestToken,
+      userId: guestId,
+      username: 'Visiteur'
+    };
+  },
+
+  /**
+   * Vérifie si l'utilisateur est en mode visiteur
+   */
+  isGuestMode: (): boolean => {
+    const token = localStorage.getItem('token');
+    return token ? token.startsWith('guest-') : false;
   },
   
   /**

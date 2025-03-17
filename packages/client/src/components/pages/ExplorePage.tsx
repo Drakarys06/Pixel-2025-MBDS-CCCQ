@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../layout/Layout';
 import PixelBoardCard from '../ui/PixelBoardCard';
 import { Input, Select } from '../ui/FormComponents';
 import Alert from '../ui/Alert';
 import Loader from '../ui/Loader';
+import { useAuth } from '../AuthContext';
 import '../../styles/pages/ExplorePage.css';
 
 interface PixelBoard {
@@ -26,11 +28,24 @@ const ExplorePage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortBy, setSortBy] = useState<string>('newest');
   const [filterBy, setFilterBy] = useState<string>('all');
+  const { isLoggedIn } = useAuth();
+  const navigate = useNavigate();
   
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+  // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
+  useEffect(() => {
+    if (!isLoggedIn) {
+      console.log('ExplorePage: Utilisateur non connecté, redirection vers /login');
+      navigate('/login', { state: { from: '/explore' } });
+    }
+  }, [isLoggedIn, navigate]);
+
   // Fetch pixel boards
   useEffect(() => {
+    // Ne charger les données que si l'utilisateur est connecté
+    if (!isLoggedIn) return;
+    
     const fetchPixelBoards = async () => {
       setLoading(true);
       setError(null);
@@ -58,7 +73,12 @@ const ExplorePage: React.FC = () => {
     };
 
     fetchPixelBoards();
-  }, [API_URL]);
+  }, [API_URL, isLoggedIn]);
+
+  // Si l'utilisateur n'est pas connecté, on ne rend rien car la redirection sera effectuée
+  if (!isLoggedIn) {
+    return <Loader text="Redirecting to login..." />;
+  }
 
   // Sort and filter options
   const sortOptions = [
