@@ -11,6 +11,7 @@ declare global {
     interface Request {
       user?: any;
       token?: string;
+      isGuest?: boolean;
     }
   }
 }
@@ -22,14 +23,24 @@ export const auth = async (req: Request, res: Response, next: NextFunction): Pro
     const authHeader = req.header('Authorization');
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(401).json({
+      return res.status(401).json({
         success: false,
         message: 'Accès refusé. Aucun token fourni'
       });
-      return; // Assurez-vous de retourner après avoir envoyé une réponse
     }
     
     const token = authHeader.replace('Bearer ', '');
+    
+    // Vérifier si c'est un token visiteur (commence par "guest-")
+    if (token.startsWith('guest-')) {
+      req.user = {
+        _id: token,
+        username: 'Visiteur',
+      };
+      req.isGuest = true;
+      req.token = token;
+      return next();
+    }
     
     // Vérifier le token
     const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
@@ -38,16 +49,16 @@ export const auth = async (req: Request, res: Response, next: NextFunction): Pro
     const user = await User.findById(decoded.id).select('-password');
     
     if (!user) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         message: 'Utilisateur non trouvé'
       });
-      return; // Assurez-vous de retourner après avoir envoyé une réponse
     }
     
     // Ajouter l'utilisateur et le token à la requête
     req.user = user;
     req.token = token;
+    req.isGuest = false;
     
     next();
   } catch (error) {
@@ -56,7 +67,6 @@ export const auth = async (req: Request, res: Response, next: NextFunction): Pro
       success: false,
       message: 'Accès refusé. Token invalide'
     });
-    // Ne pas appeler next() ici, car nous avons déjà envoyé une réponse
   }
 };
 
@@ -67,27 +77,53 @@ export const optionalAuth = async (req: Request, res: Response, next: NextFuncti
     
     // Si aucun token n'est fourni, continuer sans définir l'utilisateur
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      next();
-      return; // Retournez après avoir appelé next()
+      return next();
     }
     
     const token = authHeader.replace('Bearer ', '');
     
-    // Vérifier le token
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
-    
-    // Trouver l'utilisateur correspondant
-    const user = await User.findById(decoded.id).select('-password');
-    
-    if (user) {
-      req.user = user;
+    // Vérifier si c'est un token visiteur
+    if (token.startsWith('guest-')) {
+      req.user = {
+        _id: token,
+        username: 'Visiteur',
+      };
+      req.isGuest = true;
       req.token = token;
+      return next();
+    }
+    
+    // Vérifier le token
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+      
+      // Trouver l'utilisateur correspondant
+      const user = await User.findById(decoded.id).select('-password');
+      
+      if (user) {
+        req.user = user;
+        req.token = token;
+        req.isGuest = false;
+      }
+    } catch (err) {
+      // Token invalide, mais nous continuons quand même
     }
     
     next();
   } catch (error) {
     // En cas d'erreur, continuer sans définir l'utilisateur
-    console.error('Erreur d\'authentification optionnelle:', error);
     next();
   }
+};
+
+// Middleware pour restreindre l'accès aux créateurs (non-visiteurs)
+export const creatorOnly = (req: Request, res: Response, next: NextFunction): void => {
+  if (!req.user || req.isGuest) {
+    return res.status(403).json({
+      success: false,
+      message: 'Les visiteurs ne peuvent pas créer de tableaux'
+    });
+  }
+  
+  next();
 };

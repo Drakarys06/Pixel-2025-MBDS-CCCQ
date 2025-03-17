@@ -5,12 +5,15 @@ import authService from '../services/authService';
 type UserType = {
   id: string;
   username: string;
+  isGuest?: boolean;
 } | null;
 
 type AuthContextType = {
   currentUser: UserType;
   isLoggedIn: boolean;
+  isGuestMode: boolean;
   login: (token: string, userId: string, username: string) => void;
+  loginAsGuest: () => void;
   logout: () => void;
   loading: boolean;
 };
@@ -22,6 +25,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<UserType>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isGuestMode, setIsGuestMode] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
   // Configurer les intercepteurs axios pour la gestion automatique des tokens
@@ -39,29 +43,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const token = localStorage.getItem('token');
         const userId = localStorage.getItem('userId');
         const username = localStorage.getItem('username');
-  
+
         if (token && userId && username) {
-          // Vérifier auprès du serveur si le token est valide
-          const response = await authService.checkAuthStatus();
+          // Vérifier si c'est un token visiteur
+          const isGuest = token.startsWith('guest-');
           
-          if (response.success && response.user) {
+          if (isGuest) {
+            // Visiteur, pas besoin de vérifier avec le serveur
             setCurrentUser({
-              id: response.user.id,
-              username: response.user.username
+              id: userId,
+              username: username,
+              isGuest: true
             });
             setIsLoggedIn(true);
+            setIsGuestMode(true);
           } else {
-            // Token invalide ou expiré
-            logout();
+            // Utilisateur normal, vérifier le token
+            const response = await authService.checkAuthStatus();
+            
+            if (response.success && response.user) {
+              setCurrentUser({
+                id: response.user.id,
+                username: response.user.username,
+                isGuest: false
+              });
+              setIsLoggedIn(true);
+              setIsGuestMode(false);
+            } else {
+              // Token invalide
+              logout();
+            }
           }
         } else {
           setIsLoggedIn(false);
           setCurrentUser(null);
+          setIsGuestMode(false);
         }
       } catch (err) {
         console.error('Erreur lors de la vérification de l\'authentification:', err);
         setIsLoggedIn(false);
         setCurrentUser(null);
+        setIsGuestMode(false);
       } finally {
         setLoading(false);
       }
@@ -72,42 +94,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Fonction de connexion
   const login = (token: string, userId: string, username: string) => {
-    console.log('Login called with:', { token: token.substring(0, 10) + '...', userId, username });
+    const isGuest = token.startsWith('guest-');
     
-    // Utiliser localStorage pour stocker les informations d'authentification
     localStorage.setItem('token', token);
     localStorage.setItem('userId', userId);
     localStorage.setItem('username', username);
     
     setCurrentUser({
       id: userId,
-      username: username
+      username: username,
+      isGuest: isGuest
     });
     setIsLoggedIn(true);
+    setIsGuestMode(isGuest);
+  };
+
+  // Fonction de connexion en tant que visiteur
+  const loginAsGuest = async () => {
+    try {
+      const result = await authService.guestLogin();
+      if (result.success) {
+        login(result.token, result.userId, result.username);
+      }
+    } catch (error) {
+      console.error('Erreur de connexion visiteur:', error);
+    }
   };
 
   // Fonction de déconnexion
   const logout = () => {
-    console.log('Déconnexion de l\'utilisateur');
-    
-    // Supprimer les données de localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     localStorage.removeItem('username');
     
-    // Mettre à jour l'état du contexte
     setCurrentUser(null);
     setIsLoggedIn(false);
+    setIsGuestMode(false);
     
-    // Rediriger vers la page d'accueil ou de connexion
+    // Rediriger vers la page de connexion
     window.location.href = '/login';
   };
 
   return (
     <AuthContext.Provider value={{ 
       currentUser, 
-      isLoggedIn, 
+      isLoggedIn,
+      isGuestMode,
       login, 
+      loginAsGuest,
       logout, 
       loading
     }}>
