@@ -18,6 +18,7 @@ interface PixelBoard {
   closeTime: string | null;
   creationTime: string;
   creator: string;
+  creatorUsername?: string; // Ajout du champ pour le nom d'utilisateur
   visitor: boolean;
 }
 
@@ -103,7 +104,10 @@ const ExplorePage: React.FC = () => {
     if (searchTerm) {
       result = result.filter(board => 
         board.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        board.creator.toLowerCase().includes(searchTerm.toLowerCase())
+        // Utiliser creatorUsername si disponible, sinon creator
+        (board.creatorUsername ? 
+          board.creatorUsername.toLowerCase().includes(searchTerm.toLowerCase()) :
+          board.creator.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
     
@@ -202,7 +206,7 @@ const ExplorePage: React.FC = () => {
               creationTime={board.creationTime}
               time={board.time}
               closeTime={board.closeTime}
-              creator={board.creator}
+              creator={board.creatorUsername || board.creator}
             />
           ))}
         </div>

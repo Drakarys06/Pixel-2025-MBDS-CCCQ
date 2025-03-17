@@ -45,7 +45,7 @@ const authService = {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      return response.data;
+      return response.data as AuthCheckResponse;
     } catch (error: any) {
       // Si le token est invalide ou expiré, nettoyer le localStorage
       localStorage.removeItem('token');
@@ -66,7 +66,7 @@ const authService = {
         password
       });
       
-      return response.data;
+      return response.data as LoginResponse;
     } catch (error: any) {
       if (error.response) {
         throw new Error(error.response.data.message || 'Erreur de connexion');
@@ -110,7 +110,7 @@ const authService = {
         password
       });
       
-      return response.data;
+      return response.data as LoginResponse;
     } catch (error: any) {
       if (error.response) {
         throw new Error(error.response.data.message || 'Erreur d\'inscription');

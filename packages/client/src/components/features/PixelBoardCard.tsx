@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Card from './Card';
+import Card from '../ui/Card';
 import TimeRemaining from './TimeRemaining';
-import Button from './Button';
+import Button from '../ui/Button';
 import './PixelBoardCard.css';
 
 interface PixelBoardCardProps {
@@ -14,6 +14,7 @@ interface PixelBoardCardProps {
   time: number;
   closeTime: string | null;
   creator: string;
+  creatorUsername?: string; // Optionnel pour la compatibilité avec les anciens boards
   className?: string;
 }
 
@@ -26,6 +27,7 @@ const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
   time,
   closeTime,
   creator,
+  creatorUsername, // Nouveau paramètre
   className = ''
 }) => {
   // Function to generate random pixel blocks for preview
@@ -79,6 +81,9 @@ const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
 
   const cardClasses = ['pixel-board-card', className].filter(Boolean).join(' ');
 
+  // Utiliser creatorUsername s'il existe, sinon utiliser creator
+  const displayCreator = creatorUsername || creator;
+
   return (
     <Card className={cardClasses}>
       <div className="pixel-board-preview">
@@ -93,7 +98,7 @@ const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
         />
       </div>
       
-      <Card.Body>
+      <div className="card-body">
         <h3 className="pixel-board-title">{title}</h3>
         <div className="pixel-board-meta">
           <span>{width} x {length}</span>
@@ -107,10 +112,10 @@ const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
           className="pixel-board-time-progress"
           onTimeExpired={handleTimeExpired}
         />
-      </Card.Body>
+      </div>
       
-      <Card.Footer>
-        <div className="pixel-board-creator">By: {creator}</div>
+      <div className="card-footer">
+        <div className="pixel-board-creator">By: {displayCreator}</div>
         <Link to={`/board/${id}`}>
           <Button 
             variant={isExpired ? 'secondary' : 'join'} 
@@ -119,7 +124,7 @@ const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
             {isExpired ? 'View Board' : 'Join Board'}
           </Button>
         </Link>
-      </Card.Footer>
+      </div>
     </Card>
   );
 };

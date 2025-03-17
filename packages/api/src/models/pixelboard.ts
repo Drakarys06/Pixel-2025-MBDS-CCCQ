@@ -9,7 +9,8 @@ export interface IPixelBoard extends Document {
   redraw: boolean;
   closeTime: Date;
   creationTime: Date;
-  creator: string; // Could be a reference to User model in the future
+  creator: string; // ID de l'utilisateur créateur
+  creatorUsername: string; // Nom d'utilisateur du créateur
   visitor: boolean;
 }
 
@@ -54,6 +55,10 @@ const PixelBoardSchema: Schema = new Schema({
     type: String,
     required: [true, 'Creator is required']
   },
+  creatorUsername: {
+    type: String,
+    required: [true, 'Creator username is required']
+  },
   visitor: {
     type: Boolean,
     default: false
@@ -66,7 +71,7 @@ const PixelBoardSchema: Schema = new Schema({
 
 // Add validation for date relationships
 PixelBoardSchema.pre('validate', function(next) {
-  const pixelBoard = this as IPixelBoard;
+  const pixelBoard = this as unknown as IPixelBoard;
   
   if (pixelBoard.closeTime && pixelBoard.creationTime) {
     if (pixelBoard.closeTime < pixelBoard.creationTime) {
