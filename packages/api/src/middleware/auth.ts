@@ -23,10 +23,11 @@ export const auth = async (req: Request, res: Response, next: NextFunction): Pro
     const authHeader = req.header('Authorization');
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: 'Accès refusé. Aucun token fourni'
       });
+      return;
     }
     
     const token = authHeader.replace('Bearer ', '');
@@ -49,10 +50,11 @@ export const auth = async (req: Request, res: Response, next: NextFunction): Pro
     const user = await User.findById(decoded.id).select('-password');
     
     if (!user) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Utilisateur non trouvé'
       });
+      return;
     }
     
     // Ajouter l'utilisateur et le token à la requête
@@ -117,7 +119,7 @@ export const optionalAuth = async (req: Request, res: Response, next: NextFuncti
 };
 
 // Middleware pour restreindre l'accès aux créateurs (non-visiteurs)
-export const creatorOnly = (req: Request, res: Response, next: NextFunction): void => {
+export const creatorOnly = (req: Request, res: Response, next: NextFunction): Response | void => {
   if (!req.user || req.isGuest) {
     return res.status(403).json({
       success: false,
