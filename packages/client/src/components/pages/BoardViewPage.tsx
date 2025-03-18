@@ -135,7 +135,6 @@ const BoardViewPage: React.FC = () => {
     try {
       // Récupérer le token d'authentification
       const token = localStorage.getItem('token');
-
       const response = await fetch(`${API_URL}/api/pixels/board/${id}/place`, {
         method: 'POST',
         headers: {
@@ -146,7 +145,6 @@ const BoardViewPage: React.FC = () => {
           x,
           y,
           color: selectedColor
-          // Le backend récupère l'ID utilisateur à partir du token
         }),
       });
 
