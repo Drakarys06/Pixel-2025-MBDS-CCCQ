@@ -6,31 +6,6 @@ import { auth, optionalAuth } from '../middleware/auth';
 
 const router = express.Router();
 
-// Create a new pixel (requires authentication)
-router.post('/', auth, async (req: Request, res: Response) => {
-	try {
-		// Utiliser l'ID de l'utilisateur connecté
-		const pixel = await pixelService.createPixel({
-			...req.body,
-			modifiedBy: [req.user._id.toString()]
-		});
-		
-		// Incrémenter le compteur de pixels placés par l'utilisateur
-		if (!req.isGuest && req.user.pixelsPlaced !== undefined) {
-			req.user.pixelsPlaced += 1;
-			await req.user.save();
-		}
-		
-		res.status(201).json(pixel);
-	} catch (error) {
-		if (error instanceof Error) {
-			res.status(400).json({ message: error.message });
-		} else {
-			res.status(500).json({ message: 'An unknown error occurred' });
-		}
-	}
-});
-
 // Get all pixels (optional authentication for visitor mode)
 router.get('/', optionalAuth, async (req: Request, res: Response) => {
 	try {
@@ -63,14 +38,12 @@ router.get('/', optionalAuth, async (req: Request, res: Response) => {
 	}
 });
 
-// Reste des routes...
-
 // Place a pixel (create or update) at specific coordinates on a board (requires authentication)
 router.post('/board/:boardId/place', auth, async (req: Request, res: Response) => {
 	try {
 		const { boardId } = req.params;
 		const { x, y, color } = req.body;
-		const userId = req.user._id.toString(); // Utiliser directement l'ID de l'utilisateur authentifié
+		const userId = req.user.username.toString(); // Utiliser directement l'ID de l'utilisateur authentifié
 
 		if (x === undefined || y === undefined || !color || !userId) {
 			return res.status(400).json({ message: 'Position (x, y), color, and userId are required' });
@@ -109,7 +82,5 @@ router.post('/board/:boardId/place', auth, async (req: Request, res: Response) =
 		}
 	}
 });
-
-// Autres routes...
 
 export const pixelAPI = router;
