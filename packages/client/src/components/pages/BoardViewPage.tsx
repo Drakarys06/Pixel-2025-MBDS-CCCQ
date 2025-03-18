@@ -54,13 +54,13 @@ const BoardViewPage: React.FC = () => {
     try {
       // Ajouter le token d'authentification
       const token = localStorage.getItem('token');
-      
+
       const response = await fetch(`${API_URL}/api/pixels?boardId=${boardId}`, {
         headers: {
           'Authorization': token ? `Bearer ${token}` : ''
         }
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch pixels');
       }
@@ -78,7 +78,13 @@ const BoardViewPage: React.FC = () => {
 
       setLoading(true);
       try {
-        const response = await fetch(`${API_URL}/api/pixelboards/${id}`);
+        const token = localStorage.getItem('token');
+
+        const response = await fetch(`${API_URL}/api/pixelboards/${id}`, {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : ''
+          }
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch board details');
         }
@@ -129,7 +135,7 @@ const BoardViewPage: React.FC = () => {
     try {
       // Récupérer le token d'authentification
       const token = localStorage.getItem('token');
-      
+
       const response = await fetch(`${API_URL}/api/pixels/board/${id}/place`, {
         method: 'POST',
         headers: {

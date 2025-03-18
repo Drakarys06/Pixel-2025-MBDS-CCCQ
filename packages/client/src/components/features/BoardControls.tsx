@@ -36,15 +36,10 @@ const BoardControls: React.FC<BoardControlsProps> = ({
         <div className="controls-form">
           {currentUser && (
             <div className="user-info">
-              <span className="user-label">Logged in as:</span>
-              <span className="user-value">
-                {currentUser.username} {isGuestMode ? "(Guest)" : ""}
-              </span>
             </div>
           )}
           
           <ColorPicker
-            label="Selected Color"
             value={selectedColor}
             onChange={onColorChange}
             disabled={disabled}

@@ -35,27 +35,27 @@ const authService = {
    */
   checkAuthStatus: async (): Promise<AuthCheckResponse> => {
     const token = localStorage.getItem('token');
-    
+
     if (!token) {
       return { success: false, message: 'No token found' };
     }
-    
+
     try {
       const response = await axios.get(`${API_URL}/auth/verify`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       return response.data as AuthCheckResponse;
     } catch (error: any) {
       // Si le token est invalide ou expiré, nettoyer le localStorage
       localStorage.removeItem('token');
       localStorage.removeItem('userId');
       localStorage.removeItem('username');
-      
+
       return { success: false, message: 'Invalid or expired token' };
     }
   },
-  
+
   /**
    * Connecte un utilisateur et retourne les données de connexion
    */
@@ -65,7 +65,7 @@ const authService = {
         email,
         password
       });
-      
+
       return response.data as LoginResponse;
     } catch (error: any) {
       if (error.response) {
@@ -81,7 +81,7 @@ const authService = {
   guestLogin: async (): Promise<LoginResponse> => {
     const guestToken = 'guest-' + Math.random().toString(36).substring(2, 15);
     const guestId = guestToken;
-    
+
     return {
       success: true,
       message: 'Connecté en tant que visiteur',
@@ -98,7 +98,7 @@ const authService = {
     const token = localStorage.getItem('token');
     return token ? token.startsWith('guest-') : false;
   },
-  
+
   /**
    * Inscrit un nouvel utilisateur
    */
@@ -109,7 +109,7 @@ const authService = {
         email,
         password
       });
-      
+
       return response.data as LoginResponse;
     } catch (error: any) {
       if (error.response) {
@@ -118,7 +118,7 @@ const authService = {
       throw new Error('Erreur de connexion au serveur');
     }
   },
-  
+
   /**
    * Ajoute les headers d'authentification aux requêtes axios
    */
@@ -126,7 +126,7 @@ const authService = {
     const token = localStorage.getItem('token');
     return token ? { Authorization: `Bearer ${token}` } : {};
   },
-  
+
   /**
    * Configure axios avec un intercepteur pour ajouter automatiquement 
    * le token d'authentification à toutes les requêtes
@@ -134,7 +134,7 @@ const authService = {
   setupAxiosInterceptors: () => {
     // Éviter d'ajouter les intercepteurs plusieurs fois
     if (interceptorsSetup) return;
-    
+
     axios.interceptors.request.use(
       (config) => {
         const token = localStorage.getItem('token');
@@ -147,7 +147,7 @@ const authService = {
         return Promise.reject(error);
       }
     );
-    
+
     // Intercepteur pour gérer automatiquement les erreurs 401 (non autorisé)
     axios.interceptors.response.use(
       (response) => response,
@@ -157,14 +157,14 @@ const authService = {
           localStorage.removeItem('token');
           localStorage.removeItem('userId');
           localStorage.removeItem('username');
-          
+
           // Rediriger vers la page de connexion
           window.location.href = '/login';
         }
         return Promise.reject(error);
       }
     );
-    
+
     interceptorsSetup = true;
   }
 };
