@@ -24,4 +24,4 @@ cdk.out
 
 *.private.md
 .vscode/
-yarn.lock
+*yarn.lock

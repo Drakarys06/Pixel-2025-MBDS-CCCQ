@@ -5,7 +5,7 @@ import '../../styles/features/BoardInfo.css';
 
 interface BoardInfoProps {
   title: string;
-  creator: string;
+  creator: string; // Sera le nom d'utilisateur (creatorUsername) quand disponible
   width: number;
   height: number;
   creationTime: string;

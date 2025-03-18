@@ -10,8 +10,8 @@ export interface BoardFormData {
   width: number;
   time: number;
   redraw: boolean;
-  creator: string;
   visitor: boolean;
+  // Le champ creator a été supprimé car il sera géré par le backend
 }
 
 interface CreateBoardFormProps {
@@ -26,7 +26,6 @@ const CreateBoardForm: React.FC<CreateBoardFormProps> = ({ onSubmit, loading }) 
     width: 16,
     time: 30,
     redraw: false,
-    creator: '',
     visitor: false
   });
 
@@ -48,11 +47,11 @@ const CreateBoardForm: React.FC<CreateBoardFormProps> = ({ onSubmit, loading }) 
 
   return (
     <Card className="create-board-form">
-      <Card.Header>
+      <div className="card-header">
         <h2 className="create-board-title">Create New Pixel Board</h2>
-      </Card.Header>
+      </div>
       
-      <Card.Body>
+      <div className="card-body">
         <Form onSubmit={handleSubmit}>
           <Input
             label="Board Title"
@@ -104,17 +103,6 @@ const CreateBoardForm: React.FC<CreateBoardFormProps> = ({ onSubmit, loading }) 
             placeholder="How long will the board be active?"
           />
 
-          <Input
-            label="Creator Name"
-            type="text"
-            id="creator"
-            name="creator"
-            value={formData.creator}
-            onChange={handleChange}
-            required
-            placeholder="Your name or username"
-          />
-
           <div className="form-checkboxes">
             <Checkbox
               label="Allow users to redraw over existing pixels"
@@ -144,7 +132,7 @@ const CreateBoardForm: React.FC<CreateBoardFormProps> = ({ onSubmit, loading }) 
             </Button>
           </div>
         </Form>
-      </Card.Body>
+      </div>
     </Card>
   );
 };

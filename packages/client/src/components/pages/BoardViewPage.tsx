@@ -6,6 +6,7 @@ import BoardInfo from '../features/BoardInfo';
 import BoardControls from '../features/BoardControls';
 import Alert from '../ui/Alert';
 import Loader from '../ui/Loader';
+import { useAuth } from '../auth/AuthContext';
 import '../../styles/pages/BoardViewPage.css';
 
 interface Pixel {
@@ -28,17 +29,17 @@ interface PixelBoard {
   closeTime: string | null;
   creationTime: string;
   creator: string;
+  creatorUsername?: string; // Nom d'utilisateur du créateur
   visitor: boolean;
 }
 
 const BoardViewPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-
+  const { currentUser } = useAuth(); // Récupérer l'utilisateur connecté
   const [board, setBoard] = useState<PixelBoard | null>(null);
   const [pixels, setPixels] = useState<Pixel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('#000000');
   const [placingPixel, setPlacingPixel] = useState<boolean>(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
@@ -51,7 +52,15 @@ const BoardViewPage: React.FC = () => {
     if (!boardId) return;
 
     try {
-      const response = await fetch(`${API_URL}/api/pixels?boardId=${boardId}`);
+      // Ajouter le token d'authentification
+      const token = localStorage.getItem('token');
+
+      const response = await fetch(`${API_URL}/api/pixels?boardId=${boardId}`, {
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : ''
+        }
+      });
+
       if (!response.ok) {
         throw new Error('Failed to fetch pixels');
       }
@@ -69,7 +78,13 @@ const BoardViewPage: React.FC = () => {
 
       setLoading(true);
       try {
-        const response = await fetch(`${API_URL}/api/pixelboards/${id}`);
+        const token = localStorage.getItem('token');
+
+        const response = await fetch(`${API_URL}/api/pixelboards/${id}`, {
+          headers: {
+            'Authorization': token ? `Bearer ${token}` : ''
+          }
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch board details');
         }
@@ -98,11 +113,6 @@ const BoardViewPage: React.FC = () => {
     return () => clearInterval(interval);
   }, [board, fetchPixels]);
 
-  // Handle user ID input
-  const handleUserIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUserId(e.target.value);
-  };
-
   // Handle color selection
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedColor(e.target.value);
@@ -110,12 +120,7 @@ const BoardViewPage: React.FC = () => {
 
   // Handle pixel placement
   const handlePlacePixel = async (x: number, y: number) => {
-    if (!userId) {
-      setMessage({ text: 'Please enter a user ID', type: 'error' });
-      return;
-    }
-
-    if (!id || !board) return;
+    if (!id || !board || !currentUser) return;
 
     const existingPixel = pixels.find(p => p.x === x && p.y === y);
     if (existingPixel && !board.redraw) {
@@ -128,16 +133,18 @@ const BoardViewPage: React.FC = () => {
 
     setPlacingPixel(true);
     try {
+      // Récupérer le token d'authentification
+      const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/api/pixels/board/${id}/place`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
         },
         body: JSON.stringify({
           x,
           y,
-          color: selectedColor,
-          userId
+          color: selectedColor
         }),
       });
 
@@ -224,7 +231,7 @@ const BoardViewPage: React.FC = () => {
     <Layout>
       <BoardInfo
         title={board.title}
-        creator={board.creator}
+        creator={board.creatorUsername || board.creator}
         width={board.width}
         height={board.length}
         creationTime={board.creationTime}
@@ -237,8 +244,6 @@ const BoardViewPage: React.FC = () => {
       <div className="board-view-content">
         <div className="board-controls-container">
           <BoardControls
-            userId={userId}
-            onUserIdChange={handleUserIdChange}
             selectedColor={selectedColor}
             onColorChange={handleColorChange}
             message={message}

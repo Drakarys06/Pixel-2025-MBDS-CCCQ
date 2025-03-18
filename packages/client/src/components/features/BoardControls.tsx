@@ -1,13 +1,12 @@
 import React from 'react';
-import { Input } from '../ui/FormComponents';
 import { ColorPicker } from '../ui/FormComponents';
 import Card from '../ui/Card';
 import Alert from '../ui/Alert';
+import { useAuth } from '../auth/AuthContext';
 import '../../styles/features/BoardControls.css';
 
 interface BoardControlsProps {
-  userId: string;
-  onUserIdChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  // Suppression de userId et onUserIdChange
   selectedColor: string;
   onColorChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   message: { text: string; type: 'success' | 'error' } | null;
@@ -17,8 +16,6 @@ interface BoardControlsProps {
 }
 
 const BoardControls: React.FC<BoardControlsProps> = ({
-  userId,
-  onUserIdChange,
   selectedColor,
   onColorChange,
   message,
@@ -26,26 +23,23 @@ const BoardControls: React.FC<BoardControlsProps> = ({
   showGridLines,
   onToggleGridLines
 }) => {
+  // Utiliser le contexte d'authentification pour obtenir l'utilisateur
+  const { currentUser, isGuestMode } = useAuth();
+
   return (
     <Card className="board-controls">
-      <Card.Header>
+      <div className="card-header">
         <h3 className="controls-title">Pixel Controls</h3>
-      </Card.Header>
+      </div>
       
-      <Card.Body>
+      <div className="card-body">
         <div className="controls-form">
-          <Input
-            label="Your User ID"
-            type="text"
-            value={userId}
-            onChange={onUserIdChange}
-            placeholder="Enter your user ID"
-            disabled={disabled}
-            required
-          />
+          {currentUser && (
+            <div className="user-info">
+            </div>
+          )}
           
           <ColorPicker
-            label="Selected Color"
             value={selectedColor}
             onChange={onColorChange}
             disabled={disabled}
@@ -55,7 +49,6 @@ const BoardControls: React.FC<BoardControlsProps> = ({
         <div className="controls-instructions">
           <h4 className="instructions-title">How to Place Pixels</h4>
           <ol className="instructions-list">
-            <li>Enter your User ID</li>
             <li>Select a color</li>
             <li>Click on any cell in the grid to place your pixel</li>
           </ol>
@@ -79,7 +72,7 @@ const BoardControls: React.FC<BoardControlsProps> = ({
             duration={3000}
           />
         )}
-      </Card.Body>
+      </div>
     </Card>
   );
 };

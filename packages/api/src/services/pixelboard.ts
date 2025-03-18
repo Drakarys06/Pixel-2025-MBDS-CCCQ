@@ -1,7 +1,19 @@
 import PixelBoard, { IPixelBoard } from '../models/pixelboard';
 
+// Interface pour les données de création d'un pixel board
+interface PixelBoardInput {
+  title: string;
+  length: number;
+  width: number;
+  time: number;
+  redraw?: boolean;
+  creator: string;
+  creatorUsername: string; // Ajout du champ pour le nom d'utilisateur
+  visitor?: boolean;
+}
+
 // Create a new pixel board
-export const createPixelBoard = async (pixelBoardData: Partial<IPixelBoard>): Promise<IPixelBoard> => {
+export const createPixelBoard = async (pixelBoardData: PixelBoardInput): Promise<IPixelBoard> => {
   try {
     const pixelBoard = new PixelBoard(pixelBoardData);
     await pixelBoard.save();
