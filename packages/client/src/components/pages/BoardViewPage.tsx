@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import Layout from '../layout/Layout';
 import PixelGrid from '../features/PixelGrid';
 import BoardInfo from '../features/BoardInfo';
-import BoardControls from '../features/BoardControls';
+import PixelControls from '../features/PixelControls';
 import Alert from '../ui/Alert';
 import Loader from '../ui/Loader';
 import { useAuth } from '../auth/AuthContext';
@@ -41,7 +41,7 @@ const BoardViewPage: React.FC = () => {
   const [pixels, setPixels] = useState<Pixel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedColor, setSelectedColor] = useState<string>('#000000');
+  const [selectedColor, setSelectedColor] = useState<string>('#68ce37');
   const [placingPixel, setPlacingPixel] = useState<boolean>(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [showGridLines, setShowGridLines] = useState<boolean>(false);
@@ -324,25 +324,29 @@ const BoardViewPage: React.FC = () => {
         redraw={board.redraw}
         pixelCount={pixels.length}
       />
-      
-      {readOnly && (
-        <div className="read-only-indicator">
-          <div className="read-only-badge">Mode lecture seule</div>
-          <p>Vous pouvez voir ce tableau mais pas le modifier. {isGuestMode && "Créez un compte pour plus d'options."}</p>
-        </div>
-      )}
 
       <div className="board-view-content">
-        <div className="board-controls-container">
-          <BoardControls
+        <div className="pixel-controls-wrapper">
+          <PixelControls
             selectedColor={selectedColor}
             onColorChange={handleColorChange}
-            message={message}
             disabled={isBoardExpired() || placingPixel || readOnly}
             showGridLines={showGridLines}
-            onToggleGridLines={() => setShowGridLines(!showGridLines)}
+            onToggleGridLines={setShowGridLines}
           />
-
+          
+          {message && (
+            <div className={`message-container ${message.type}`}>
+              <p>{message.text}</p>
+            </div>
+          )}
+          
+          {readOnly && (
+            <div className="read-only-indicator">
+              <div className="read-only-badge">Mode lecture seule</div>
+              <p>Vous pouvez voir ce tableau mais pas le modifier. {isGuestMode && "Créez un compte pour plus d'options."}</p>
+            </div>
+          )}
         </div>
 
         <div className="board-grid-container">

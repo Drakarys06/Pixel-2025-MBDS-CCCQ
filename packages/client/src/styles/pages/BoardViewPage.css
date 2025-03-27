@@ -1,112 +1,168 @@
+/* Styles pour le titre et les métadonnées du tableau */
+.board-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.board-status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.board-status.active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.board-status.expired {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.board-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.board-meta-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.meta-label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.meta-value {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+/* Styles pour la disposition du contenu */
+.board-view-content {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
 .board-loading {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 400px;
+  height: 300px;
 }
 
 .board-error {
-  margin-bottom: 20px;
+  margin: 20px 0;
 }
 
 .board-error-actions {
   display: flex;
   justify-content: center;
+  margin-top: 20px;
 }
 
 .board-retry-button {
-  background-color: var(--accent-color);
+  padding: 8px 16px;
+  background-color: #4a90e2;
   color: white;
   border: none;
-  padding: 10px 20px;
   border-radius: 4px;
   cursor: pointer;
   font-weight: 500;
-  transition: background-color 0.2s;
 }
 
 .board-retry-button:hover {
-  background-color: var(--accent-hover);
+  background-color: #3b7dce;
 }
 
-.board-view-content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.board-controls-container {
-  width: 100%;
+/* Conteneurs pour la grille et les contrôles */
+.pixel-controls-wrapper {
+  width: 350px;
+  flex-shrink: 0;
 }
 
 .board-grid-container {
-  background-color: var(--bg-secondary);
+  flex: 1;
+  background-color: #fff;
   border-radius: 8px;
-  padding: 10px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  min-height: 300px;
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: auto;
-  max-width: 100%;
-  box-shadow: 0 2px 4px var(--shadow-color);
-  flex-grow: 1;
+  overflow: hidden;
 }
 
-@media (min-width: 768px) {
-  .board-view-content {
-    flex-direction: row;
-  }
-
-  .board-controls-container {
-    width: 300px;
-    flex-shrink: 0;
-  }
-
-  .board-grid-container {
-    flex-grow: 1;
-    min-height: 500px;
-    align-items: flex-start;
-  }
+/* Messages et alertes */
+.message-container {
+  margin-top: 15px;
+  padding: 10px 15px;
+  border-radius: 4px;
+  font-size: 14px;
 }
 
-/* Ajoutez ces styles à votre fichier BoardViewPage.css */
+.message-container.success {
+  background-color: #d4edda;
+  color: #155724;
+  border-left: 4px solid #c3e6cb;
+}
+
+.message-container.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-left: 4px solid #f5c6cb;
+}
 
 /* Indicateur de mode lecture seule */
 .read-only-indicator {
-  background-color: var(--warning-bg, #fff3cd);
-  color: var(--warning-text, #856404);
+  margin-top: 15px;
+  background-color: #fff3cd;
+  color: #856404;
   padding: 10px 15px;
-  margin-bottom: 20px;
   border-radius: 4px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  border-left: 4px solid #ffeeba;
 }
 
 .read-only-badge {
-  background-color: var(--warning-dark, #ffc107);
-  color: var(--warning-text-dark, #212529);
+  display: inline-block;
+  background-color: #ffc107;
+  color: #212529;
   padding: 3px 8px;
   border-radius: 3px;
-  font-size: 0.85rem;
+  font-size: 12px;
   font-weight: 600;
   margin-bottom: 8px;
 }
 
-.read-only-indicator p {
-  margin: 0;
-  text-align: center;
-}
-
-/* Mode sombre pour l'indicateur de lecture seule */
-@media (prefers-color-scheme: dark) {
-  .read-only-indicator {
-    background-color: var(--warning-bg-dark, #4d3800);
-    color: var(--warning-text-dark, #ffda6a);
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .board-view-content {
+    flex-direction: column;
   }
   
-  .read-only-badge {
-    background-color: var(--warning-dark-dark, #856404);
-    color: var(--warning-text-dark, #ffda6a);
+  .board-meta {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .pixel-controls-wrapper {
+    width: 100%;
+  }
+  
+  .board-grid-container {
+    min-height: 250px;
   }
 }
