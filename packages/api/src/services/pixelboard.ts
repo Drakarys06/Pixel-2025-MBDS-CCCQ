@@ -43,6 +43,16 @@ export const getPixelBoardById = async (id: string): Promise<IPixelBoard | null>
   }
 };
 
+// Get pixel boards created by a specific user
+export const getPixelBoardsByCreator = async (creatorId: string): Promise<IPixelBoard[]> => {
+	try {
+		const pixelBoards = await PixelBoard.find({ creator: creatorId });
+		return pixelBoards;
+	} catch (error) {
+		throw error;
+	}
+};
+
 // Update a pixel board
 export const updatePixelBoard = async (id: string, updates: Partial<IPixelBoard>): Promise<IPixelBoard | null> => {
   try {

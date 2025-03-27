@@ -1,0 +1,50 @@
+/* Styles spécifiques pour la page My Boards */
+.my-board-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.create-board-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 16px;
+	background-color: var(--accent-color);
+	color: white;
+	border-radius: 6px;
+	text-decoration: none;
+	font-weight: 600;
+	transition: background-color 0.2s;
+}
+
+.create-board-button:hover {
+	background-color: var(--accent-hover);
+}
+
+.create-board-button svg {
+	width: 16px;
+	height: 16px;
+}
+
+.empty-boards-container {
+	text-align: center;
+	padding: 40px 20px;
+	background-color: var(--bg-secondary);
+	border-radius: 8px;
+	margin-top: 20px;
+}
+
+.empty-boards-title {
+	font-size: 1.2rem;
+	margin-bottom: 10px;
+	color: var(--text-primary);
+}
+
+.empty-boards-text {
+	color: var(--text-secondary);
+	margin-bottom: 20px;
+}
+
+/* Si nécessaire, hérite d'autres styles de ExplorePage.css */
