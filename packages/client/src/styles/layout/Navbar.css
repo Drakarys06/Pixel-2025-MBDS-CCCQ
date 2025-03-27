@@ -98,3 +98,130 @@
     font-size: 14px;
   }
 }
+/* Styles pour l'indicateur de mode visiteur dans la navbar */
+.guest-mode-indicator {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  background-color: var(--warning-bg, #fff3cd);
+  color: var(--warning-text, #856404);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  margin-right: 10px;
+  white-space: nowrap;
+}
+
+.guest-mode-indicator .signup-link {
+  margin-left: 8px;
+  text-decoration: underline;
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+.guest-mode-indicator .signup-link:hover {
+  color: var(--accent-hover);
+}
+
+/* Styles pour les infos utilisateur et boutons d'authentification */
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.profile-link {
+  color: var(--text-primary);
+  font-weight: 500;
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.profile-link:hover {
+  background-color: var(--hover-color);
+}
+
+.logout-button {
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logout-button:hover {
+  background-color: var(--error-light);
+  color: var(--error);
+  border-color: var(--error);
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.login-button, .signup-button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.login-button {
+  background-color: transparent;
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+}
+
+.login-button:hover {
+  background-color: var(--accent-light);
+}
+
+.signup-button {
+  background-color: var(--accent-color);
+  color: white;
+  border: 1px solid var(--accent-color);
+}
+
+.signup-button:hover {
+  background-color: var(--accent-hover);
+}
+
+/* Ajustements pour le mode sombre */
+@media (prefers-color-scheme: dark) {
+  .guest-mode-indicator {
+    background-color: var(--warning-bg-dark, #4d3800);
+    color: var(--warning-text-dark, #ffda6a);
+  }
+  
+  .logout-button:hover {
+    background-color: var(--error-dark);
+  }
+}
+
+/* Ajustements responsive pour l'indicateur de mode visiteur */
+@media (max-width: 768px) {
+  .guest-mode-indicator {
+    width: 100%;
+    margin-top: 10px;
+    margin-right: 0;
+    justify-content: center;
+  }
+  
+  .navbar-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .guest-mode-indicator {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+  }
+  
+  .guest-mode-indicator .signup-link {
+    margin-left: 4px;
+  }
+}

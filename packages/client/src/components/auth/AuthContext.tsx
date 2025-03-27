@@ -13,7 +13,7 @@ type AuthContextType = {
   isLoggedIn: boolean;
   isGuestMode: boolean;
   login: (token: string, userId: string, username: string) => void;
-  loginAsGuest: () => void;
+  loginAsGuest: () => Promise<void>;
   logout: () => void;
   loading: boolean;
 };
@@ -115,9 +115,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const result = await authService.guestLogin();
       if (result.success) {
         login(result.token, result.userId, result.username);
+      } else {
+        throw new Error('Échec de la connexion visiteur');
       }
     } catch (error) {
       console.error('Erreur de connexion visiteur:', error);
+      throw error; // Propager l'erreur pour que la page de connexion puisse la gérer
     }
   };
 

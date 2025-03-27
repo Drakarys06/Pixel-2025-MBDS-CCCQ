@@ -68,3 +68,45 @@
     align-items: flex-start;
   }
 }
+
+/* Ajoutez ces styles à votre fichier BoardViewPage.css */
+
+/* Indicateur de mode lecture seule */
+.read-only-indicator {
+  background-color: var(--warning-bg, #fff3cd);
+  color: var(--warning-text, #856404);
+  padding: 10px 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.read-only-badge {
+  background-color: var(--warning-dark, #ffc107);
+  color: var(--warning-text-dark, #212529);
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.read-only-indicator p {
+  margin: 0;
+  text-align: center;
+}
+
+/* Mode sombre pour l'indicateur de lecture seule */
+@media (prefers-color-scheme: dark) {
+  .read-only-indicator {
+    background-color: var(--warning-bg-dark, #4d3800);
+    color: var(--warning-text-dark, #ffda6a);
+  }
+  
+  .read-only-badge {
+    background-color: var(--warning-dark-dark, #856404);
+    color: var(--warning-text-dark, #ffda6a);
+  }
+}

@@ -1,4 +1,3 @@
-// Modifier les routes pixelboard.ts pour permettre l'accès en lecture seule pour certains tableaux
 import express, { Request, Response } from 'express';
 import * as pixelBoardService from '../services/pixelboard';
 import { auth, optionalAuth, creatorOnly } from '../middleware/auth';
@@ -53,15 +52,15 @@ router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'PixelBoard not found' });
     }
     
-    // Si le tableau n'autorise pas les visiteurs et que l'utilisateur n'est pas authentifié
-    if (!pixelBoard.visitor && !req.user) {
-      return res.status(401).json({ 
-        message: 'Authentication required to view this board',
-        redirectTo: '/login'
-      });
-    }
+    // Tous les utilisateurs peuvent voir le tableau, mais on indique s'ils peuvent le modifier
+    const canModify = req.user && (!req.isGuest || (req.isGuest && pixelBoard.visitor));
     
-    res.json(pixelBoard);
+    // On ajoute un champ readOnly pour indiquer au frontend que l'utilisateur 
+    // ne peut pas modifier ce tableau
+    res.json({
+      ...pixelBoard.toObject(),
+      readOnly: !canModify
+    });
   } catch (error) {
     if (error instanceof Error) {
       res.status(500).json({ message: error.message });

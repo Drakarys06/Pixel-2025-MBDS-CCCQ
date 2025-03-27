@@ -10,7 +10,7 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { login, isLoggedIn } = useAuth();
+  const { login, loginAsGuest, isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -52,6 +52,22 @@ const LoginPage: React.FC = () => {
     } catch (err) {
       console.error('Erreur de connexion:', err);
       setError(err instanceof Error ? err.message : 'Une erreur est survenue lors de la connexion');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fonction de connexion en tant que visiteur
+  const handleGuestLogin = async () => {
+    setError('');
+    setIsLoading(true);
+    
+    try {
+      await loginAsGuest();
+      navigate(from, { replace: true });
+    } catch (err) {
+      console.error('Erreur de connexion visiteur:', err);
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue lors de la connexion visiteur');
     } finally {
       setIsLoading(false);
     }
@@ -108,6 +124,17 @@ const LoginPage: React.FC = () => {
               {isLoading ? 'Connexion...' : 'Se connecter'}
             </button>
           </form>
+          
+          <div className="login-guest">
+            <p>ou</p>
+            <button 
+              onClick={handleGuestLogin}
+              className="guest-button"
+              disabled={isLoading}
+            >
+              Continuer en tant que visiteur
+            </button>
+          </div>
           
           <div className="login-footer">
             <p>Vous n'avez pas de compte? <Link to="/signup">S'inscrire</Link></p>

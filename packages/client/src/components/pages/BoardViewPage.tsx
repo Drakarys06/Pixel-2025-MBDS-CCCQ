@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '../layout/Layout';
 import PixelGrid from '../features/PixelGrid';
@@ -31,11 +31,12 @@ interface PixelBoard {
   creator: string;
   creatorUsername?: string; // Nom d'utilisateur du créateur
   visitor: boolean;
+  readOnly?: boolean; // Indique si l'utilisateur courant peut modifier ce tableau
 }
 
 const BoardViewPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { currentUser } = useAuth(); // Récupérer l'utilisateur connecté
+  const { currentUser, isGuestMode } = useAuth(); // Récupérer l'utilisateur connecté et son statut de visiteur
   const [board, setBoard] = useState<PixelBoard | null>(null);
   const [pixels, setPixels] = useState<Pixel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -44,12 +45,26 @@ const BoardViewPage: React.FC = () => {
   const [placingPixel, setPlacingPixel] = useState<boolean>(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [showGridLines, setShowGridLines] = useState<boolean>(false);
+  const [readOnly, setReadOnly] = useState<boolean>(false);
+  
+  // Références pour gérer les requêtes et l'intervalle de polling
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const intervalIdRef = useRef<number | null>(null);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
   // Fetch pixels for this board
   const fetchPixels = useCallback(async (boardId: string) => {
     if (!boardId) return;
+
+    // Annuler toute requête précédente
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    // Créer un nouveau controller pour cette requête
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     try {
       // Ajouter le token d'authentification
@@ -58,7 +73,8 @@ const BoardViewPage: React.FC = () => {
       const response = await fetch(`${API_URL}/api/pixels?boardId=${boardId}`, {
         headers: {
           'Authorization': token ? `Bearer ${token}` : ''
-        }
+        },
+        signal: controller.signal
       });
 
       if (!response.ok) {
@@ -66,8 +82,11 @@ const BoardViewPage: React.FC = () => {
       }
       const data = await response.json();
       setPixels(data);
-    } catch (err) {
-      console.error('Error fetching pixels:', err);
+    } catch (err: any) {
+      // Ne pas afficher d'erreur si c'est une annulation intentionnelle
+      if (err.name !== 'AbortError') {
+        console.error('Error fetching pixels:', err);
+      }
     }
   }, [API_URL]);
 
@@ -76,6 +95,15 @@ const BoardViewPage: React.FC = () => {
     const fetchBoardDetails = async () => {
       if (!id) return;
 
+      // Annuler toute requête précédente
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      
+      // Créer un nouveau controller pour cette requête
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
       setLoading(true);
       try {
         const token = localStorage.getItem('token');
@@ -83,34 +111,66 @@ const BoardViewPage: React.FC = () => {
         const response = await fetch(`${API_URL}/api/pixelboards/${id}`, {
           headers: {
             'Authorization': token ? `Bearer ${token}` : ''
-          }
+          },
+          signal: controller.signal
         });
         if (!response.ok) {
           throw new Error('Failed to fetch board details');
         }
 
         const data = await response.json();
+        
+        // Vérifier si le tableau est en lecture seule
+        if (data.readOnly) {
+          setReadOnly(true);
+        }
+        
         setBoard(data);
 
         // Fetch pixels after board is loaded
         fetchPixels(id);
-      } catch (err) {
-        console.error('Error fetching board details:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load board. Please try again.');
+      } catch (err: any) {
+        // Ne pas afficher d'erreur si c'est une annulation intentionnelle
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching board details:', err);
+          setError(err instanceof Error ? err.message : 'Failed to load board. Please try again.');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchBoardDetails();
+    
+    // Nettoyer les requêtes en cours lors du démontage
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [id, API_URL, fetchPixels]);
 
   // Set up polling for real-time updates (every 10 seconds)
   useEffect(() => {
     if (!board) return;
 
-    const interval = setInterval(() => fetchPixels(board._id), 10000);
-    return () => clearInterval(interval);
+    // Nettoyer l'intervalle précédent si existant
+    if (intervalIdRef.current !== null) {
+      window.clearInterval(intervalIdRef.current);
+    }
+
+    // Démarrer un nouvel intervalle
+    intervalIdRef.current = window.setInterval(() => {
+      fetchPixels(board._id);
+    }, 10000);
+
+    // Nettoyer l'intervalle au démontage ou lorsque board change
+    return () => {
+      if (intervalIdRef.current !== null) {
+        window.clearInterval(intervalIdRef.current);
+        intervalIdRef.current = null;
+      }
+    };
   }, [board, fetchPixels]);
 
   // Handle color selection
@@ -122,6 +182,15 @@ const BoardViewPage: React.FC = () => {
   const handlePlacePixel = async (x: number, y: number) => {
     if (!id || !board || !currentUser) return;
 
+    // Empêcher la modification en mode lecture seule
+    if (readOnly) {
+      setMessage({
+        text: 'Vous êtes en mode lecture seule. La modification n\'est pas autorisée.',
+        type: 'error'
+      });
+      return;
+    }
+
     const existingPixel = pixels.find(p => p.x === x && p.y === y);
     if (existingPixel && !board.redraw) {
       setMessage({
@@ -132,6 +201,10 @@ const BoardViewPage: React.FC = () => {
     }
 
     setPlacingPixel(true);
+    
+    // Créer un nouvel AbortController pour cette requête
+    const controller = new AbortController();
+    
     try {
       // Récupérer le token d'authentification
       const token = localStorage.getItem('token');
@@ -146,6 +219,7 @@ const BoardViewPage: React.FC = () => {
           y,
           color: selectedColor
         }),
+        signal: controller.signal
       });
 
       if (!response.ok) {
@@ -170,15 +244,25 @@ const BoardViewPage: React.FC = () => {
 
       setMessage({ text: 'Pixel placed successfully!', type: 'success' });
 
-      setTimeout(() => {
+      // Utiliser un timeout pour effacer le message après un délai
+      const timeoutId = window.setTimeout(() => {
         setMessage(null);
       }, 3000);
-    } catch (err) {
-      console.error('Error placing pixel:', err);
-      setMessage({
-        text: err instanceof Error ? err.message : 'Failed to place pixel',
-        type: 'error'
-      });
+      
+      // Nettoyer le timeout si le composant est démonté
+      return () => {
+        window.clearTimeout(timeoutId);
+      };
+      
+    } catch (err: any) {
+      // Ne pas afficher d'erreur si c'est une annulation intentionnelle
+      if (err.name !== 'AbortError') {
+        console.error('Error placing pixel:', err);
+        setMessage({
+          text: err instanceof Error ? err.message : 'Failed to place pixel',
+          type: 'error'
+        });
+      }
     } finally {
       setPlacingPixel(false);
     }
@@ -240,6 +324,13 @@ const BoardViewPage: React.FC = () => {
         redraw={board.redraw}
         pixelCount={pixels.length}
       />
+      
+      {readOnly && (
+        <div className="read-only-indicator">
+          <div className="read-only-badge">Mode lecture seule</div>
+          <p>Vous pouvez voir ce tableau mais pas le modifier. {isGuestMode && "Créez un compte pour plus d'options."}</p>
+        </div>
+      )}
 
       <div className="board-view-content">
         <div className="board-controls-container">
@@ -247,7 +338,7 @@ const BoardViewPage: React.FC = () => {
             selectedColor={selectedColor}
             onColorChange={handleColorChange}
             message={message}
-            disabled={isBoardExpired() || placingPixel}
+            disabled={isBoardExpired() || placingPixel || readOnly}
             showGridLines={showGridLines}
             onToggleGridLines={() => setShowGridLines(!showGridLines)}
           />
@@ -259,7 +350,7 @@ const BoardViewPage: React.FC = () => {
             width={board.width}
             height={board.length}
             pixels={pixels}
-            editable={!isBoardExpired()}
+            editable={!isBoardExpired() && !readOnly}
             onPixelClick={handlePlacePixel}
             loading={placingPixel}
             showGridLines={showGridLines}
