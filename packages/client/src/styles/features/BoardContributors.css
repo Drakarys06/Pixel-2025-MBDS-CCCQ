@@ -1,0 +1,138 @@
+.contributors-card {
+	margin-top: 20px;
+	width: 100%;
+}
+
+.contributors-title {
+	margin: 0;
+	font-size: 1.2rem;
+	color: var(--text-primary);
+}
+
+.contributors-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.refresh-indicator {
+	transform: scale(0.6);
+	margin-right: -10px;
+}
+
+.contributors-stats {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 15px;
+	padding: 10px;
+	background-color: var(--bg-tertiary);
+	border-radius: 6px;
+}
+
+.stat-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.stat-label {
+	font-size: 0.9rem;
+	color: var(--text-secondary);
+	margin-bottom: 5px;
+}
+
+.stat-value {
+	font-weight: 600;
+	font-size: 1.2rem;
+	color: var(--accent-color);
+}
+
+.contributors-table-container {
+	overflow-x: auto;
+	max-height: 300px;
+	overflow-y: auto;
+}
+
+.contributors-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.contributors-table th,
+.contributors-table td {
+	padding: 10px;
+	text-align: left;
+	border-bottom: 1px solid var(--border-color);
+}
+
+.contributors-table th {
+	background-color: var(--bg-tertiary);
+	font-weight: 600;
+	color: var(--text-primary);
+	position: sticky;
+	top: 0;
+	z-index: 1;
+}
+
+.contributors-table tr:hover {
+	background-color: var(--hover-color);
+}
+
+.pixel-count {
+	text-align: center;
+	font-weight: 600;
+}
+
+.contribution-percent {
+	position: relative;
+	padding-right: 0;
+}
+
+.contribution-bar {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	background-color: rgba(66, 133, 244, 0.1);
+	z-index: 0;
+	transition: width 0.3s ease;
+}
+
+.contributors-error {
+	color: var(--error-color);
+	padding: 10px;
+	background-color: var(--error-bg);
+	border-radius: 4px;
+}
+
+.no-contributors {
+	text-align: center;
+	padding: 20px;
+	color: var(--text-secondary);
+	font-style: italic;
+}
+
+/* Animations */
+@keyframes pulse {
+	0% { opacity: 1; }
+	50% { opacity: 0.5; }
+	100% { opacity: 1; }
+}
+
+.refreshing {
+	animation: pulse 1s infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+	.contributors-stats {
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	.stat-item {
+		flex-direction: row;
+		justify-content: space-between;
+		width: 100%;
+	}
+}
