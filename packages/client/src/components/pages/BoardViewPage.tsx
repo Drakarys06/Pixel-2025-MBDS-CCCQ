@@ -46,6 +46,7 @@ const BoardViewPage: React.FC = () => {
   const [placingPixel, setPlacingPixel] = useState<boolean>(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [showGridLines, setShowGridLines] = useState<boolean>(false);
+  const [contributorsRefreshTrigger, setContributorsRefreshTrigger] = useState<number>(0);
   const pixelGridRef = useRef<PixelGridRef>(null);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
