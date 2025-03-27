@@ -20,6 +20,21 @@ router.get('/my-boards', auth, async (req: Request, res: Response) => {
 	}
 });
 
+// Get boards where the authenticated user has contributed (placed at least one pixel)
+router.get('/contributed-boards', auth, async (req: Request, res: Response) => {
+	try {
+		const userId = req.user._id;
+		const contributedBoards = await pixelBoardService.getPixelBoardsWithUserContribution(userId);
+		res.json(contributedBoards);
+	} catch (error) {
+		if (error instanceof Error) {
+			res.status(500).json({ message: error.message });
+		} else {
+			res.status(500).json({ message: 'An unknown error occurred' });
+		}
+	}
+});
+
 // Create a new pixel board (requires authentication)
 router.post('/', auth, creatorOnly, async (req: Request, res: Response) => {
 	try {

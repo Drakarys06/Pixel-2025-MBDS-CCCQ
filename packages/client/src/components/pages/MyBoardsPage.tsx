@@ -5,8 +5,9 @@ import PixelBoardCard from '../ui/PixelBoardCard';
 import { Input, Select } from '../ui/FormComponents';
 import Alert from '../ui/Alert';
 import Loader from '../ui/Loader';
+import Button from '../ui/Button';
 import { useAuth } from '../auth/AuthContext';
-import '../../styles/pages/ExplorePage.css'; // Réutiliser les styles de ExplorePage
+import '../../styles/pages/MyBoardsPage.css';
 
 interface PixelBoard {
 	_id: string;
@@ -22,9 +23,17 @@ interface PixelBoard {
 	visitor: boolean;
 }
 
+enum TabType {
+	CREATED = 'created',
+	CONTRIBUTED = 'contributed'
+}
+
 const MyBoardsPage: React.FC = () => {
-	const [pixelBoards, setPixelBoards] = useState<PixelBoard[]>([]);
-	const [loading, setLoading] = useState<boolean>(true);
+	const [activeTab, setActiveTab] = useState<TabType>(TabType.CREATED);
+	const [createdBoards, setCreatedBoards] = useState<PixelBoard[]>([]);
+	const [contributedBoards, setContributedBoards] = useState<PixelBoard[]>([]);
+	const [loadingCreated, setLoadingCreated] = useState<boolean>(true);
+	const [loadingContributed, setLoadingContributed] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState<string>('');
 	const [sortBy, setSortBy] = useState<string>('newest');
@@ -42,13 +51,13 @@ const MyBoardsPage: React.FC = () => {
 		}
 	}, [isLoggedIn, navigate]);
 
-	// Fetch user's pixel boards
+	// Fetch user's created pixel boards
 	useEffect(() => {
 		// Ne charger les données que si l'utilisateur est connecté
 		if (!isLoggedIn || !currentUser) return;
 
-		const fetchMyPixelBoards = async () => {
-			setLoading(true);
+		const fetchMyCreatedBoards = async () => {
+			setLoadingCreated(true);
 			setError(null);
 			try {
 				// Récupérer le token d'authentification depuis localStorage
@@ -64,17 +73,56 @@ const MyBoardsPage: React.FC = () => {
 					throw new Error('Failed to fetch your boards');
 				}
 				const data = await response.json();
-				setPixelBoards(data);
+				setCreatedBoards(data);
 			} catch (err) {
-				console.error('Error fetching your boards:', err);
+				console.error('Error fetching your created boards:', err);
 				setError('Unable to load your boards. Please try again later.');
 			} finally {
-				setLoading(false);
+				setLoadingCreated(false);
 			}
 		};
 
-		fetchMyPixelBoards();
+		fetchMyCreatedBoards();
 	}, [API_URL, isLoggedIn, currentUser]);
+
+	// Fonction pour charger les boards où l'utilisateur a contribué
+	const fetchMyContributedBoards = async () => {
+		if (!isLoggedIn || !currentUser) return;
+
+		setLoadingContributed(true);
+		setError(null);
+		try {
+			const token = localStorage.getItem('token');
+
+			const response = await fetch(`${API_URL}/api/pixelboards/contributed-boards`, {
+				headers: {
+					'Authorization': token ? `Bearer ${token}` : ''
+				}
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to fetch boards you contributed to');
+			}
+
+			const data = await response.json();
+
+			// Ne plus filtrer les boards créés par l'utilisateur dans les boards avec contribution
+			// Un utilisateur peut contribuer à ses propres boards
+			setContributedBoards(data);
+		} catch (err) {
+			console.error('Error fetching your contributed boards:', err);
+			setError('Unable to load boards you contributed to. Please try again later.');
+		} finally {
+			setLoadingContributed(false);
+		}
+	};
+
+	// Charger les boards avec contribution lorsque l'utilisateur clique sur l'onglet
+	useEffect(() => {
+		if (activeTab === TabType.CONTRIBUTED && contributedBoards.length === 0 && !loadingContributed) {
+			fetchMyContributedBoards();
+		}
+	}, [activeTab]);
 
 	// Si l'utilisateur n'est pas connecté, on ne rend rien car la redirection sera effectuée
 	if (!isLoggedIn) {
@@ -96,9 +144,9 @@ const MyBoardsPage: React.FC = () => {
 		{ value: 'expired', label: 'Expired Boards' }
 	];
 
-	// Sort and filter the boards
-	const filteredAndSortedBoards = React.useMemo(() => {
-		let result = [...pixelBoards];
+	// Helper function to apply sorting and filtering
+	const applySortAndFilter = (boards: PixelBoard[]) => {
+		let result = [...boards];
 
 		// Filter by search term
 		if (searchTerm) {
@@ -152,11 +200,37 @@ const MyBoardsPage: React.FC = () => {
 			default:
 				return result;
 		}
-	}, [pixelBoards, searchTerm, sortBy, filterBy]);
+	};
+
+	// Get filtered and sorted boards based on active tab
+	const filteredAndSortedBoards = applySortAndFilter(
+		activeTab === TabType.CREATED ? createdBoards : contributedBoards
+	);
 
 	return (
 		<Layout title="My Pixel Boards">
 			{error && <Alert variant="error" message={error} />}
+
+			<div className="my-boards-tabs">
+				<button
+					className={`tab-button ${activeTab === TabType.CREATED ? 'active' : ''}`}
+					onClick={() => setActiveTab(TabType.CREATED)}
+				>
+					Boards I Created
+				</button>
+				<button
+					className={`tab-button ${activeTab === TabType.CONTRIBUTED ? 'active' : ''}`}
+					onClick={() => setActiveTab(TabType.CONTRIBUTED)}
+				>
+					Boards I Contributed To
+				</button>
+			</div>
+
+			{activeTab === TabType.CONTRIBUTED && (
+				<div className="tab-info">
+					This tab shows all boards where you have placed at least one pixel, including boards you created yourself.
+				</div>
+			)}
 
 			<div className="explore-filter">
 				<div className="filter-options">
@@ -178,7 +252,7 @@ const MyBoardsPage: React.FC = () => {
 				<div className="search-box">
 					<Input
 						type="text"
-						placeholder="Search my boards..."
+						placeholder="Search boards..."
 						value={searchTerm}
 						onChange={(e) => setSearchTerm(e.target.value)}
 						fullWidth={false}
@@ -186,9 +260,10 @@ const MyBoardsPage: React.FC = () => {
 				</div>
 			</div>
 
-			{loading ? (
+			{(activeTab === TabType.CREATED && loadingCreated) ||
+			(activeTab === TabType.CONTRIBUTED && loadingContributed) ? (
 				<div className="board-grid-loading">
-					<Loader text="Loading your boards..." />
+					<Loader text={`Loading ${activeTab === TabType.CREATED ? 'your' : 'contributed'} boards...`} />
 				</div>
 			) : filteredAndSortedBoards.length > 0 ? (
 				<div className="board-grid">
@@ -210,7 +285,22 @@ const MyBoardsPage: React.FC = () => {
 				<div className="no-data">
 					{searchTerm ?
 						"No boards matching your search." :
-						"You haven't created any pixel boards yet. Click 'Create' to make your first board!"}
+						activeTab === TabType.CREATED ?
+							"You haven't created any pixel boards yet. Click 'Create' to make your first board!" :
+							"You haven't placed any pixels on any boards yet."
+					}
+				</div>
+			)}
+
+			{activeTab === TabType.CREATED && (
+				<div className="create-board-button-container">
+					<Button
+						variant="primary"
+						onClick={() => navigate('/create')}
+						className="create-board-button"
+					>
+						Create New Board
+					</Button>
 				</div>
 			)}
 		</Layout>

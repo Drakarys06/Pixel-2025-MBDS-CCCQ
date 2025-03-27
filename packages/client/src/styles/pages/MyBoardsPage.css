@@ -1,50 +1,84 @@
-/* Styles spécifiques pour la page My Boards */
-.my-board-header {
+/* Hériter des styles de ExplorePage.css */
+@import './ExplorePage.css';
+
+/* Styles pour les onglets */
+.my-boards-tabs {
 	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 20px;
-}
-
-.create-board-button {
-	display: inline-flex;
-	align-items: center;
-	gap: 8px;
-	padding: 10px 16px;
-	background-color: var(--accent-color);
-	color: white;
-	border-radius: 6px;
-	text-decoration: none;
-	font-weight: 600;
-	transition: background-color 0.2s;
-}
-
-.create-board-button:hover {
-	background-color: var(--accent-hover);
-}
-
-.create-board-button svg {
-	width: 16px;
-	height: 16px;
-}
-
-.empty-boards-container {
-	text-align: center;
-	padding: 40px 20px;
 	background-color: var(--bg-secondary);
 	border-radius: 8px;
-	margin-top: 20px;
+	margin-bottom: 12px;
+	overflow: hidden;
 }
 
-.empty-boards-title {
-	font-size: 1.2rem;
-	margin-bottom: 10px;
+/* Texte d'information sous l'onglet */
+.tab-info {
+	padding: 10px 15px;
+	background-color: var(--bg-tertiary);
+	border-radius: 6px;
+	margin-bottom: 20px;
+	font-size: 14px;
+	color: var(--text-secondary);
+	font-style: italic;
+}
+
+.tab-button {
+	flex: 1;
+	padding: 15px;
+	background-color: transparent;
+	border: none;
+	border-bottom: 3px solid transparent;
+	cursor: pointer;
+	font-weight: 600;
+	color: var(--text-secondary);
+	transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+	background-color: var(--hover-color);
 	color: var(--text-primary);
 }
 
-.empty-boards-text {
-	color: var(--text-secondary);
-	margin-bottom: 20px;
+.tab-button.active {
+	border-bottom-color: var(--accent-color);
+	color: var(--accent-color);
+	background-color: var(--hover-color);
 }
 
-/* Si nécessaire, hérite d'autres styles de ExplorePage.css */
+/* Container pour le bouton de création de board */
+.create-board-button-container {
+	display: flex;
+	justify-content: center;
+	margin-top: 30px;
+}
+
+.create-board-button {
+	padding: 12px 24px;
+	font-size: 16px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.create-board-button::before {
+	content: '+';
+	font-size: 20px;
+	line-height: 1;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+	.my-boards-tabs {
+		flex-direction: row;
+	}
+
+	.tab-button {
+		padding: 12px 5px;
+		font-size: 14px;
+	}
+}
+
+@media (max-width: 480px) {
+	.create-board-button {
+		width: 100%;
+	}
+}
