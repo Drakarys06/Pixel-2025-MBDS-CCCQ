@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 import PixelTooltip from '../ui/PixelTooltip';
 import '../../styles/ui/PixelGrid.css';
 
@@ -23,6 +23,12 @@ interface PixelGridProps {
   showGridLines?: boolean;
 }
 
+export interface PixelGridRef {
+  getCanvas: () => HTMLCanvasElement | null;
+  exportCanvas: () => HTMLCanvasElement;
+  getPixelData: () => Pixel[];
+}
+
 interface TooltipState {
   visible: boolean;
   x: number;
@@ -32,7 +38,7 @@ interface TooltipState {
   height: number;
 }
 
-const PixelGrid: React.FC<PixelGridProps> = ({
+const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
   width,
   height,
   pixels,
@@ -41,16 +47,16 @@ const PixelGrid: React.FC<PixelGridProps> = ({
   className = '',
   loading = false,
   showGridLines = false
-}) => {
+}, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const tooltipTimeoutRef = useRef<number | null>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
   const [cellSize, setCellSize] = useState(25);
-  const [tooltip, setTooltip] = useState<TooltipState>({ 
-    visible: false, 
-    x: 0, 
-    y: 0, 
+  const [tooltip, setTooltip] = useState<TooltipState>({
+    visible: false,
+    x: 0,
+    y: 0,
     content: '',
     width: 0,
     height: 0
@@ -59,7 +65,7 @@ const PixelGrid: React.FC<PixelGridProps> = ({
   // Extract pixel coordinate calculation to a reusable function
   const getPixelCoordinates = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!canvasRef.current) return null;
-    
+
     const rect = canvasRef.current.getBoundingClientRect();
     return {
       x: Math.floor((e.clientX - rect.left) / cellSize),
@@ -167,10 +173,36 @@ const PixelGrid: React.FC<PixelGridProps> = ({
     }
   }, []);
 
+  // Expose canvas element for external use (exporting)
+  useImperativeHandle(ref, () => ({
+    getCanvas: () => canvasRef.current,
+    exportCanvas: () => {
+      // Create a clean canvas for export without grid lines
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = width;
+      exportCanvas.height = height;
+      const ctx = exportCanvas.getContext('2d');
+
+      if (ctx) {
+        // Clear canvas
+        ctx.clearRect(0, 0, width, height);
+
+        // Draw only the pixels (no grid lines or empty cells)
+        pixels.forEach(pixel => {
+          ctx.fillStyle = pixel.color;
+          ctx.fillRect(pixel.x, pixel.y, 1, 1);
+        });
+      }
+
+      return exportCanvas;
+    },
+    getPixelData: () => pixels
+  }));
+
   // Handle canvas click
   const handleCanvasClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!canvasRef.current || !editable || loading) return;
-    
+
     const coords = getPixelCoordinates(e);
     if (coords && onPixelClick) {
       onPixelClick(coords.x, coords.y);
@@ -180,19 +212,19 @@ const PixelGrid: React.FC<PixelGridProps> = ({
   // Handle mouse movement for tooltip
   const handleCanvasMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!canvasRef.current) return;
-    
+
     clearTooltipTimeout();
-    
+
     const coords = getPixelCoordinates(e);
     if (!coords) return;
-    
+
     const pixel = pixels.find(p => p.x === coords.x && p.y === coords.y);
-    
+
     if (!pixel) {
       setTooltip(prev => ({ ...prev, visible: false }));
       return;
     }
-    
+
     const formatDate = (dateString: string) => {
       const date = new Date(dateString);
       const day = String(date.getDate()).padStart(2, '0');
@@ -204,7 +236,7 @@ const PixelGrid: React.FC<PixelGridProps> = ({
     };
 
     const tooltipContent = `(${pixel.x}, ${pixel.y})\ncolor: ${pixel.color}\n${formatDate(pixel.lastModifiedDate)}\nBy: ${pixel.modifiedBy.join(', ')}`;
-    
+
     tooltipTimeoutRef.current = window.setTimeout(() => {
       setTooltip({
         visible: true,
@@ -242,7 +274,7 @@ const PixelGrid: React.FC<PixelGridProps> = ({
           <div className="pixel-grid-spinner"></div>
         </div>
       )}
-      
+
       <PixelTooltip
         visible={tooltip.visible}
         content={tooltip.content}
@@ -252,6 +284,6 @@ const PixelGrid: React.FC<PixelGridProps> = ({
       />
     </div>
   );
-};
+});
 
 export default PixelGrid;
