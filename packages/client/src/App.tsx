@@ -5,6 +5,7 @@ import HomePage from './components/pages/HomePage';
 import ExplorePage from './components/pages/ExplorePage';
 import CreateBoardPage from './components/pages/CreateBoardPage';
 import BoardViewPage from './components/pages/BoardViewPage';
+import MyBoardsPage from './components/pages/MyBoardsPage';
 import NotFoundPage from './components/pages/NotFoundPage';
 import LoginPage from './components/pages/LoginPage';
 import SignupPage from './components/pages/SignUpPage';
@@ -82,7 +83,7 @@ const App: React.FC = () => {
               
               <Route path="/boards" element={
                 <ProtectedRoute>
-                  <div className="page-placeholder">My Boards page coming soon</div>
+                  <MyBoardsPage />
                 </ProtectedRoute>
               } />
               

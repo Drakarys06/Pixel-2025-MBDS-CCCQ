@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '../layout/Layout';
-import PixelGrid from '../features/PixelGrid';
+import PixelGrid, { PixelGridRef } from '../features/PixelGrid';
 import BoardInfo from '../features/BoardInfo';
 import PixelControls from '../features/PixelControls';
+import BoardContributors from '../features/BoardContributors';
 import Alert from '../ui/Alert';
 import Loader from '../ui/Loader';
+import ExportCanvas from '../ui/ExportCanvas';
 import { useAuth } from '../auth/AuthContext';
 import '../../styles/pages/BoardViewPage.css';
 
@@ -29,7 +31,7 @@ interface PixelBoard {
   closeTime: string | null;
   creationTime: string;
   creator: string;
-  creatorUsername?: string; // Nom d'utilisateur du créateur
+  creatorUsername?: string;
   visitor: boolean;
   readOnly?: boolean; // Indique si l'utilisateur courant peut modifier ce tableau
 }
@@ -46,10 +48,12 @@ const BoardViewPage: React.FC = () => {
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [showGridLines, setShowGridLines] = useState<boolean>(false);
   const [readOnly, setReadOnly] = useState<boolean>(false);
+  const [contributorsRefreshTrigger, setContributorsRefreshTrigger] = useState<number>(0);
   
   // Références pour gérer les requêtes et l'intervalle de polling
   const abortControllerRef = useRef<AbortController | null>(null);
   const intervalIdRef = useRef<number | null>(null);
+  const pixelGridRef = useRef<PixelGridRef>(null);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -67,7 +71,6 @@ const BoardViewPage: React.FC = () => {
     abortControllerRef.current = controller;
 
     try {
-      // Ajouter le token d'authentification
       const token = localStorage.getItem('token');
 
       const response = await fetch(`${API_URL}/api/pixels?boardId=${boardId}`, {
@@ -206,7 +209,6 @@ const BoardViewPage: React.FC = () => {
     const controller = new AbortController();
     
     try {
-      // Récupérer le token d'authentification
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/api/pixels/board/${id}/place`, {
         method: 'POST',
@@ -232,10 +234,8 @@ const BoardViewPage: React.FC = () => {
       setPixels(prev => {
         const existingIndex = prev.findIndex(p => p.x === x && p.y === y);
         if (existingIndex >= 0) {
-
           const newPixels = [...prev];
           newPixels[existingIndex] = newPixel;
-
           return newPixels;
         } else {
           return [...prev, newPixel];
@@ -243,6 +243,9 @@ const BoardViewPage: React.FC = () => {
       });
 
       setMessage({ text: 'Pixel placed successfully!', type: 'success' });
+      
+      // Déclencher le rafraîchissement des contributeurs
+      setContributorsRefreshTrigger(prev => prev + 1);
 
       // Utiliser un timeout pour effacer le message après un délai
       const timeoutId = window.setTimeout(() => {
@@ -347,10 +350,25 @@ const BoardViewPage: React.FC = () => {
               <p>Vous pouvez voir ce tableau mais pas le modifier. {isGuestMode && "Créez un compte pour plus d'options."}</p>
             </div>
           )}
+          
+          {/* Ajout du composant pour afficher les contributeurs avec le déclencheur de rafraîchissement */}
+          <BoardContributors
+            boardId={board._id}
+            refreshTrigger={contributorsRefreshTrigger}
+          />
+
+          <ExportCanvas
+            getCanvasData={() => pixelGridRef.current?.getCanvas() || null}
+            pixelGridRef={pixelGridRef}
+            boardWidth={board.width}
+            boardHeight={board.length}
+            className="board-export-button"
+          />
         </div>
 
         <div className="board-grid-container">
           <PixelGrid
+            ref={pixelGridRef}
             width={board.width}
             height={board.length}
             pixels={pixels}

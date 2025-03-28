@@ -1,12 +1,43 @@
 import express, { Request, Response } from 'express';
 import * as pixelBoardService from '../services/pixelboard';
-import { auth, optionalAuth } from '../middleware/auth';
+import { auth, optionalAuth, creatorOnly } from '../middleware/auth';
 import { hasPermission, isResourceCreator } from '../middleware/authorization';
 import { PERMISSIONS } from '../services/roleService';
 import Role from '../models/Role';
 import { DEFAULT_ROLES } from '../services/roleService';
 
 const router = express.Router();
+
+// Get boards created by the authenticated user (requires authentication)
+// Important: cette route doit être AVANT la route /:id pour éviter l'erreur
+router.get('/my-boards', auth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user._id;
+    const myBoards = await pixelBoardService.getPixelBoardsByCreator(userId);
+    res.json(myBoards);
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: 'An unknown error occurred' });
+    }
+  }
+});
+
+// Get boards where the authenticated user has contributed (placed at least one pixel)
+router.get('/contributed-boards', auth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user._id;
+    const contributedBoards = await pixelBoardService.getPixelBoardsWithUserContribution(userId);
+    res.json(contributedBoards);
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: 'An unknown error occurred' });
+    }
+  }
+});
 
 // Create a new pixel board (requires authentication and permission)
 router.post('/', 
@@ -57,6 +88,14 @@ router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
     const pixelBoard = await pixelBoardService.getPixelBoardById(req.params.id);
     if (!pixelBoard) {
       return res.status(404).json({ message: 'PixelBoard not found' });
+    }
+    
+    // Si le tableau n'autorise pas les visiteurs et que l'utilisateur n'est pas authentifié
+    if (!pixelBoard.visitor && !req.user) {
+      return res.status(401).json({
+        message: 'Authentication required to view this board',
+        redirectTo: '/login'
+      });
     }
     
     // Par défaut, tous les utilisateurs peuvent voir le tableau

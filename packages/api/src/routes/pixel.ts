@@ -4,6 +4,7 @@ import * as pixelBoardService from '../services/pixelboard';
 import { auth, optionalAuth } from '../middleware/auth';
 import { hasPermission } from '../middleware/authorization';
 import { PERMISSIONS } from '../services/roleService';
+import PixelBoard from '../models/pixelboard';
 
 const router = express.Router();
 
@@ -11,6 +12,22 @@ const router = express.Router();
 router.get('/', optionalAuth, async (req: Request, res: Response) => {
   try {
     const boardId = req.query.boardId as string;
+    
+    // Si on filtre par boardId, vérifier si le tableau autorise les visiteurs
+    if (boardId) {
+      const pixelBoard = await pixelBoardService.getPixelBoardById(boardId);
+      if (!pixelBoard) {
+        return res.status(404).json({ message: 'PixelBoard not found' });
+      }
+
+      // Si le tableau n'autorise pas les visiteurs et que l'utilisateur n'est pas authentifié
+      if (!pixelBoard.visitor && !req.user) {
+        return res.status(401).json({
+          message: 'Authentication required to view pixels on this board',
+          redirectTo: '/login'
+        });
+      }
+    }
     
     // Tous les utilisateurs peuvent voir les pixels, même en mode lecture seule
     const pixels = await pixelService.getAllPixels(boardId);
@@ -51,6 +68,11 @@ router.post('/board/:boardId/place',
       const { boardId } = req.params;
       const { x, y, color } = req.body;
       const userId = req.user._id.toString();
+      const username = req.user.username;
+
+      if (x === undefined || y === undefined || !color) {
+        return res.status(400).json({ message: 'Position (x, y) and color are required' });
+      }
 
       // Vérifier si le tableau existe
       const pixelBoard = await pixelBoardService.getPixelBoardById(boardId);
@@ -81,6 +103,31 @@ router.post('/board/:boardId/place',
         color, 
         userId
       );
+
+      // Ajouter ou mettre à jour l'utilisateur dans la liste des contributeurs
+      const existingContributor = pixelBoard.contributors?.find(
+        contributor => contributor.userId === userId
+      );
+
+      if (existingContributor) {
+        // Incrémenter le compteur de pixels si l'utilisateur existe déjà
+        existingContributor.pixelsCount += 1;
+      } else {
+        // Si la propriété contributors n'existe pas encore, l'initialiser
+        if (!pixelBoard.contributors) {
+          pixelBoard.contributors = [];
+        }
+        
+        // Ajouter un nouveau contributeur s'il n'existe pas encore
+        pixelBoard.contributors.push({
+          userId,
+          username,
+          pixelsCount: 1
+        });
+      }
+
+      // Sauvegarder les modifications du tableau
+      await pixelBoard.save();
       
       // Incrémenter le compteur de pixels placés pour les utilisateurs authentifiés (non-invités)
       if (!req.isGuest && req.user.pixelsPlaced !== undefined) {
@@ -133,6 +180,34 @@ router.delete('/:id',
         res.status(500).json({ message: 'An unknown error occurred' });
       }
     }
+});
+
+// Ajouter un endpoint pour récupérer les contributeurs d'un tableau
+router.get('/board/:boardId/contributors', optionalAuth, async (req: Request, res: Response) => {
+  try {
+    const { boardId } = req.params;
+
+    const pixelBoard = await pixelBoardService.getPixelBoardById(boardId);
+    if (!pixelBoard) {
+      return res.status(404).json({ message: 'PixelBoard not found' });
+    }
+
+    // Gérer le cas où contributors n'existe pas encore
+    if (!pixelBoard.contributors) {
+      return res.json([]);
+    }
+
+    // Trier les contributeurs par nombre de pixels placés (décroissant)
+    const sortedContributors = pixelBoard.contributors.sort((a, b) => b.pixelsCount - a.pixelsCount);
+
+    res.json(sortedContributors);
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).json({ message: error.message });
+    } else {
+      res.status(500).json({ message: 'An unknown error occurred' });
+    }
+  }
 });
 
 export const pixelAPI = router;
