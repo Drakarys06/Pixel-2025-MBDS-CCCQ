@@ -8,11 +8,15 @@ import BoardViewPage from './components/pages/BoardViewPage';
 import NotFoundPage from './components/pages/NotFoundPage';
 import LoginPage from './components/pages/LoginPage';
 import SignupPage from './components/pages/SignUpPage';
-// Import the temporary profile page
 import TemporaryProfilePage from './components/pages/ProfilePage';
+import UnauthorizedPage from './components/pages/admin/UnauthorizedPage';
+import AdminDashboard from './components/pages/admin/AdminDashboard';
+import UserManagement from './components/pages/admin/UserManagement';
+import RoleManagement from './components/pages/admin/RoleManagement';
 import { AuthProvider } from './components/auth/AuthContext';
+import PermissionRoute from './components/auth/PermissionRoute';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-// Import global stylesheets
+import { PERMISSIONS } from './constants/permissions';
 import './styles/index.css';
 import './styles/colors.css';
 
@@ -23,8 +27,9 @@ const cleanupLocalStorage = () => {
                              localStorage.getItem('userId') || 
                              localStorage.getItem('username');
   
-  // Si on trouve des données, les supprimer
-  if (hasLocalStorageAuth) {
+  // Si on trouve des données mais pas de rôles ou permissions, les supprimer pour forcer une nouvelle connexion
+  if (hasLocalStorageAuth && 
+      (!localStorage.getItem('roles') || !localStorage.getItem('permissions'))) {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     localStorage.removeItem('username');
@@ -46,29 +51,59 @@ const App: React.FC = () => {
             <Routes>
               {/* Routes publiques */}
               <Route path="/" element={<HomePage />} />
-              <Route path="/explore" element={<ExplorePage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
+              <Route path="/unauthorized" element={<UnauthorizedPage />} />
               
-              {/* Routes protégées */}
+              {/* Routes avec vérification de permission */}
+              <Route path="/explore" element={
+                <PermissionRoute permission={PERMISSIONS.BOARD_VIEW}>
+                  <ExplorePage />
+                </PermissionRoute>
+              } />
+              
               <Route path="/create" element={
-                <ProtectedRoute>
+                <PermissionRoute permission={PERMISSIONS.BOARD_CREATE}>
                   <CreateBoardPage />
-                </ProtectedRoute>
+                </PermissionRoute>
               } />
+              
               <Route path="/board/:id" element={
-                <ProtectedRoute>
+                <PermissionRoute permission={PERMISSIONS.BOARD_VIEW}>
                   <BoardViewPage />
+                </PermissionRoute>
+              } />
+              
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <TemporaryProfilePage />
                 </ProtectedRoute>
               } />
+              
               <Route path="/boards" element={
                 <ProtectedRoute>
                   <div className="page-placeholder">My Boards page coming soon</div>
                 </ProtectedRoute>
               } />
               
-              {/* Use temporary profile page directly, not wrapped in ProtectedRoute */}
-              <Route path="/profile" element={<TemporaryProfilePage />} />
+              {/* Routes d'administration */}
+              <Route path="/admin" element={
+                <PermissionRoute permission={PERMISSIONS.ADMIN_ACCESS}>
+                  <AdminDashboard />
+                </PermissionRoute>
+              } />
+              
+              <Route path="/admin/users" element={
+                <PermissionRoute permission={PERMISSIONS.USER_VIEW}>
+                  <UserManagement />
+                </PermissionRoute>
+              } />
+              
+              <Route path="/admin/roles" element={
+                <PermissionRoute permission={PERMISSIONS.ROLE_MANAGE}>
+                  <RoleManagement />
+                </PermissionRoute>
+              } />
               
               {/* Route 404 */}
               <Route path="*" element={<NotFoundPage />} />

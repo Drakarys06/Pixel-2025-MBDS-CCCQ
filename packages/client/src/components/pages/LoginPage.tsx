@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import ThemeToggle from '../ui/ThemeToggle';
 import { useAuth } from '../auth/AuthContext';
+import authService from '../../services/authService';
 import '../../styles/pages/LoginPage.css';
 
 const LoginPage: React.FC = () => {
@@ -30,22 +31,11 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Échec de la connexion');
-      }
+      // Utiliser authService au lieu de fetch directement
+      const data = await authService.login(email, password);
 
       // Login successful - update auth context
-      login(data.token, data.userId, data.username);
+      login(data.token, data.userId, data.username, data.roles || [], data.permissions || []);
       
       // Redirect to the page they were trying to access, or home page
       navigate(from, { replace: true });

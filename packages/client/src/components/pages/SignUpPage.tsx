@@ -50,7 +50,11 @@ const SignupPage: React.FC = () => {
       }
 
       // Registration successful - log the user in
-      login(data.token, data.userId, data.username);
+      // Extraire les rôles et permissions de la réponse ou utiliser des valeurs par défaut
+      const roles = data.roles || ['user'];
+      const permissions = data.permissions || [];
+      
+      login(data.token, data.userId, data.username, roles, permissions);
       
       // Redirect to home page
       navigate('/');

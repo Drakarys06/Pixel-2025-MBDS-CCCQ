@@ -8,6 +8,8 @@ export interface LoginResponse {
   token: string;
   userId: string;
   username: string;
+  roles?: string[];
+  permissions?: string[];
 }
 
 export interface AuthCheckResponse {
@@ -20,6 +22,8 @@ export interface AuthCheckResponse {
     pixelsPlaced: number;
     boardsCreated: number;
     isGuest?: boolean;
+    roles?: string[];
+    permissions?: string[];
   };
 }
 
@@ -50,6 +54,8 @@ const authService = {
       localStorage.removeItem('token');
       localStorage.removeItem('userId');
       localStorage.removeItem('username');
+      localStorage.removeItem('roles');
+      localStorage.removeItem('permissions');
 
       return { success: false, message: 'Invalid or expired token' };
     }
@@ -78,24 +84,24 @@ const authService = {
    */
   guestLogin: async (): Promise<LoginResponse> => {
     try {
-      // Génération d'un identifiant unique pour le visiteur
+      // Dans un environnement réel, vous pourriez faire une requête au serveur
+      // pour enregistrer le visiteur et obtenir un token valide
+      // const response = await axios.post(`${API_URL}/auth/guest-login`);
+      // return response.data;
+      
+      // Simulation de la réponse du serveur
       const guestToken = 'guest-' + Math.random().toString(36).substring(2, 15);
       const guestId = 'guest-' + Math.random().toString(36).substring(2, 15);
       const guestUsername = 'Visiteur-' + Math.floor(Math.random() * 10000);
       
-      // Dans un environnement réel, vous pourriez vouloir appeler une API
-      // pour enregistrer le visiteur temporairement
-      // const response = await axios.post(`${API_URL}/auth/guest-login`);
-      // return response.data;
-      
-      // Comme notre backend n'a pas d'endpoint pour les visiteurs, 
-      // nous simulons la réponse
       return {
         success: true,
         message: 'Connecté en tant que visiteur',
         token: guestToken,
         userId: guestId,
-        username: guestUsername
+        username: guestUsername,
+        roles: ['guest'],
+        permissions: ['board:view', 'pixel:view']
       };
     } catch (error: any) {
       console.error('Erreur lors de la connexion en tant que visiteur:', error);
@@ -164,6 +170,8 @@ const authService = {
           localStorage.removeItem('token');
           localStorage.removeItem('userId');
           localStorage.removeItem('username');
+          localStorage.removeItem('roles');
+          localStorage.removeItem('permissions');
           // Rediriger vers la page de connexion
           window.location.href = '/login';
         }

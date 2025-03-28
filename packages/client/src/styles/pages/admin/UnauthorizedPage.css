@@ -1,0 +1,85 @@
+.unauthorized-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 2rem;
+  }
+  
+  .unauthorized-content {
+    max-width: 600px;
+    text-align: center;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 2.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .unauthorized-icon {
+    margin-bottom: 1.5rem;
+    color: #e53935;
+  }
+  
+  .unauthorized-title {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 1rem;
+  }
+  
+  .unauthorized-message {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+  }
+  
+  .permission-info,
+  .role-info {
+    display: block;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+  
+  .permission-info code,
+  .role-info code {
+    background-color: #e0e0e0;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: monospace;
+  }
+  
+  .unauthorized-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  /* Dark mode support */
+  @media (prefers-color-scheme: dark) {
+    .unauthorized-content {
+      background-color: #333;
+    }
+    
+    .unauthorized-title {
+      color: #f5f5f5;
+    }
+    
+    .unauthorized-message {
+      color: #ccc;
+    }
+    
+    .permission-info,
+    .role-info {
+      background-color: #444;
+    }
+    
+    .permission-info code,
+    .role-info code {
+      background-color: #555;
+      color: #f5f5f5;
+    }
+  }
