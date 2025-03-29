@@ -117,3 +117,25 @@
 		height: 160px;
 	}
 }
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.board-settings-button {
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.board-settings-button:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
