@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 import PixelTooltip from '../ui/PixelTooltip';
+import { useTheme } from '../ui/ThemeContext';
 import '../../styles/ui/PixelGrid.css';
 
 interface Pixel {
@@ -10,7 +11,7 @@ interface Pixel {
 	lastModifiedDate: string;
 	modifiedBy: string[];
 	boardId: string;
-	modificationCount: number;
+	modificationCount?: number;
 }
 
 interface PixelGridProps {
@@ -51,6 +52,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 																showGridLines = false,
 																showHeatmap = false
 															}, ref) => {
+	const { theme } = useTheme(); // Obtenir le thème actuel
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const wrapperRef = useRef<HTMLDivElement>(null);
 	const legendCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -84,9 +86,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 		const normalizedValue = Math.min(value / maxValue, 1);
 
 		// Utiliser une fonction d'échelle logarithmique pour mieux distribuer les couleurs
-		// Cela permettra d'avoir une meilleure visualisation des différences entre les valeurs faibles
-		// tout en conservant une bonne distinction pour les valeurs élevées
-		const enhancedValue = Math.pow(normalizedValue, 0.7); // Exposant < 1 pour augmenter les valeurs faibles
+		const enhancedValue = Math.pow(normalizedValue, 0.7);
 
 		// Définir les palettes de couleurs
 		const colors = [
@@ -126,7 +126,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 		// Count the number of modifications for each pixel
 		pixels.forEach(pixel => {
 			if (pixel.x >= 0 && pixel.x < width && pixel.y >= 0 && pixel.y < height) {
-				// Utiliser le nouveau champ modificationCount
+				// Utiliser le champ modificationCount ou défaut à 1
 				heatmapData[pixel.y][pixel.x] = pixel.modificationCount || 1;
 			}
 		});
@@ -188,10 +188,15 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 		// Clear the canvas
 		ctx.clearRect(0, 0, legendWidth, legendHeight);
 
+		// Adapter la légende au thème actuel
+		const bgColor = theme === 'dark' ? 'rgba(40, 40, 40, 0.8)' : 'rgba(255, 255, 255, 0.8)';
+		const textColor = theme === 'dark' ? '#fff' : '#000';
+		const borderColor = theme === 'dark' ? '#555' : '#000';
+
 		// Draw background
-		ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+		ctx.fillStyle = bgColor;
 		ctx.fillRect(0, 0, legendWidth, legendHeight);
-		ctx.strokeStyle = '#000';
+		ctx.strokeStyle = borderColor;
 		ctx.strokeRect(0, 0, legendWidth, legendHeight);
 
 		// Draw gradient
@@ -203,7 +208,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 		}
 
 		// Add text
-		ctx.fillStyle = '#000';
+		ctx.fillStyle = textColor;
 		ctx.font = '10px Arial';
 		ctx.textAlign = 'left';
 		ctx.fillText('Low', 10, 16);
@@ -212,7 +217,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 		ctx.textAlign = 'center';
 		ctx.fillText(`(max: ${maxHeatmapValue})`, legendWidth / 2, 30);
 
-	}, [showHeatmap, maxHeatmapValue, getHeatmapColor]);
+	}, [showHeatmap, maxHeatmapValue, getHeatmapColor, theme]);
 
 	// Handle drawing the pixel grid
 	useEffect(() => {
@@ -223,81 +228,34 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 
 		ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 
-		// Si mode heatmap, on ne dessine pas les pixels normaux d'abord
-		if (!showHeatmap) {
-			// Draw regular pixels (only in normal mode)
-			pixels.forEach(pixel => {
-				ctx.fillStyle = pixel.color;
-				ctx.fillRect(pixel.x * cellSize, pixel.y * cellSize, cellSize, cellSize);
-			});
-		}
-
-		// Draw empty cells and/or grid lines if needed
-		if (showGridLines || showHeatmap) {
-			// Fill empty cells with light grey
-			ctx.fillStyle = '#f0f0f0';
-			for (let x = 0; x < width; x++) {
-				for (let y = 0; y < height; y++) {
-					const pixelExists = pixels.some(pixel => pixel.x === x && pixel.y === y);
-					if (!pixelExists || showHeatmap) {
-						// En mode heatmap, on colorie toutes les cellules en gris clair comme fond
-						ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-					}
-				}
-			}
-
-			// Draw grid lines
-			if (showGridLines) {
-				ctx.strokeStyle = '#ccc';
-				ctx.lineWidth = 1;
-				for (let x = 0; x <= width; x++) {
-					ctx.beginPath();
-					ctx.moveTo(x * cellSize, 0);
-					ctx.lineTo(x * cellSize, height * cellSize);
-					ctx.stroke();
-				}
-				for (let y = 0; y <= height; y++) {
-					ctx.beginPath();
-					ctx.moveTo(0, y * cellSize);
-					ctx.lineTo(width * cellSize, y * cellSize);
-					ctx.stroke();
-				}
-			}
-		}
-
-		// Draw heatmap if enabled
+		// Si on est en mode heatmap, on dessine différemment
 		if (showHeatmap) {
+			// Remplir tout le canvas avec la couleur de fond gris clair pour le mode heatmap
+			ctx.fillStyle = '#f0f0f0';
+			ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+
+			// Dessiner la heatmap
 			const { heatmapData, maxValue } = calculateHeatmap();
 
-			// Draw heatmap cells (completely replacing the original colors)
+			// Draw heatmap cells
 			for (let y = 0; y < height; y++) {
 				for (let x = 0; x < width; x++) {
 					const value = heatmapData[y][x];
 					if (value > 0) {
-						// Utiliser une couleur pleine (non transparente) pour remplacer complètement la couleur d'origine
 						const heatmapColor = getHeatmapColor(value, maxValue);
 						ctx.fillStyle = heatmapColor;
 						ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
 
 						// Add text to show the exact number of modifications for each pixel
 						if (cellSize > 15) {  // Only show numbers if cells are big enough
-							// Amélioration de la lisibilité du texte en fonction de la couleur de fond
 							const rgbMatch = heatmapColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-
-							let textColor = 'black'; // Défaut à noir
+							let textColor = 'black';
 
 							if (rgbMatch) {
-								// Formule de luminance perçue (Rec. 709)
-								// L = 0.2126*R + 0.7152*G + 0.0722*B
 								const r = parseInt(rgbMatch[1], 10);
 								const g = parseInt(rgbMatch[2], 10);
 								const b = parseInt(rgbMatch[3], 10);
-
-								// Calculer la luminance (valeur entre 0 et 255)
 								const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-
-								// Si la luminance est inférieure à 140 (sur 255), utiliser du texte blanc, sinon noir
-								// Le seuil de 140 est ajusté pour assurer que les jaunes et couleurs claires utilisent du texte noir
 								textColor = luminance < 140 ? 'white' : 'black';
 							}
 
@@ -314,8 +272,55 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 					}
 				}
 			}
+		} else {
+			// Mode normal (non-heatmap) - PAS de fond gris, seulement les pixels et éventuellement la grille
+
+			// Dessiner les pixels placés
+			pixels.forEach(pixel => {
+				ctx.fillStyle = pixel.color;
+				ctx.fillRect(pixel.x * cellSize, pixel.y * cellSize, cellSize, cellSize);
+			});
+
+			// Ensuite, si showGridLines est actif, dessiner les diagonales et lignes de grille
+			if (showGridLines) {
+				ctx.strokeStyle = '#ccc'; // Couleur pour les lignes diagonales et grille
+				ctx.lineWidth = 1;
+
+				// Remplir les cellules vides en gris clair et dessiner une diagonale
+				for (let x = 0; x < width; x++) {
+					for (let y = 0; y < height; y++) {
+						const pixelExists = pixels.some(pixel => pixel.x === x && pixel.y === y);
+						if (!pixelExists) {
+							// Fill empty cell with light grey
+							ctx.fillStyle = '#f0f0f0';
+							ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+
+							// Draw just one diagonal line (top-left to bottom-right)
+							ctx.beginPath();
+							ctx.moveTo(x * cellSize, y * cellSize);
+							ctx.lineTo((x + 1) * cellSize, (y + 1) * cellSize);
+							ctx.stroke();
+						}
+					}
+				}
+
+				// Draw the grid lines after all the cells
+				for (let x = 0; x <= width; x++) {
+					ctx.beginPath();
+					ctx.moveTo(x * cellSize, 0);
+					ctx.lineTo(x * cellSize, height * cellSize);
+					ctx.stroke();
+				}
+
+				for (let y = 0; y <= height; y++) {
+					ctx.beginPath();
+					ctx.moveTo(0, y * cellSize);
+					ctx.lineTo(width * cellSize, y * cellSize);
+					ctx.stroke();
+				}
+			}
 		}
-	}, [pixels, cellSize, canvasSize, width, height, showGridLines, showHeatmap, calculateHeatmap]);
+	}, [pixels, cellSize, canvasSize, width, height, showGridLines, showHeatmap, calculateHeatmap, theme]);
 
 	// Handle tooltip size changes
 	const handleTooltipSizeChange = useCallback((width: number, height: number) => {
@@ -438,7 +443,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 				width={canvasSize.width}
 				height={canvasSize.height}
 				style={{
-					border: '2px solid black',
+					border: `2px solid ${theme === 'dark' ? '#555' : '#000'}`,
 					cursor: editable && !loading && !showHeatmap ? 'pointer' : 'default'
 				}}
 				onClick={handleCanvasClick}
