@@ -98,25 +98,19 @@ router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
       });
     }
     
-    // Par défaut, tous les utilisateurs peuvent voir le tableau
-    let readOnly = false;
-    
-    // Si l'utilisateur n'est pas authentifié ou est en mode visiteur
-    if (!req.user || req.isGuest) {
-      // Vérifier si les visiteurs peuvent modifier ce tableau
-      if (!pixelBoard.visitor) {
-        readOnly = true;
-      }
-    } else {
-      // Si l'utilisateur est authentifié mais n'est pas le créateur
-      // Vérifier s'il a la permission de modifier des tableaux
-      const isCreator = pixelBoard.creator.toString() === req.user._id.toString();
-      const hasUpdatePermission = await req.user.hasPermission(PERMISSIONS.BOARD_UPDATE);
-      
-      if (!isCreator && !hasUpdatePermission) {
-        readOnly = true;
-      }
+  // Par défaut, tous les utilisateurs peuvent voir le tableau
+  let readOnly = false;
+
+  // Si l'utilisateur n'est pas authentifié ou est en mode visiteur
+  if (!req.user || req.isGuest) {
+    // Vérifier si les visiteurs peuvent modifier ce tableau
+    if (!pixelBoard.visitor) {
+      readOnly = true;
     }
+  } else {
+    // Tous les utilisateurs authentifiés peuvent modifier les tableaux
+    readOnly = false;
+  }
     
     // Retourner le tableau avec l'indicateur readOnly
     res.json({
@@ -136,9 +130,12 @@ router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
 router.put('/:id', 
   auth,
   hasPermission(PERMISSIONS.BOARD_UPDATE),
-  isResourceCreator(async (req) => {
-    return await pixelBoardService.getPixelBoardById(req.params.id);
-  }),
+  isResourceCreator(
+    async (req) => {
+      return await pixelBoardService.getPixelBoardById(req.params.id);
+    },
+    PERMISSIONS.BOARD_UPDATE // Permettre de contourner la vérification du créateur si l'utilisateur a cette permission
+  ),
   async (req: Request, res: Response) => {
     try {
       const pixelBoard = await pixelBoardService.getPixelBoardById(req.params.id);
@@ -168,9 +165,12 @@ router.put('/:id',
 router.delete('/:id', 
   auth,
   hasPermission(PERMISSIONS.BOARD_DELETE),
-  isResourceCreator(async (req) => {
-    return await pixelBoardService.getPixelBoardById(req.params.id);
-  }),
+  isResourceCreator(
+    async (req) => {
+      return await pixelBoardService.getPixelBoardById(req.params.id);
+    },
+    PERMISSIONS.BOARD_DELETE // Permettre de contourner la vérification du créateur si l'utilisateur a cette permission
+  ),
   async (req: Request, res: Response) => {
     try {
       const pixelBoard = await pixelBoardService.getPixelBoardById(req.params.id);

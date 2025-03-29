@@ -178,7 +178,7 @@ export const initializeDefaultRoles = async (): Promise<void> => {
       description: 'Regular authenticated user',
       permissions: [
         PERMISSIONS.USER_VIEW,
-        PERMISSIONS.BOARD_VIEW, PERMISSIONS.BOARD_CREATE,
+        PERMISSIONS.BOARD_VIEW, PERMISSIONS.BOARD_CREATE, PERMISSIONS.BOARD_UPDATE,
         PERMISSIONS.PIXEL_VIEW, PERMISSIONS.PIXEL_CREATE
       ],
       isDefault: true

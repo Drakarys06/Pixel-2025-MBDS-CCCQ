@@ -114,8 +114,8 @@ export const hasRole = (role: string | string[]) => {
   };
 };
 
-// Middleware qui vérifie si l'utilisateur est le créateur de la ressource
-export const isResourceCreator = (getResourceFn: (req: Request) => Promise<any>) => {
+// Middleware qui vérifie si l'utilisateur est le créateur de la ressource ou a les permissions appropriées
+export const isResourceCreator = (getResourceFn: (req: Request) => Promise<any>, bypassPermission?: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({ 
@@ -126,6 +126,11 @@ export const isResourceCreator = (getResourceFn: (req: Request) => Promise<any>)
     }
     
     try {
+      // Si une permission de contournement est spécifiée et que l'utilisateur l'a, autoriser
+      if (bypassPermission && await req.user.hasPermission(bypassPermission)) {
+        return next();
+      }
+      
       // Obtenir la ressource
       const resource = await getResourceFn(req);
       
