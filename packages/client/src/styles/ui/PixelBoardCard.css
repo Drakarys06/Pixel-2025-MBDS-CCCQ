@@ -1,55 +1,55 @@
 .pixel-board-card {
-  transition: transform 0.2s, box-shadow 0.2s;
+	transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .pixel-board-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px var(--shadow-color);
+	transform: translateY(-5px);
+	box-shadow: 0 5px 15px var(--shadow-color);
 }
 
 .pixel-board-preview {
-  height: 180px;
-  background-color: var(--bg-tertiary);
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+	height: 180px;
+	background-color: var(--bg-tertiary);
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
 }
 
 .pixel-block-preview {
-  width: 40px;
-  height: 40px;
-  position: absolute;
-  border-radius: 3px;
+	width: 40px;
+	height: 40px;
+	position: absolute;
+	border-radius: 3px;
 }
 
 .pixel-board-title {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: var(--text-primary);
+	font-size: 18px;
+	font-weight: 600;
+	margin-bottom: 8px;
+	color: var(--text-primary);
 }
 
 .pixel-board-meta {
-  display: flex;
-  justify-content: space-between;
-  color: var(--text-secondary);
-  font-size: 14px;
-  margin-bottom: 12px;
+	display: flex;
+	justify-content: space-between;
+	color: var(--text-secondary);
+	font-size: 14px;
+	margin-bottom: 12px;
 }
 
 .pixel-board-creator {
-  font-size: 14px;
-  color: var(--text-secondary);
+	font-size: 14px;
+	color: var(--text-secondary);
 }
 
 .pixel-board-time-progress {
-  margin-top: 8px;
+	margin-top: 8px;
 }
 
 @media (max-width: 480px) {
-  .pixel-board-preview {
-    height: 160px;
-  }
+	.pixel-board-preview {
+		height: 160px;
+	}
 }
