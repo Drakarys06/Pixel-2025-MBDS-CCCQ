@@ -23,17 +23,17 @@ interface Pixel {
 }
 
 interface PixelBoard {
-	_id: string;
-	title: string;
-	length: number;
-	width: number;
-	time: number;
-	redraw: boolean;
-	closeTime: string | null;
-	creationTime: string;
-	creator: string;
-	creatorUsername?: string;
-	visitor: boolean;
+  _id: string;
+  title: string;
+  length: number;
+  width: number;
+  time: number;
+  redraw: boolean;
+  closeTime: string | null;
+  creationTime: string;
+  creator: string;
+  creatorUsername?: string;
+  visitor: boolean;
 }
 
 const BoardViewPage: React.FC = () => {
@@ -162,10 +162,10 @@ const BoardViewPage: React.FC = () => {
     setSelectedColor(e.target.value);
   };
 
-	// Add toggle for heatmap mode
-	const handleToggleHeatmap = () => {
-		setShowHeatmap(prevState => !prevState);
-	};
+  // Add toggle for heatmap mode
+  const handleToggleHeatmap = () => {
+    setShowHeatmap(prevState => !prevState);
+  };
 
   // Handle pixel placement
   const handlePlacePixel = async (x: number, y: number) => {
@@ -299,8 +299,8 @@ const BoardViewPage: React.FC = () => {
             disabled={isBoardExpired() || placingPixel}
             showGridLines={showGridLines}
             onToggleGridLines={() => setShowGridLines(!showGridLines)}
-						showHeatmap={showHeatmap}
-						onToggleHeatmap={handleToggleHeatmap}
+            showHeatmap={showHeatmap}
+            onToggleHeatmap={handleToggleHeatmap}
           />
 
           <BoardContributors
@@ -308,30 +308,31 @@ const BoardViewPage: React.FC = () => {
             refreshTrigger={contributorsRefreshTrigger}
           />
 
-					<ExportCanvas
-						getCanvasData={() => pixelGridRef.current?.getCanvas() || null}
-						pixelGridRef={pixelGridRef}
-						boardWidth={board.width}
-						boardHeight={board.length}
-						className="board-export-button"
-					/>
-				</div>
+          <ExportCanvas
+            getCanvasData={() => pixelGridRef.current?.getCanvas() || null}
+            pixelGridRef={pixelGridRef}
+            boardWidth={board.width}
+            boardHeight={board.length}
+            className="board-export-button"
+          />
+        </div>
 
-				<div className="board-grid-container">
-					<PixelGrid
-						ref={pixelGridRef}
-						width={board.width}
-						height={board.length}
-						pixels={pixels}
-						editable={!isBoardExpired() && !showHeatmap}
-						loading={placingPixel}
-						showGridLines={showGridLines}
-						showHeatmap={showHeatmap}
-					/>
-				</div>
-			</div>
-		</Layout>
-	);
+        <div className="board-grid-container">
+          <PixelGrid
+            ref={pixelGridRef}
+            width={board.width}
+            height={board.length}
+            pixels={pixels}
+            editable={!isBoardExpired() && !showHeatmap}
+            onPixelClick={handlePlacePixel}
+            loading={placingPixel}
+            showGridLines={showGridLines}
+            showHeatmap={showHeatmap}
+          />
+        </div>
+      </div>
+    </Layout>
+  );
 };
 
 export default BoardViewPage;
