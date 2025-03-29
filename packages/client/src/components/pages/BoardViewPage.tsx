@@ -33,12 +33,12 @@ interface PixelBoard {
   creator: string;
   creatorUsername?: string;
   visitor: boolean;
-  readOnly?: boolean; // Indique si l'utilisateur courant peut modifier ce tableau
+  readOnly?: boolean; // Indicates if the current user can modify this board
 }
 
 const BoardViewPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { currentUser, isGuestMode } = useAuth(); // Récupérer l'utilisateur connecté et son statut de visiteur
+  const { currentUser, isGuestMode } = useAuth(); // Get the logged in user and guest status
   const [board, setBoard] = useState<PixelBoard | null>(null);
   const [pixels, setPixels] = useState<Pixel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -50,7 +50,7 @@ const BoardViewPage: React.FC = () => {
   const [readOnly, setReadOnly] = useState<boolean>(false);
   const [contributorsRefreshTrigger, setContributorsRefreshTrigger] = useState<number>(0);
   
-  // Références pour gérer les requêtes et l'intervalle de polling
+  // References to manage requests and polling interval
   const abortControllerRef = useRef<AbortController | null>(null);
   const intervalIdRef = useRef<number | null>(null);
   const pixelGridRef = useRef<PixelGridRef>(null);
@@ -61,12 +61,12 @@ const BoardViewPage: React.FC = () => {
   const fetchPixels = useCallback(async (boardId: string) => {
     if (!boardId) return;
 
-    // Annuler toute requête précédente
+    // Cancel any previous request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
     
-    // Créer un nouveau controller pour cette requête
+    // Create a new controller for this request
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
@@ -86,7 +86,7 @@ const BoardViewPage: React.FC = () => {
       const data = await response.json();
       setPixels(data);
     } catch (err: any) {
-      // Ne pas afficher d'erreur si c'est une annulation intentionnelle
+      // Don't display an error if it's an intentional abort
       if (err.name !== 'AbortError') {
         console.error('Error fetching pixels:', err);
       }
@@ -98,12 +98,12 @@ const BoardViewPage: React.FC = () => {
     const fetchBoardDetails = async () => {
       if (!id) return;
 
-      // Annuler toute requête précédente
+      // Cancel any previous request
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
       
-      // Créer un nouveau controller pour cette requête
+      // Create a new controller for this request
       const controller = new AbortController();
       abortControllerRef.current = controller;
 
@@ -123,7 +123,7 @@ const BoardViewPage: React.FC = () => {
 
         const data = await response.json();
         
-        // Vérifier si le tableau est en lecture seule
+        // Check if the board is read-only
         if (data.readOnly) {
           setReadOnly(true);
         }
@@ -133,7 +133,7 @@ const BoardViewPage: React.FC = () => {
         // Fetch pixels after board is loaded
         fetchPixels(id);
       } catch (err: any) {
-        // Ne pas afficher d'erreur si c'est une annulation intentionnelle
+        // Don't display an error if it's an intentional abort
         if (err.name !== 'AbortError') {
           console.error('Error fetching board details:', err);
           setError(err instanceof Error ? err.message : 'Failed to load board. Please try again.');
@@ -145,7 +145,7 @@ const BoardViewPage: React.FC = () => {
 
     fetchBoardDetails();
     
-    // Nettoyer les requêtes en cours lors du démontage
+    // Clean up ongoing requests during unmount
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -157,17 +157,17 @@ const BoardViewPage: React.FC = () => {
   useEffect(() => {
     if (!board) return;
 
-    // Nettoyer l'intervalle précédent si existant
+    // Clear previous interval if it exists
     if (intervalIdRef.current !== null) {
       window.clearInterval(intervalIdRef.current);
     }
 
-    // Démarrer un nouvel intervalle
+    // Start a new interval
     intervalIdRef.current = window.setInterval(() => {
       fetchPixels(board._id);
     }, 10000);
 
-    // Nettoyer l'intervalle au démontage ou lorsque board change
+    // Clean up the interval on unmount or when board changes
     return () => {
       if (intervalIdRef.current !== null) {
         window.clearInterval(intervalIdRef.current);
@@ -185,10 +185,10 @@ const BoardViewPage: React.FC = () => {
   const handlePlacePixel = async (x: number, y: number) => {
     if (!id || !board || !currentUser) return;
 
-    // Empêcher la modification en mode lecture seule
+    // Prevent modification in read-only mode
     if (readOnly) {
       setMessage({
-        text: 'Vous êtes en mode lecture seule. La modification n\'est pas autorisée.',
+        text: 'You are in read-only mode. Modification is not allowed.',
         type: 'error'
       });
       return;
@@ -205,7 +205,7 @@ const BoardViewPage: React.FC = () => {
 
     setPlacingPixel(true);
     
-    // Créer un nouvel AbortController pour cette requête
+    // Create a new AbortController for this request
     const controller = new AbortController();
     
     try {
@@ -244,21 +244,21 @@ const BoardViewPage: React.FC = () => {
 
       setMessage({ text: 'Pixel placed successfully!', type: 'success' });
       
-      // Déclencher le rafraîchissement des contributeurs
+      // Trigger contributors refresh
       setContributorsRefreshTrigger(prev => prev + 1);
 
-      // Utiliser un timeout pour effacer le message après un délai
+      // Use a timeout to clear the message after a delay
       const timeoutId = window.setTimeout(() => {
         setMessage(null);
       }, 3000);
       
-      // Nettoyer le timeout si le composant est démonté
+      // Clean up the timeout if the component is unmounted
       return () => {
         window.clearTimeout(timeoutId);
       };
       
     } catch (err: any) {
-      // Ne pas afficher d'erreur si c'est une annulation intentionnelle
+      // Don't display an error if it's an intentional abort
       if (err.name !== 'AbortError') {
         console.error('Error placing pixel:', err);
         setMessage({
@@ -346,12 +346,12 @@ const BoardViewPage: React.FC = () => {
           
           {readOnly && (
             <div className="read-only-indicator">
-              <div className="read-only-badge">Mode lecture seule</div>
-              <p>Vous pouvez voir ce tableau mais pas le modifier. {isGuestMode && "Créez un compte pour plus d'options."}</p>
+              <div className="read-only-badge">Read Only Mode</div>
+              <p>You can view this board but not modify it. {isGuestMode && "Create an account for more options."}</p>
             </div>
           )}
           
-          {/* Ajout du composant pour afficher les contributeurs avec le déclencheur de rafraîchissement */}
+          {/* Add component to display contributors with refresh trigger */}
           <BoardContributors
             boardId={board._id}
             refreshTrigger={contributorsRefreshTrigger}
