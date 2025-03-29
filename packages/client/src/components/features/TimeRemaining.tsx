@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import ProgressBar from './ProgressBar';
+import ProgressBar from '../ui/ProgressBar';
 import './TimeRemaining.css';
 
 interface TimeRemainingProps {

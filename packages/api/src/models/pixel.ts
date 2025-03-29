@@ -8,7 +8,6 @@ export interface IPixel extends Document {
 	lastModifiedDate: Date;
 	modifiedBy: string[]; // Array of users who modified this pixel
 	boardId: mongoose.Types.ObjectId; // Reference to the parent PixelBoard
-	modificationCount: number; // Nouveau champ pour suivre le nombre total de modifications
 }
 
 // Create the Pixel schema
@@ -40,11 +39,6 @@ const PixelSchema: Schema = new Schema({
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'PixelBoard',
 		required: [true, 'Board ID is required']
-	},
-	modificationCount: {
-		type: Number,
-		default: 1, // Commence à 1 pour la première création
-		min: [1, 'Modification count must be at least 1']
 	}
 }, {
 	timestamps: true,

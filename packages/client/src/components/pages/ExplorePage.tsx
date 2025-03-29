@@ -5,7 +5,10 @@ import PixelBoardCard from '../ui/PixelBoardCard';
 import { Input, Select } from '../ui/FormComponents';
 import Alert from '../ui/Alert';
 import Loader from '../ui/Loader';
+import Button from '../ui/Button';
 import { useAuth } from '../auth/AuthContext';
+import PermissionGate from '../auth/PermissionGate';
+import { PERMISSIONS } from '../auth/permissions';
 import '../../styles/pages/ExplorePage.css';
 
 interface PixelBoard {
@@ -18,7 +21,7 @@ interface PixelBoard {
 	closeTime: string | null;
 	creationTime: string;
 	creator: string;
-	creatorUsername?: string; // Ajout du champ pour le nom d'utilisateur
+	creatorUsername?: string;
 	visitor: boolean;
 }
 
@@ -29,7 +32,7 @@ const ExplorePage: React.FC = () => {
 	const [searchTerm, setSearchTerm] = useState<string>('');
 	const [sortBy, setSortBy] = useState<string>('newest');
 	const [filterBy, setFilterBy] = useState<string>('all');
-	const { isLoggedIn } = useAuth();
+	const { isLoggedIn, isGuestMode } = useAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
 
@@ -44,19 +47,8 @@ const ExplorePage: React.FC = () => {
 		}
 	}, [location.search]);
 
-	// Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
-	useEffect(() => {
-		if (!isLoggedIn) {
-			console.log('ExplorePage: Utilisateur non connecté, redirection vers /login');
-			navigate('/login', { state: { from: '/explore' } });
-		}
-	}, [isLoggedIn, navigate]);
-
 	// Fetch pixel boards
 	useEffect(() => {
-		// Ne charger les données que si l'utilisateur est connecté
-		if (!isLoggedIn) return;
-
 		const fetchPixelBoards = async () => {
 			setLoading(true);
 			setError(null);
@@ -84,12 +76,7 @@ const ExplorePage: React.FC = () => {
 		};
 
 		fetchPixelBoards();
-	}, [API_URL, isLoggedIn]);
-
-	// Si l'utilisateur n'est pas connecté, on ne rend rien car la redirection sera effectuée
-	if (!isLoggedIn) {
-		return <Loader text="Redirecting to login..." />;
-	}
+	}, [API_URL]);
 
 	// Sort and filter options
 	const sortOptions = [
@@ -114,7 +101,6 @@ const ExplorePage: React.FC = () => {
 		if (searchTerm) {
 			result = result.filter(board =>
 				board.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				// Utiliser creatorUsername si disponible, sinon creator
 				(board.creatorUsername ?
 					board.creatorUsername.toLowerCase().includes(searchTerm.toLowerCase()) :
 					board.creator.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -139,6 +125,11 @@ const ExplorePage: React.FC = () => {
 				}
 				return true;
 			});
+		}
+
+		// Filtrer les tableaux qui nécessitent une authentification pour les visiteurs
+		if (!isLoggedIn) {
+			result = result.filter(board => board.visitor);
 		}
 
 		// Sort the boards
@@ -166,11 +157,19 @@ const ExplorePage: React.FC = () => {
 			default:
 				return result;
 		}
-	}, [pixelBoards, searchTerm, sortBy, filterBy]);
+	}, [pixelBoards, searchTerm, sortBy, filterBy, isLoggedIn]);
 
 	return (
 		<Layout title="Explore Pixel Boards">
 			{error && <Alert variant="error" message={error} />}
+
+			{isGuestMode && (
+				<Alert 
+					variant="info" 
+					message="You're browsing as a guest. Some boards may be restricted. Sign up for full access!" 
+					dismissible
+				/>
+			)}
 
 			<div className="explore-filter">
 				<div className="filter-options">
@@ -200,6 +199,31 @@ const ExplorePage: React.FC = () => {
 				</div>
 			</div>
 
+			<div className="explore-actions">
+				<PermissionGate 
+					permission={PERMISSIONS.BOARD_CREATE}
+					fallback={
+						<div className="permission-note">
+							{!isLoggedIn ? (
+								<span>
+									<a href="/login" className="text-link">Log in</a> or <a href="/signup" className="text-link">sign up</a> to create your own boards!
+								</span>
+							) : (
+								<span>Your current role doesn't allow board creation.</span>
+							)}
+						</div>
+					}
+				>
+					<Button
+						variant="primary"
+						onClick={() => navigate('/create')}
+						className="create-board-button"
+					>
+						Create New Board
+					</Button>
+				</PermissionGate>
+			</div>
+
 			{loading ? (
 				<div className="board-grid-loading">
 					<Loader text="Loading boards..." />
@@ -222,7 +246,15 @@ const ExplorePage: React.FC = () => {
 				</div>
 			) : (
 				<div className="no-data">
-					No pixel boards found matching your search.
+					{searchTerm ? (
+						"No pixel boards found matching your search."
+					) : filterBy !== 'all' ? (
+						`No ${filterBy} pixel boards available.`
+					) : !isLoggedIn ? (
+						"No boards available for guest viewing. Please log in to see more boards."
+					) : (
+						"No pixel boards available yet. Be the first to create one!"
+					)}
 				</div>
 			)}
 		</Layout>
