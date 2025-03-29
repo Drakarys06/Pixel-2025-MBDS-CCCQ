@@ -1,4 +1,4 @@
-// Modifier le fichier api.ts pour protéger toutes les routes
+// Modified api.ts to make stats routes public
 import express, { Request, Response } from 'express';
 import { articleAPI } from './routes/article';
 import { pixelBoardAPI } from './routes/pixelboard';
@@ -11,7 +11,7 @@ export const api = express.Router();
 
 // Routes publiques (pas besoin d'authentification)
 api.use('/auth', authRoutes);
-api.use('/stats', statsRoutes);
+api.use('/stats', statsRoutes); // Stats routes are now public without auth middleware
 
 // Route de base - rediriger vers la connexion si non authentifié
 api.get('/', optionalAuth, (req: Request, res: Response) => {
@@ -28,8 +28,8 @@ api.get('/', optionalAuth, (req: Request, res: Response) => {
 
 // Routes protégées (nécessitent une authentification)
 api.use('/articles', auth, articleAPI);
-api.use('/pixelboards', auth, pixelBoardAPI);
-api.use('/pixels', auth, pixelAPI);
+api.use('/pixelboards', pixelBoardAPI); // Remove auth middleware since it's already applied in route definitions
+api.use('/pixels', pixelAPI); // Remove auth middleware since it's already applied in route definitions
 
 // Route pour vérifier l'authentification de l'utilisateur
 api.get('/check-auth', optionalAuth, (req: Request, res: Response) => {
