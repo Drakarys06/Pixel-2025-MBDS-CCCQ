@@ -116,6 +116,20 @@ router.post('/board/:boardId/place',
         userId
       );
 
+      // Émettre l'événement via WebSockets (fonctionnalité de main)
+      try {
+        const { io } = require('../index');
+
+        // Pixel placed event
+        io.to(`board-${boardId}`).emit('pixelPlaced', {
+          ...pixel.toObject(),
+          username: req.user.username
+        });
+        console.log(`Emitted pixelPlaced event for board ${boardId} from user ${req.user.username}`);
+      } catch (error) {
+        console.error('Failed to emit pixelPlaced event:', error);
+      }
+
       // Ajouter ou mettre à jour l'utilisateur dans la liste des contributeurs
       const existingContributor = pixelBoard.contributors?.find(
         contributor => contributor.userId === userId

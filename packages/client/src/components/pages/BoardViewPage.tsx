@@ -7,6 +7,8 @@ import BoardControls from '../features/BoardControls';
 import BoardContributors from '../features/BoardContributors';
 import Alert from '../ui/Alert';
 import Loader from '../ui/Loader';
+import ExportCanvas from '../ui/ExportCanvas';
+import websocketService from '../../services/websocketService';
 import { useAuth } from '../auth/AuthContext';
 import usePermissions from '../auth/usePermissions';
 import { PERMISSIONS } from '../auth/permissions';
@@ -55,6 +57,57 @@ const BoardViewPage: React.FC = () => {
   const pixelGridRef = useRef<PixelGridRef>(null);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  
+  const boardConnectionRef = useRef(false);
+
+  // WebSocket setup (from main branch)
+  useEffect(() => {
+    if (!id || !board) return;
+
+    // Connect to WebSocket
+    if (!websocketService.isConnected()) {
+      websocketService.connect();
+    }
+
+    // Join the board
+    if (!boardConnectionRef.current) {
+      console.log(`Joining board: ${id}`);
+      websocketService.joinBoard(id);
+      boardConnectionRef.current = true;
+
+      // Listener for pixel updates
+      websocketService.onPixelPlaced((pixelData) => {
+        console.log('Received pixel placed event:', pixelData);
+
+        setPixels(prev => {
+          const existingIndex = prev.findIndex(p =>
+            p.x === pixelData.x && p.y === pixelData.y
+          );
+
+          if (existingIndex >= 0) {
+            const newPixels = [...prev];
+            newPixels[existingIndex] = pixelData;
+            return newPixels;
+          } else {
+            return [...prev, pixelData];
+          }
+        });
+        
+        // Refresh contributors when new pixel is placed via WebSocket
+        setRefreshTrigger(prev => prev + 1);
+      });
+    }
+
+    // Clean up on unmount
+    return () => {
+      if (boardConnectionRef.current) {
+        console.log(`Leaving board: ${id}`);
+        websocketService.leaveBoard(id);
+        websocketService.removeListener('pixelPlaced');
+        boardConnectionRef.current = false;
+      }
+    };
+  }, [id, board]);
 
   // Fetch pixels for this board
   const fetchPixels = useCallback(async (boardId: string) => {
@@ -118,7 +171,7 @@ const BoardViewPage: React.FC = () => {
     fetchBoardDetails();
   }, [id, API_URL, fetchPixels]);
 
-  // Set up polling for real-time updates (every 10 seconds)
+  // Set up polling for real-time updates as fallback (every 10 seconds)
   useEffect(() => {
     if (!board) return;
 
@@ -129,6 +182,11 @@ const BoardViewPage: React.FC = () => {
   // Handle color selection
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedColor(e.target.value);
+  };
+
+  // Toggle heatmap view
+  const toggleHeatmap = () => {
+    setShowHeatmap(prev => !prev);
   };
 
   // Handle pixel placement
@@ -204,11 +262,6 @@ const BoardViewPage: React.FC = () => {
     } finally {
       setPlacingPixel(false);
     }
-  };
-
-  // Toggle heatmap view
-  const toggleHeatmap = () => {
-    setShowHeatmap(prev => !prev);
   };
 
   // Check if board is expired
@@ -308,6 +361,15 @@ const BoardViewPage: React.FC = () => {
           <BoardContributors 
             boardId={board._id} 
             refreshTrigger={refreshTrigger}
+          />
+
+          {/* ExportCanvas de la branche main */}
+          <ExportCanvas
+            getCanvasData={() => pixelGridRef.current?.getCanvas() || null}
+            pixelGridRef={pixelGridRef}
+            boardWidth={board.width}
+            boardHeight={board.length}
+            className="board-export-button"
           />
         </div>
 
