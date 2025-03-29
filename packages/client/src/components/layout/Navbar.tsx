@@ -14,7 +14,7 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ logoText = 'PixelBoard' }) => {
-	const { isLoggedIn, currentUser, logout } = useAuth();
+	const { isLoggedIn, currentUser, logout, isGuestMode } = useAuth();
 	const permissions = usePermissions();
 
 	const handleLogout = () => {
@@ -25,10 +25,12 @@ const Navbar: React.FC<NavbarProps> = ({ logoText = 'PixelBoard' }) => {
 	return (
 		<header className="navbar">
 			<nav className="navbar-content">
+				{/* Logo */}
 				<Link to="/" className="navbar-logo">
 					{logoText}
 				</Link>
 
+				{/* Navigation links */}
 				<div className="navbar-links">
 					<NavLink to="/explore" className={({isActive}) =>
 						isActive ? "navbar-link active" : "navbar-link"
@@ -55,15 +57,22 @@ const Navbar: React.FC<NavbarProps> = ({ logoText = 'PixelBoard' }) => {
 					)}
 				</div>
 
+				{/* Right side actions */}
 				<div className="navbar-actions">
 					{isLoggedIn ? (
 						// Utilisateur connecté - afficher profil et déconnexion
 						<div className="navbar-auth">
-							<Link to="/profile" className="navbar-user">
-								{/* Ajouter le badge de rôle à côté du nom d'utilisateur */}
+							<Link to="/profile" className="profile-button">
+								<div className={`user-avatar ${isGuestMode ? 'avatar-guest' : 'avatar-user'}`}>
+									{isGuestMode ? (
+										<i className="avatar-icon guest-icon">👤</i>
+									) : (
+										<i className="avatar-icon user-icon">👤</i>
+									)}
+								</div>
 								<div className="user-info">
 									<span className="username">{currentUser?.username}</span>
-									<RoleBadge />
+									<RoleBadge compact={true} />
 								</div>
 							</Link>
 							<Button variant="secondary" size="sm" onClick={handleLogout}>
