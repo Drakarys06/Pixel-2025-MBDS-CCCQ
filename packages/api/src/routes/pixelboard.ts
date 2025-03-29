@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import * as pixelBoardService from '../services/pixelboard';
-import { auth, optionalAuth, creatorOnly } from '../middleware/auth';
+import { auth, optionalAuth } from '../middleware/auth';
 import { hasPermission, isResourceCreator } from '../middleware/authorization';
 import { PERMISSIONS } from '../services/roleService';
 import Role from '../models/Role';

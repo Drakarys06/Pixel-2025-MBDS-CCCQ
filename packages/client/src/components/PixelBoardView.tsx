@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
-import ThemeToggle from './ThemeToggle';
-
+import ThemeToggle from '../../src/components/ui/ThemeToggle';
 interface Pixel {
 	_id: string;
 	x: number;
