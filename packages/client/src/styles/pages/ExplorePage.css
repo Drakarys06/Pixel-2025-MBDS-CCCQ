@@ -1,7 +1,5 @@
 .explore-filter {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 20px;
   padding: 15px;
   background-color: var(--bg-secondary);
@@ -9,17 +7,24 @@
   box-shadow: 0 2px 4px var(--shadow-color);
 }
 
-.filter-options {
+.filter-controls {
   display: flex;
-  gap: 15px;
   align-items: center;
+  gap: 15px;
+  width: 100%;
   flex-wrap: wrap;
 }
 
-.search-box {
-  display: flex;
-  align-items: center;
+.sort-select,
+.filter-select {
+  min-width: 150px;
+  flex-grow: 0;
+}
+
+.search-input {
   min-width: 250px;
+  flex-grow: 1;
+  margin-left: auto;
 }
 
 /* Board Grid */
@@ -46,26 +51,28 @@
   margin-top: 20px;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .explore-filter {
-    flex-direction: column;
-    align-items: flex-start;
+/* Responsive styling */
+@media (min-width: 768px) {
+  .filter-controls {
+    flex-wrap: nowrap;
   }
+}
 
-  .filter-options {
+@media (max-width: 767px) {
+  .filter-controls {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .sort-select,
+  .filter-select,
+  .search-input {
     width: 100%;
-    margin-bottom: 15px;
-    overflow-x: auto;
-    padding-bottom: 5px;
+    min-width: 0;
   }
-
-  .search-box {
-    width: 100%;
-  }
-
-  .board-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  
+  .search-input {
+    margin-left: 0;
   }
 }
 

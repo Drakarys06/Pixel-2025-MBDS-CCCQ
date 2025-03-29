@@ -18,7 +18,7 @@ interface PixelBoard {
   closeTime: string | null;
   creationTime: string;
   creator: string;
-  creatorUsername?: string; // Ajout du champ pour le nom d'utilisateur
+  creatorUsername?: string;
   visitor: boolean;
 }
 
@@ -34,24 +34,24 @@ const ExplorePage: React.FC = () => {
   
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-  // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
+  // Redirect to login page if user is not logged in
   useEffect(() => {
     if (!isLoggedIn) {
-      console.log('ExplorePage: Utilisateur non connecté, redirection vers /login');
+      console.log('ExplorePage: User not logged in, redirecting to /login');
       navigate('/login', { state: { from: '/explore' } });
     }
   }, [isLoggedIn, navigate]);
 
   // Fetch pixel boards
   useEffect(() => {
-    // Ne charger les données que si l'utilisateur est connecté
+    // Only load data if user is logged in
     if (!isLoggedIn) return;
     
     const fetchPixelBoards = async () => {
       setLoading(true);
       setError(null);
       try {
-        // Récupérer le token d'authentification depuis localStorage
+        // Get authentication token from localStorage
         const token = localStorage.getItem('token');
         
         const response = await fetch(`${API_URL}/api/pixelboards`, {
@@ -76,7 +76,7 @@ const ExplorePage: React.FC = () => {
     fetchPixelBoards();
   }, [API_URL, isLoggedIn]);
 
-  // Si l'utilisateur n'est pas connecté, on ne rend rien car la redirection sera effectuée
+  // If user is not logged in, render nothing as redirect will happen
   if (!isLoggedIn) {
     return <Loader text="Redirecting to login..." />;
   }
@@ -96,6 +96,18 @@ const ExplorePage: React.FC = () => {
     { value: 'viewable', label: 'View-only Boards' }
   ];
 
+  // Function to check if a board is expired
+  const isBoardExpired = (board: PixelBoard): boolean => {
+    const now = new Date();
+    if (board.closeTime) return true;
+    
+    const creationDate = new Date(board.creationTime);
+    const durationMs = board.time * 60 * 1000;
+    const closingDate = new Date(creationDate.getTime() + durationMs);
+    
+    return now > closingDate;
+  };
+
   // Sort and filter the boards
   const filteredAndSortedBoards = React.useMemo(() => {
     let result = [...pixelBoards];
@@ -104,7 +116,6 @@ const ExplorePage: React.FC = () => {
     if (searchTerm) {
       result = result.filter(board => 
         board.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        // Utiliser creatorUsername si disponible, sinon creator
         (board.creatorUsername ? 
           board.creatorUsername.toLowerCase().includes(searchTerm.toLowerCase()) :
           board.creator.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -113,14 +124,8 @@ const ExplorePage: React.FC = () => {
     
     // Apply status filter
     if (filterBy !== 'all') {
-      // Get current time for comparison
-      const now = new Date();
-      
       result = result.filter(board => {
-        const creationDate = new Date(board.creationTime);
-        const durationMs = board.time * 60 * 1000;
-        const closingDate = new Date(creationDate.getTime() + durationMs);
-        const isExpired = board.closeTime !== null || now > closingDate;
+        const isExpired = isBoardExpired(board);
         
         if (filterBy === 'joinable') {
           return !isExpired;
@@ -134,15 +139,19 @@ const ExplorePage: React.FC = () => {
     // Sort the boards
     switch (sortBy) {
       case 'newest':
-        return result.sort((a, b) => new Date(b.creationTime).getTime() - new Date(a.creationTime).getTime());
+        result.sort((a, b) => new Date(b.creationTime).getTime() - new Date(a.creationTime).getTime());
+        break;
       case 'oldest':
-        return result.sort((a, b) => new Date(a.creationTime).getTime() - new Date(b.creationTime).getTime());
+        result.sort((a, b) => new Date(a.creationTime).getTime() - new Date(b.creationTime).getTime());
+        break;
       case 'az':
-        return result.sort((a, b) => a.title.localeCompare(b.title));
+        result.sort((a, b) => a.title.localeCompare(b.title));
+        break;
       case 'za':
-        return result.sort((a, b) => b.title.localeCompare(a.title));
+        result.sort((a, b) => b.title.localeCompare(a.title));
+        break;
       case 'closing-soon':
-        return result.sort((a, b) => {
+        result.sort((a, b) => {
           // Closed boards go to the end
           if (a.closeTime && !b.closeTime) return 1;
           if (!a.closeTime && b.closeTime) return -1;
@@ -153,9 +162,12 @@ const ExplorePage: React.FC = () => {
           const bEndTime = new Date(new Date(b.creationTime).getTime() + (b.time * 60 * 1000));
           return aEndTime.getTime() - bEndTime.getTime();
         });
-      default:
-        return result;
+        break;
     }
+    
+    // Final step: Always put active boards first, then expired boards
+    return [...result.filter(board => !isBoardExpired(board)), 
+            ...result.filter(board => isBoardExpired(board))];
   }, [pixelBoards, searchTerm, sortBy, filterBy]);
 
   return (
@@ -163,12 +175,13 @@ const ExplorePage: React.FC = () => {
       {error && <Alert variant="error" message={error} />}
       
       <div className="explore-filter">
-        <div className="filter-options">
+        <div className="filter-controls">
           <Select
             options={sortOptions}
             value={sortBy}
             onChange={setSortBy}
             fullWidth={false}
+            className="sort-select"
           />
           
           <Select
@@ -176,16 +189,16 @@ const ExplorePage: React.FC = () => {
             value={filterBy}
             onChange={setFilterBy}
             fullWidth={false}
+            className="filter-select"
           />
-        </div>
-        
-        <div className="search-box">
+          
           <Input
             type="text"
             placeholder="Search boards..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             fullWidth={false}
+            className="search-input"
           />
         </div>
       </div>
@@ -207,6 +220,7 @@ const ExplorePage: React.FC = () => {
               time={board.time}
               closeTime={board.closeTime}
               creator={board.creatorUsername || board.creator}
+              showGridLines={false}
             />
           ))}
         </div>

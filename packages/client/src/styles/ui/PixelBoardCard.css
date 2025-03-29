@@ -1,5 +1,8 @@
 .pixel-board-card {
   transition: transform 0.2s, box-shadow 0.2s;
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .pixel-board-card:hover {
@@ -9,7 +12,7 @@
 
 .pixel-board-preview {
   height: 180px;
-  background-color: var(--bg-tertiary);
+  background-color: #000000; /* Black background for better contrast */
   position: relative;
   display: flex;
   align-items: center;
@@ -17,11 +20,29 @@
   overflow: hidden;
 }
 
-.pixel-block-preview {
+.pixel-preview-canvas {
+  display: block;
+  image-rendering: pixelated; /* Critical: Makes pixels sharp */
+  image-rendering: crisp-edges; /* Alternative for Firefox */
+  margin: 0 auto;
+  max-width: 100%;
+  max-height: 100%;
+  border: none;
+  box-shadow: none;
+}
+
+.pixel-preview-loading {
   width: 40px;
   height: 40px;
-  position: absolute;
-  border-radius: 3px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top: 3px solid var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .pixel-board-title {
@@ -29,6 +50,9 @@
   font-weight: 600;
   margin-bottom: 8px;
   color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .pixel-board-meta {
@@ -42,10 +66,50 @@
 .pixel-board-creator {
   font-size: 14px;
   color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
 }
 
 .pixel-board-time-progress {
   margin-top: 8px;
+}
+
+/* Time badge style */
+.time-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: var(--accent-color);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.time-badge.time-ending-soon {
+  background-color: orange;
+}
+
+.time-badge.time-expired {
+  background-color: var(--error-color);
+}
+
+.card-body {
+  padding: 15px;
+}
+
+.card-footer {
+  padding: 10px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-tertiary);
 }
 
 @media (max-width: 480px) {
