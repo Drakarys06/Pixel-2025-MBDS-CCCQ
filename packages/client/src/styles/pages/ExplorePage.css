@@ -1,7 +1,9 @@
+/* Style pour mettre les filtres sur une seule ligne */
 .explore-filter {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
   margin-bottom: 20px;
   padding: 15px;
   background-color: var(--bg-secondary);
@@ -11,21 +13,34 @@
 
 .filter-options {
   display: flex;
-  gap: 15px;
   align-items: center;
-  flex-wrap: wrap;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.filter-select,
+.sort-select {
+  min-width: 150px;
+  flex-shrink: 0;
 }
 
 .search-box {
-  display: flex;
-  align-items: center;
-  min-width: 250px;
+  flex-grow: 1;
+  margin-left: 10px;
+  max-width: 300px;
 }
 
-/* Board Grid */
+/* Assurez-vous que les inputs et selects ont la bonne largeur */
+.filter-options .form-input,
+.filter-options .form-select,
+.search-box .form-input {
+  width: 100%;
+}
+
+/* Style pour la grille de boards avec espacement correct */
 .board-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   margin-top: 20px;
   width: 100%;
@@ -46,42 +61,36 @@
   margin-top: 20px;
 }
 
-/* Responsive adjustments */
+/* Responsive styling */
+@media (max-width: 1200px) {
+  .board-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .explore-filter {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-wrap: wrap;
   }
-
+  
   .filter-options {
     width: 100%;
-    margin-bottom: 15px;
-    overflow-x: auto;
-    padding-bottom: 5px;
+    margin-bottom: 10px;
   }
-
+  
   .search-box {
     width: 100%;
+    margin-left: 0;
+    max-width: none;
   }
-
+  
   .board-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 480px) {
-  .explore-filter {
-    padding: 10px;
-  }
-
   .board-grid {
     grid-template-columns: 1fr;
-    gap: 15px;
-  }
-}
-
-@media (min-width: 1921px) {
-  .board-grid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   }
 }
