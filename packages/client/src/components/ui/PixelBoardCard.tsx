@@ -82,38 +82,38 @@ const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size
+    // Set canvas size - même taille pour tous les canevas
     const previewSize = 140;
     canvas.width = previewSize;
     canvas.height = previewSize;
 
-    // Clear the canvas with a white background
-    ctx.fillStyle = '#FFFFFF';  
+    // Fond blanc
+    ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // If no pixels, draw default pattern
+    // Si pas de pixels, dessiner un motif par défaut
     if (pixels.length === 0) {
       drawDefaultPattern(ctx, previewSize);
       return;
     }
 
-    // Calculate scale to fit the preview
+    // Calculer l'échelle pour s'adapter à la prévisualisation
     const maxDimension = Math.max(width, length);
     const cellSize = previewSize / maxDimension;
     
-    // Important: Make sure pixels are perfectly aligned
+    // Centrer le contenu
     const offsetX = (previewSize - (width * cellSize)) / 2;
     const offsetY = (previewSize - (length * cellSize)) / 2;
 
-    // Draw pixels exactly with no gaps
+    // Dessiner les pixels sans espaces entre eux
     pixels.forEach(pixel => {
       ctx.fillStyle = pixel.color;
       
-      // Use exact pixel positions with Math.floor to prevent anti-aliasing
+      // Utiliser des positions exactes
       const x = Math.floor(offsetX + pixel.x * cellSize);
       const y = Math.floor(offsetY + pixel.y * cellSize);
-      const w = Math.ceil(cellSize);
-      const h = Math.ceil(cellSize);
+      const w = Math.ceil(cellSize + 0.5); // Ajouter un peu pour éviter les espaces
+      const h = Math.ceil(cellSize + 0.5);
       
       ctx.fillRect(x, y, w, h);
     });
@@ -126,21 +126,21 @@ const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
       '#FF7F50', '#87CEEB', '#FFC0CB', '#98FB98'
     ];
     
-    const numCells = 4; // 4x4 grid
+    const numCells = 4; // Grille 4x4
     const cellSize = size / numCells;
     
     for (let y = 0; y < numCells; y++) {
       for (let x = 0; x < numCells; x++) {
-        // Skip some cells to create a pattern
+        // Créer un motif d'échiquier
         if ((x + y) % 2 === 0) {
           const colorIndex = (x * 3 + y * 5) % colors.length;
           ctx.fillStyle = colors[colorIndex];
           
-          // Use exact positions with no gaps
+          // Positions exactes sans espaces
           const exactX = Math.floor(x * cellSize);
           const exactY = Math.floor(y * cellSize);
-          const exactW = Math.ceil(cellSize);
-          const exactH = Math.ceil(cellSize);
+          const exactW = Math.ceil(cellSize + 0.5);
+          const exactH = Math.ceil(cellSize + 0.5);
           
           ctx.fillRect(exactX, exactY, exactW, exactH);
         }
@@ -214,15 +214,24 @@ const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
       
       <div className="card-footer">
         <div className="pixel-board-creator">By: {displayCreator}</div>
-        <div className="card-actions">
-          {showSettings && (
+        {showSettings ? (
+          <div className="card-actions">
             <button
               className="board-settings-button"
               onClick={handleSettingsClick}
             >
               Settings
             </button>
-          )}
+            <Link to={`/board/${id}`}>
+              <Button 
+                variant={isExpired ? 'secondary' : 'join'} 
+                size="sm"
+              >
+                {isExpired ? 'View Board' : 'Join Board'}
+              </Button>
+            </Link>
+          </div>
+        ) : (
           <Link to={`/board/${id}`}>
             <Button 
               variant={isExpired ? 'secondary' : 'join'} 
@@ -231,7 +240,7 @@ const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
               {isExpired ? 'View Board' : 'Join Board'}
             </Button>
           </Link>
-        </div>
+        )}
       </div>
     </Card>
   );

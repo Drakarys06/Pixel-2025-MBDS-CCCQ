@@ -20,8 +20,8 @@ const Navbar: React.FC<NavbarProps> = ({ logoText = 'PixelBoard' }) => {
 	return (
 		<header className="navbar">
 			<nav className="navbar-content">
-				{/* Modifier le lien pour rediriger vers /explore au lieu de / */}
-				<Link to="/explore" className="navbar-logo">
+				{/* Rediriger vers / (home) au lieu de /explore */}
+				<Link to="/" className="navbar-logo">
 					{logoText}
 				</Link>
 

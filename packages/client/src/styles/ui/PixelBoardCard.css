@@ -3,16 +3,19 @@
   background-color: var(--bg-secondary);
   border-radius: 8px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .pixel-board-card:hover {
-	transform: translateY(-5px);
-	box-shadow: 0 5px 15px var(--shadow-color);
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px var(--shadow-color);
 }
 
 .pixel-board-preview {
   height: 180px;
-  background-color: #000000; /* Black background for better contrast */
+  background-color: #FFFFFF;
   position: relative;
   display: flex;
   align-items: center;
@@ -22,19 +25,17 @@
 
 .pixel-preview-canvas {
   display: block;
-  image-rendering: pixelated; /* Critical: Makes pixels sharp */
-  image-rendering: crisp-edges; /* Alternative for Firefox */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
   margin: 0 auto;
-  max-width: 100%;
-  max-height: 100%;
-  border: none;
-  box-shadow: none;
+  width: 140px;
+  height: 140px;
 }
 
 .pixel-preview-loading {
   width: 40px;
   height: 40px;
-  border: 3px solid rgba(255, 255, 255, 0.1);
+  border: 3px solid rgba(0, 0, 0, 0.1);
   border-top: 3px solid var(--accent-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -56,11 +57,11 @@
 }
 
 .pixel-board-meta {
-	display: flex;
-	justify-content: space-between;
-	color: var(--text-secondary);
-	font-size: 14px;
-	margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 12px;
 }
 
 .pixel-board-creator {
@@ -73,7 +74,7 @@
 }
 
 .pixel-board-time-progress {
-	margin-top: 8px;
+  margin-top: 8px;
 }
 
 /* Time badge style */
@@ -101,6 +102,7 @@
 
 .card-body {
   padding: 15px;
+  flex: 1;
 }
 
 .card-footer {
@@ -110,12 +112,6 @@
   align-items: center;
   border-top: 1px solid var(--border-color);
   background-color: var(--bg-tertiary);
-}
-
-@media (max-width: 480px) {
-	.pixel-board-preview {
-		height: 160px;
-	}
 }
 
 .card-actions {

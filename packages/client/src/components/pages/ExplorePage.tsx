@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Layout from '../layout/Layout';
 import PixelBoardCard from '../ui/PixelBoardCard';
 import { Input, Select } from '../ui/FormComponents';
@@ -31,35 +31,45 @@ const ExplorePage: React.FC = () => {
   const [filterBy, setFilterBy] = useState<string>('all');
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
-  
+  const location = useLocation();
+
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-  // Redirect to login page if user is not logged in
+  // Set filter param from URL if provided
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const filterParam = params.get('filter');
+    if (filterParam && ['all', 'active', 'expired'].includes(filterParam)) {
+      setFilterBy(filterParam);
+    }
+  }, [location.search]);
+
+  // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
   useEffect(() => {
     if (!isLoggedIn) {
-      console.log('ExplorePage: User not logged in, redirecting to /login');
+      console.log('ExplorePage: Utilisateur non connecté, redirection vers /login');
       navigate('/login', { state: { from: '/explore' } });
     }
   }, [isLoggedIn, navigate]);
 
   // Fetch pixel boards
   useEffect(() => {
-    // Only load data if user is logged in
+    // Ne charger les données que si l'utilisateur est connecté
     if (!isLoggedIn) return;
-    
+
     const fetchPixelBoards = async () => {
       setLoading(true);
       setError(null);
       try {
-        // Get authentication token from localStorage
+        // Récupérer le token d'authentification depuis localStorage
         const token = localStorage.getItem('token');
-        
+
         const response = await fetch(`${API_URL}/api/pixelboards`, {
           headers: {
             'Authorization': token ? `Bearer ${token}` : ''
           }
         });
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch pixel boards');
         }
@@ -76,7 +86,7 @@ const ExplorePage: React.FC = () => {
     fetchPixelBoards();
   }, [API_URL, isLoggedIn]);
 
-  // If user is not logged in, render nothing as redirect will happen
+  // Si l'utilisateur n'est pas connecté, on ne rend rien car la redirection sera effectuée
   if (!isLoggedIn) {
     return <Loader text="Redirecting to login..." />;
   }
@@ -116,6 +126,7 @@ const ExplorePage: React.FC = () => {
     if (searchTerm) {
       result = result.filter(board => 
         board.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        // Utiliser creatorUsername si disponible, sinon creator
         (board.creatorUsername ? 
           board.creatorUsername.toLowerCase().includes(searchTerm.toLowerCase()) :
           board.creator.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -175,7 +186,7 @@ const ExplorePage: React.FC = () => {
       {error && <Alert variant="error" message={error} />}
       
       <div className="explore-filter">
-        <div className="filter-controls">
+        <div className="filter-options">
           <Select
             options={sortOptions}
             value={sortBy}
@@ -191,13 +202,15 @@ const ExplorePage: React.FC = () => {
             fullWidth={false}
             className="filter-select"
           />
-          
+        </div>
+        
+        <div className="search-box">
           <Input
             type="text"
             placeholder="Search boards..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            fullWidth={false}
+            fullWidth={true}
             className="search-input"
           />
         </div>
@@ -220,7 +233,6 @@ const ExplorePage: React.FC = () => {
               time={board.time}
               closeTime={board.closeTime}
               creator={board.creatorUsername || board.creator}
-              showGridLines={false}
             />
           ))}
         </div>

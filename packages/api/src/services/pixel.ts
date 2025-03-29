@@ -11,6 +11,11 @@ export const createPixel = async (pixelData: Partial<IPixel>): Promise<IPixel> =
 			throw new Error('PixelBoard not found');
 		}
 
+		// Assurer que modificationCount est initialisé à 1 pour les nouveaux pixels
+		if (!pixelData.modificationCount) {
+			pixelData.modificationCount = 1;
+		}
+
 		const pixel = new Pixel(pixelData);
 		await pixel.save();
 		return pixel;
@@ -75,6 +80,9 @@ export const updatePixel = async (id: string, updates: Partial<IPixel>, userId: 
 				}
 			}
 
+			// Incrémenter le compteur de modifications
+			updates.modificationCount = (existingPixel.modificationCount || 1) + 1;
+
 			// Update the lastModifiedDate
 			updates.lastModifiedDate = new Date();
 
@@ -133,6 +141,10 @@ export const placePixel = async (boardId: string, x: number, y: number, color: s
 				if (!pixel.modifiedBy.includes(userId)) {
 					pixel.modifiedBy.push(userId);
 				}
+
+				// Incrémenter le compteur de modifications
+				pixel.modificationCount = (pixel.modificationCount || 1) + 1;
+
 				pixel.color = color;
 				pixel.lastModifiedDate = new Date();
 				await pixel.save({ session });
@@ -144,7 +156,8 @@ export const placePixel = async (boardId: string, x: number, y: number, color: s
 					y,
 					color,
 					modifiedBy: [userId],
-					lastModifiedDate: new Date()
+					lastModifiedDate: new Date(),
+					modificationCount: 1 // Initialiser à 1 pour un nouveau pixel
 				});
 				await pixel.save({ session });
 			}
