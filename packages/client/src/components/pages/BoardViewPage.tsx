@@ -1,22 +1,24 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '../layout/Layout';
-import PixelGrid from '../features/PixelGrid';
+import PixelGrid, { PixelGridRef } from '../features/PixelGrid';
 import BoardInfo from '../features/BoardInfo';
 import BoardControls from '../features/BoardControls';
+import BoardContributors from '../features/BoardContributors';
 import Alert from '../ui/Alert';
 import Loader from '../ui/Loader';
+import ExportCanvas from '../ui/ExportCanvas';
 import { useAuth } from '../auth/AuthContext';
 import '../../styles/pages/BoardViewPage.css';
 
 interface Pixel {
-  _id: string;
-  x: number;
-  y: number;
-  color: string;
-  lastModifiedDate: string;
-  modifiedBy: string[];
-  boardId: string;
+	_id: string;
+	x: number;
+	y: number;
+	color: string;
+	lastModifiedDate: string;
+	modifiedBy: string[];
+	boardId: string;
 }
 
 interface PixelBoard {
@@ -29,13 +31,13 @@ interface PixelBoard {
   closeTime: string | null;
   creationTime: string;
   creator: string;
-  creatorUsername?: string; // Nom d'utilisateur du créateur
+  creatorUsername?: string;
   visitor: boolean;
 }
 
 const BoardViewPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { currentUser } = useAuth(); // Récupérer l'utilisateur connecté
+  const { currentUser } = useAuth();
   const [board, setBoard] = useState<PixelBoard | null>(null);
   const [pixels, setPixels] = useState<Pixel[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -44,6 +46,8 @@ const BoardViewPage: React.FC = () => {
   const [placingPixel, setPlacingPixel] = useState<boolean>(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [showGridLines, setShowGridLines] = useState<boolean>(false);
+  const [contributorsRefreshTrigger, setContributorsRefreshTrigger] = useState<number>(0);
+  const pixelGridRef = useRef<PixelGridRef>(null);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -52,7 +56,6 @@ const BoardViewPage: React.FC = () => {
     if (!boardId) return;
 
     try {
-      // Ajouter le token d'authentification
       const token = localStorage.getItem('token');
 
       const response = await fetch(`${API_URL}/api/pixels?boardId=${boardId}`, {
@@ -133,7 +136,6 @@ const BoardViewPage: React.FC = () => {
 
     setPlacingPixel(true);
     try {
-      // Récupérer le token d'authentification
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/api/pixels/board/${id}/place`, {
         method: 'POST',
@@ -158,10 +160,8 @@ const BoardViewPage: React.FC = () => {
       setPixels(prev => {
         const existingIndex = prev.findIndex(p => p.x === x && p.y === y);
         if (existingIndex >= 0) {
-
           const newPixels = [...prev];
           newPixels[existingIndex] = newPixel;
-
           return newPixels;
         } else {
           return [...prev, newPixel];
@@ -169,6 +169,9 @@ const BoardViewPage: React.FC = () => {
       });
 
       setMessage({ text: 'Pixel placed successfully!', type: 'success' });
+      
+			// Déclencher le rafraîchissement des contributeurs
+			setContributorsRefreshTrigger(prev => prev + 1);
 
       setTimeout(() => {
         setMessage(null);
@@ -251,11 +254,25 @@ const BoardViewPage: React.FC = () => {
             showGridLines={showGridLines}
             onToggleGridLines={() => setShowGridLines(!showGridLines)}
           />
+          
+          {/* Ajout du composant pour afficher les contributeurs avec le déclencheur de rafraîchissement */}
+					<BoardContributors
+						boardId={board._id}
+						refreshTrigger={contributorsRefreshTrigger}
+					/>
 
+          <ExportCanvas
+            getCanvasData={() => pixelGridRef.current?.getCanvas() || null}
+            pixelGridRef={pixelGridRef}
+            boardWidth={board.width}
+            boardHeight={board.length}
+            className="board-export-button"
+          />
         </div>
 
         <div className="board-grid-container">
           <PixelGrid
+            ref={pixelGridRef}
             width={board.width}
             height={board.length}
             pixels={pixels}
@@ -271,3 +288,4 @@ const BoardViewPage: React.FC = () => {
 };
 
 export default BoardViewPage;
+    

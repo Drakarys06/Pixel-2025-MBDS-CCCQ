@@ -16,15 +16,18 @@ interface Pixel {
 }
 
 interface PixelBoardCardProps {
-  id: string;
-  title: string;
-  width: number;
-  length: number;
-  creationTime: string;
-  time: number;
-  closeTime: string | null;
-  creator: string;
-  className?: string;
+	id: string;
+	title: string;
+	width: number;
+	length: number;
+	creationTime: string;
+	time: number;
+	closeTime: string | null;
+	creator: string;
+	creatorUsername?: string;
+	className?: string;
+	showSettings?: boolean;
+	onSettingsClick?: (id: string) => void;
 }
 
 const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
@@ -142,21 +145,32 @@ const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
     }
   };
 
-  // Format the creation date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
-  };
+	// Format the creation date
+	const formatDate = (dateString: string) => {
+		return new Date(dateString).toLocaleDateString();
+	};
 
   // Check if board is expired
   const [isExpired, setIsExpired] = React.useState(
     closeTime !== null || new Date(creationTime).getTime() + time * 60 * 1000 < Date.now()
   );
 
-  const handleTimeExpired = () => {
-    setIsExpired(true);
-  };
+	const handleTimeExpired = () => {
+		setIsExpired(true);
+	};
 
-  const cardClasses = ['pixel-board-card', className].filter(Boolean).join(' ');
+	const cardClasses = ['pixel-board-card', className].filter(Boolean).join(' ');
+
+	// Utiliser creatorUsername s'il existe, sinon utiliser creator
+	const displayCreator = creatorUsername || creator;
+
+	// Handle settings button click
+	const handleSettingsClick = (e: React.MouseEvent) => {
+		e.preventDefault(); // Prevent navigating to board
+		if (onSettingsClick) {
+			onSettingsClick(id);
+		}
+	};
 
   return (
     <Card className={cardClasses}>

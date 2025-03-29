@@ -6,8 +6,8 @@
 }
 
 .pixel-board-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px var(--shadow-color);
+	transform: translateY(-5px);
+	box-shadow: 0 5px 15px var(--shadow-color);
 }
 
 .pixel-board-preview {
@@ -56,11 +56,11 @@
 }
 
 .pixel-board-meta {
-  display: flex;
-  justify-content: space-between;
-  color: var(--text-secondary);
-  font-size: 14px;
-  margin-bottom: 12px;
+	display: flex;
+	justify-content: space-between;
+	color: var(--text-secondary);
+	font-size: 14px;
+	margin-bottom: 12px;
 }
 
 .pixel-board-creator {
@@ -73,7 +73,7 @@
 }
 
 .pixel-board-time-progress {
-  margin-top: 8px;
+	margin-top: 8px;
 }
 
 /* Time badge style */
@@ -113,7 +113,7 @@
 }
 
 @media (max-width: 480px) {
-  .pixel-board-preview {
-    height: 160px;
-  }
+	.pixel-board-preview {
+		height: 160px;
+	}
 }
