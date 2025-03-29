@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ThemeToggle from '../ui/ThemeToggle';
 import { useAuth } from '../auth/AuthContext';
+import authService from '../../services/authService';
 import '../../styles/pages/LoginPage.css';
 
 const SignupPage: React.FC = () => {
@@ -21,46 +22,24 @@ const SignupPage: React.FC = () => {
     
     // Basic validation
     if (password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
+      setError('Passwords do not match');
       return;
     }
     
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, email, password }),
-      });
-
-      const data = await response.json();
-      console.log('Signup response:', data);
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Erreur lors de l\'inscription');
-      }
-
-      // Check that these properties exist in the response
-      if (!data.token || !data.userId || !data.username) {
-        console.error('Missing required data in response:', data);
-        throw new Error('Réponse du serveur incomplète');
-      }
+      // Use authService instead of direct fetch
+      const data = await authService.signup(username, email, password);
 
       // Registration successful - log the user in
-      // Extraire les rôles et permissions de la réponse ou utiliser des valeurs par défaut
-      const roles = data.roles || ['user'];
-      const permissions = data.permissions || [];
-      
-      login(data.token, data.userId, data.username, roles, permissions);
+      login(data.token, data.userId, data.username, data.roles || ['user'], data.permissions || []);
       
       // Redirect to home page
       navigate('/');
     } catch (err) {
-      console.error('Erreur d\'inscription:', err);
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue lors de l\'inscription');
+      console.error('Registration error:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred during registration');
     } finally {
       setIsLoading(false);
     }
@@ -80,59 +59,55 @@ const SignupPage: React.FC = () => {
         </div>
         
         <div className="login-form-container">
-          <h2>Créer un compte</h2>
+          <h2>Create an account</h2>
           
           {error && <div className="login-error">{error}</div>}
           
           <form className="login-form" onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="username">Nom d'utilisateur</label>
               <input 
                 type="text" 
                 id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                placeholder="Choisissez un nom d'utilisateur"
+                placeholder="Choose a username"
                 minLength={3}
                 maxLength={20}
               />
             </div>
             
             <div className="form-group">
-              <label htmlFor="email">Email</label>
               <input 
                 type="email" 
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="Entrez votre email"
+                placeholder="Enter your email"
               />
             </div>
             
             <div className="form-group">
-              <label htmlFor="password">Mot de passe</label>
               <input 
                 type="password" 
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="Créez un mot de passe"
+                placeholder="Create a password"
                 minLength={6}
               />
             </div>
             
             <div className="form-group">
-              <label htmlFor="confirmPassword">Confirmer le mot de passe</label>
               <input 
                 type="password" 
                 id="confirmPassword"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                placeholder="Confirmez votre mot de passe"
+                placeholder="Confirm your password"
                 minLength={6}
               />
             </div>
@@ -142,12 +117,12 @@ const SignupPage: React.FC = () => {
               className="login-button"
               disabled={isLoading}
             >
-              {isLoading ? 'Création en cours...' : 'Créer un compte'}
+              {isLoading ? 'Creating account...' : 'Create account'}
             </button>
           </form>
           
           <div className="login-footer">
-            <p>Vous avez déjà un compte? <Link to="/login">Se connecter</Link></p>
+            <p>Already have an account? <Link to="/login">Log in</Link></p>
           </div>
         </div>
       </div>

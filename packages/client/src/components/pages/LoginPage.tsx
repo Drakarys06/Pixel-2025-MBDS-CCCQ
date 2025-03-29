@@ -31,7 +31,7 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Utiliser authService au lieu de fetch directement
+      // Use authService instead of direct fetch
       const data = await authService.login(email, password);
 
       // Login successful - update auth context
@@ -40,14 +40,14 @@ const LoginPage: React.FC = () => {
       // Redirect to the page they were trying to access, or home page
       navigate(from, { replace: true });
     } catch (err) {
-      console.error('Erreur de connexion:', err);
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue lors de la connexion');
+      console.error('Login error:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred during login');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Fonction de connexion en tant que visiteur
+  // Guest login function
   const handleGuestLogin = async () => {
     setError('');
     setIsLoading(true);
@@ -56,8 +56,8 @@ const LoginPage: React.FC = () => {
       await loginAsGuest();
       navigate(from, { replace: true });
     } catch (err) {
-      console.error('Erreur de connexion visiteur:', err);
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue lors de la connexion visiteur');
+      console.error('Guest login error:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred during guest login');
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +77,7 @@ const LoginPage: React.FC = () => {
         </div>
         
         <div className="login-form-container">
-          <h2>Connectez-vous à PixelBoard</h2>
+          <h2>Sign in to PixelBoard</h2>
           
           {error && <div className="login-error">{error}</div>}
           
@@ -90,19 +90,19 @@ const LoginPage: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="Entrez votre email"
+                placeholder="Enter your email"
               />
             </div>
             
             <div className="form-group">
-              <label htmlFor="password">Mot de passe</label>
+              <label htmlFor="password">Password</label>
               <input 
                 type="password" 
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="Entrez votre mot de passe"
+                placeholder="Enter your password"
               />
             </div>
             
@@ -111,23 +111,23 @@ const LoginPage: React.FC = () => {
               className="login-button"
               disabled={isLoading}
             >
-              {isLoading ? 'Connexion...' : 'Se connecter'}
+              {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
           
           <div className="login-guest">
-            <p>ou</p>
+            <p>or</p>
             <button 
               onClick={handleGuestLogin}
               className="guest-button"
               disabled={isLoading}
             >
-              Continuer en tant que visiteur
+              Continue as guest
             </button>
           </div>
           
           <div className="login-footer">
-            <p>Vous n'avez pas de compte? <Link to="/signup">S'inscrire</Link></p>
+            <p>Don't have an account? <Link to="/signup">Sign up</Link></p>
           </div>
         </div>
       </div>
