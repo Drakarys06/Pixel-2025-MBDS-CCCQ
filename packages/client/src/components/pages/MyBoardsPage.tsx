@@ -6,8 +6,10 @@ import { Input, Select } from '../ui/FormComponents';
 import Alert from '../ui/Alert';
 import Loader from '../ui/Loader';
 import Button from '../ui/Button';
+import BoardSettingsDialog from '../features/BoardSettingsDialog';
 import { useAuth } from '../auth/AuthContext';
 import '../../styles/pages/MyBoardsPage.css';
+import '../../styles/features/BoardSettingsDialog.css';
 
 interface PixelBoard {
 	_id: string;
@@ -38,12 +40,13 @@ const MyBoardsPage: React.FC = () => {
 	const [searchTerm, setSearchTerm] = useState<string>('');
 	const [sortBy, setSortBy] = useState<string>('newest');
 	const [filterBy, setFilterBy] = useState<string>('all');
+	const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
 	const { isLoggedIn, currentUser } = useAuth();
 	const navigate = useNavigate();
 
 	const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-	// Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
+	// Redirect to login if user is not logged in
 	useEffect(() => {
 		if (!isLoggedIn) {
 			console.log('MyBoardsPage: Utilisateur non connecté, redirection vers /login');
@@ -52,40 +55,41 @@ const MyBoardsPage: React.FC = () => {
 	}, [isLoggedIn, navigate]);
 
 	// Fetch user's created pixel boards
-	useEffect(() => {
-		// Ne charger les données que si l'utilisateur est connecté
+	const fetchMyCreatedBoards = async () => {
+		// Only load data if user is logged in
 		if (!isLoggedIn || !currentUser) return;
 
-		const fetchMyCreatedBoards = async () => {
-			setLoadingCreated(true);
-			setError(null);
-			try {
-				// Récupérer le token d'authentification depuis localStorage
-				const token = localStorage.getItem('token');
+		setLoadingCreated(true);
+		setError(null);
+		try {
+			// Get auth token from localStorage
+			const token = localStorage.getItem('token');
 
-				const response = await fetch(`${API_URL}/api/pixelboards/my-boards`, {
-					headers: {
-						'Authorization': token ? `Bearer ${token}` : ''
-					}
-				});
-
-				if (!response.ok) {
-					throw new Error('Failed to fetch your boards');
+			const response = await fetch(`${API_URL}/api/pixelboards/my-boards`, {
+				headers: {
+					'Authorization': token ? `Bearer ${token}` : ''
 				}
-				const data = await response.json();
-				setCreatedBoards(data);
-			} catch (err) {
-				console.error('Error fetching your created boards:', err);
-				setError('Unable to load your boards. Please try again later.');
-			} finally {
-				setLoadingCreated(false);
-			}
-		};
+			});
 
+			if (!response.ok) {
+				throw new Error('Failed to fetch your boards');
+			}
+			const data = await response.json();
+			setCreatedBoards(data);
+		} catch (err) {
+			console.error('Error fetching your created boards:', err);
+			setError('Unable to load your boards. Please try again later.');
+		} finally {
+			setLoadingCreated(false);
+		}
+	};
+
+	// Load created boards on initial render
+	useEffect(() => {
 		fetchMyCreatedBoards();
 	}, [API_URL, isLoggedIn, currentUser]);
 
-	// Fonction pour charger les boards où l'utilisateur a contribué
+	// Fetch boards where user has contributed
 	const fetchMyContributedBoards = async () => {
 		if (!isLoggedIn || !currentUser) return;
 
@@ -105,9 +109,6 @@ const MyBoardsPage: React.FC = () => {
 			}
 
 			const data = await response.json();
-
-			// Ne plus filtrer les boards créés par l'utilisateur dans les boards avec contribution
-			// Un utilisateur peut contribuer à ses propres boards
 			setContributedBoards(data);
 		} catch (err) {
 			console.error('Error fetching your contributed boards:', err);
@@ -117,14 +118,14 @@ const MyBoardsPage: React.FC = () => {
 		}
 	};
 
-	// Charger les boards avec contribution lorsque l'utilisateur clique sur l'onglet
+	// Load contributed boards when user switches to that tab
 	useEffect(() => {
 		if (activeTab === TabType.CONTRIBUTED && contributedBoards.length === 0 && !loadingContributed) {
 			fetchMyContributedBoards();
 		}
 	}, [activeTab]);
 
-	// Si l'utilisateur n'est pas connecté, on ne rend rien car la redirection sera effectuée
+	// If user is not logged in, show nothing as redirect will happen
 	if (!isLoggedIn) {
 		return <Loader text="Redirecting to login..." />;
 	}
@@ -200,6 +201,22 @@ const MyBoardsPage: React.FC = () => {
 			default:
 				return result;
 		}
+	};
+
+	// Handle settings button click
+	const handleSettingsClick = (boardId: string) => {
+		setSelectedBoardId(boardId);
+	};
+
+	// Handle dialog close
+	const handleCloseSettings = () => {
+		setSelectedBoardId(null);
+	};
+
+	// Handle settings saved
+	const handleSettingsSaved = () => {
+		// Refresh the boards list to show updated settings
+		fetchMyCreatedBoards();
 	};
 
 	// Get filtered and sorted boards based on active tab
@@ -278,6 +295,9 @@ const MyBoardsPage: React.FC = () => {
 							time={board.time}
 							closeTime={board.closeTime}
 							creator={board.creatorUsername || board.creator}
+							// Show settings button only for boards created by the user and when in the "Created" tab
+							showSettings={activeTab === TabType.CREATED}
+							onSettingsClick={handleSettingsClick}
 						/>
 					))}
 				</div>
@@ -302,6 +322,15 @@ const MyBoardsPage: React.FC = () => {
 						Create New Board
 					</Button>
 				</div>
+			)}
+
+			{/* Settings Dialog */}
+			{selectedBoardId && (
+				<BoardSettingsDialog
+					boardId={selectedBoardId}
+					onClose={handleCloseSettings}
+					onSaved={handleSettingsSaved}
+				/>
 			)}
 		</Layout>
 	);

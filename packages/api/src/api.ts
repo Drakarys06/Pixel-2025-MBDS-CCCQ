@@ -4,6 +4,7 @@ import { pixelBoardAPI } from './routes/pixelboard';
 import { pixelAPI } from './routes/pixel';
 import { adminAPI } from './routes/admin';
 import authRoutes from './routes/auth';
+import statsRoutes from './routes/stats';
 import { auth, optionalAuth } from './middleware/auth';
 import cors from 'cors';
 import * as roleService from './services/roleService';
@@ -38,6 +39,7 @@ api.get('/init-roles', async (req: Request, res: Response) => {
 
 // Routes publiques (pas besoin d'authentification)
 api.use('/auth', authRoutes);
+api.use('/stats', statsRoutes);
 
 // Route de base - rediriger vers la connexion si non authentifié
 api.get('/', optionalAuth, (req: Request, res: Response) => {
