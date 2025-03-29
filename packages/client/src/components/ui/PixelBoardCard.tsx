@@ -87,8 +87,8 @@ const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
     canvas.width = previewSize;
     canvas.height = previewSize;
 
-    // Clear the canvas with a completely black background
-    ctx.fillStyle = '#000000';  
+    // Clear the canvas with a white background
+    ctx.fillStyle = '#FFFFFF';  
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // If no pixels, draw default pattern

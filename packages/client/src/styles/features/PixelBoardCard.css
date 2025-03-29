@@ -1,55 +1,54 @@
-.pixel-board-card {
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-  
-  .pixel-board-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px var(--shadow-color);
-  }
-  
-  .pixel-board-preview {
-    height: 180px;
-    background-color: var(--bg-tertiary);
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-  
-  .pixel-block-preview {
-    width: 40px;
-    height: 40px;
-    position: absolute;
-    border-radius: 3px;
-  }
-  
-  .pixel-board-title {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--text-primary);
-  }
-  
-  .pixel-board-meta {
-    display: flex;
-    justify-content: space-between;
-    color: var(--text-secondary);
-    font-size: 14px;
-    margin-bottom: 12px;
-  }
-  
-  .pixel-board-creator {
-    font-size: 14px;
-    color: var(--text-secondary);
-  }
-  
-  .pixel-board-time-progress {
-    margin-top: 8px;
-  }
-  
-  @media (max-width: 480px) {
-    .pixel-board-preview {
-      height: 160px;
-    }
-  }
+.pixel-board-preview {
+  height: 180px;
+  background-color: #FFFFFF;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.pixel-preview-canvas {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  margin: 0 auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.pixel-preview-loading {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top: 3px solid var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.board-settings-button {
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.board-settings-button:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
