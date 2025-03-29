@@ -8,17 +8,18 @@ import BoardContributors from '../features/BoardContributors';
 import Alert from '../ui/Alert';
 import Loader from '../ui/Loader';
 import ExportCanvas from '../ui/ExportCanvas';
+import websocketService from '../../services/websocketService';
 import { useAuth } from '../auth/AuthContext';
 import '../../styles/pages/BoardViewPage.css';
 
 interface Pixel {
-	_id: string;
-	x: number;
-	y: number;
-	color: string;
-	lastModifiedDate: string;
-	modifiedBy: string[];
-	boardId: string;
+  _id: string;
+  x: number;
+  y: number;
+  color: string;
+  lastModifiedDate: string;
+  modifiedBy: string[];
+  boardId: string;
 }
 
 interface PixelBoard {
@@ -50,6 +51,33 @@ const BoardViewPage: React.FC = () => {
   const pixelGridRef = useRef<PixelGridRef>(null);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+  const boardConnectionRef = useRef(false);
+
+  useEffect(() => {
+    if (!id || !board) return;
+    
+    // Connect to WebSocket if needed
+    if (!websocketService.isConnected()) {
+      websocketService.connect();
+    }
+    
+    // Join the board
+    if (!boardConnectionRef.current) {
+      console.log(`Joining board: ${id}`);
+      websocketService.joinBoard(id);
+      boardConnectionRef.current = true;
+    }
+    
+    // Clean up on unmount
+    return () => {
+      if (boardConnectionRef.current) {
+        console.log(`Leaving board: ${id}`);
+        websocketService.leaveBoard(id);
+        boardConnectionRef.current = false;
+      }
+    };
+  }, [id, board]);
 
   // Fetch pixels for this board
   const fetchPixels = useCallback(async (boardId: string) => {
@@ -169,9 +197,9 @@ const BoardViewPage: React.FC = () => {
       });
 
       setMessage({ text: 'Pixel placed successfully!', type: 'success' });
-      
-			// Déclencher le rafraîchissement des contributeurs
-			setContributorsRefreshTrigger(prev => prev + 1);
+
+      // Déclencher le rafraîchissement des contributeurs
+      setContributorsRefreshTrigger(prev => prev + 1);
 
       setTimeout(() => {
         setMessage(null);
@@ -254,12 +282,12 @@ const BoardViewPage: React.FC = () => {
             showGridLines={showGridLines}
             onToggleGridLines={() => setShowGridLines(!showGridLines)}
           />
-          
+
           {/* Ajout du composant pour afficher les contributeurs avec le déclencheur de rafraîchissement */}
-					<BoardContributors
-						boardId={board._id}
-						refreshTrigger={contributorsRefreshTrigger}
-					/>
+          <BoardContributors
+            boardId={board._id}
+            refreshTrigger={contributorsRefreshTrigger}
+          />
 
           <ExportCanvas
             getCanvasData={() => pixelGridRef.current?.getCanvas() || null}
@@ -288,4 +316,3 @@ const BoardViewPage: React.FC = () => {
 };
 
 export default BoardViewPage;
-    
