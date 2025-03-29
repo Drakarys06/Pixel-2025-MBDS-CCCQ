@@ -56,24 +56,44 @@ const BoardViewPage: React.FC = () => {
 
   useEffect(() => {
     if (!id || !board) return;
-    
-    // Connect to WebSocket if needed
+
+    // Connect to WebSocket
     if (!websocketService.isConnected()) {
       websocketService.connect();
     }
-    
+
     // Join the board
     if (!boardConnectionRef.current) {
       console.log(`Joining board: ${id}`);
       websocketService.joinBoard(id);
       boardConnectionRef.current = true;
+
+      // Listener for pixel updates
+      websocketService.onPixelPlaced((pixelData) => {
+        console.log('Received pixel placed event:', pixelData);
+
+        setPixels(prev => {
+          const existingIndex = prev.findIndex(p =>
+            p.x === pixelData.x && p.y === pixelData.y
+          );
+
+          if (existingIndex >= 0) {
+            const newPixels = [...prev];
+            newPixels[existingIndex] = pixelData;
+            return newPixels;
+          } else {
+            return [...prev, pixelData];
+          }
+        });
+      });
     }
-    
+
     // Clean up on unmount
     return () => {
       if (boardConnectionRef.current) {
         console.log(`Leaving board: ${id}`);
         websocketService.leaveBoard(id);
+        websocketService.removeListener('pixelPlaced');
         boardConnectionRef.current = false;
       }
     };
@@ -135,14 +155,6 @@ const BoardViewPage: React.FC = () => {
 
     fetchBoardDetails();
   }, [id, API_URL, fetchPixels]);
-
-  // Set up polling for real-time updates (every 10 seconds)
-  useEffect(() => {
-    if (!board) return;
-
-    const interval = setInterval(() => fetchPixels(board._id), 10000);
-    return () => clearInterval(interval);
-  }, [board, fetchPixels]);
 
   // Handle color selection
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -70,6 +70,19 @@ router.post('/board/:boardId/place', auth, async (req: Request, res: Response) =
 		// Placer le pixel
 		const pixel = await pixelService.placePixel(boardId, parseInt(x as string), parseInt(y as string), color, userId);
 
+		try {
+			const { io } = require('../index');
+
+			// Pixel placed event
+			io.to(`board-${boardId}`).emit('pixelPlaced', {
+				...pixel.toObject(),
+				username: req.user.username
+			});
+			console.log(`Emitted pixelPlaced event for board ${boardId} from user ${req.user.username}`);
+		} catch (error) {
+			console.error('Failed to emit pixelPlaced event:', error);
+		}
+
 		// Ajouter ou mettre à jour l'utilisateur dans la liste des contributeurs
 		const existingContributor = pixelBoard.contributors.find(
 			contributor => contributor.userId === userId
