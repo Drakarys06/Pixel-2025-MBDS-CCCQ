@@ -53,9 +53,11 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 	showGridLines = false,
 	showHeatmap = false
 }, ref) => {
-	const { currentUser } = useAuth();
+	const { currentUser, isGuestMode } = useAuth();
 	const permissions = usePermissions();
-	const canCreatePixel = permissions.canCreatePixel();
+  const canCreatePixel = useCallback(() => {
+    return permissions.canCreatePixel();
+  }, [permissions, currentUser, isGuestMode]);
 	
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const wrapperRef = useRef<HTMLDivElement>(null);
