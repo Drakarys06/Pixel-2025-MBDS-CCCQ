@@ -1,12 +1,71 @@
-/* Ajoutez ou mettez à jour ce style dans votre fichier BoardControls.css */
+/* packages/client/src/styles/features/BoardControls.css - Updated for timelapse feature */
+.board-controls {
+	margin-bottom: 20px;
+}
+
+.controls-title {
+	margin: 0;
+	font-size: 1.2rem;
+	color: var(--text-primary);
+}
+
+.controls-form {
+	margin-bottom: 20px;
+}
+
+.color-sample {
+	display: inline-block;
+	width: 24px;
+	height: 24px;
+	border-radius: 4px;
+	margin-right: 8px;
+	vertical-align: middle;
+	border: 1px solid var(--border-color);
+}
+
+.controls-message {
+	margin-top: 15px;
+}
+
+/* View Options section */
 .view-options-section {
 	margin-top: 15px;
 	padding-top: 15px;
 	border-top: 1px solid var(--border-color);
 }
 
+.view-toggle-buttons {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-bottom: 10px;
+}
+
+.view-toggle-button {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 10px;
+	transition: all 0.2s ease;
+}
+
+.view-toggle-button.active {
+	font-weight: bold;
+}
+
+.mode-active-indicator {
+	background-color: var(--bg-tertiary);
+	color: var(--text-secondary);
+	padding: 10px;
+	border-radius: 6px;
+	margin: 10px 0;
+	font-size: 0.9rem;
+	text-align: center;
+	font-style: italic;
+}
+
 .view-options {
-	margin-top: 10px;
+	margin-top: 15px;
 }
 
 .toggle-option {
@@ -19,4 +78,36 @@
 
 .toggle-option input[type="checkbox"] {
 	margin-right: 8px;
+}
+
+.permission-notice {
+	padding: 12px;
+	background-color: var(--bg-tertiary);
+	border-radius: 6px;
+	margin-bottom: 15px;
+	font-size: 0.9rem;
+	color: var(--text-secondary);
+	text-align: center;
+}
+
+/* Heatmap toggle */
+.heatmap-toggle-container {
+	margin-bottom: 15px;
+}
+
+.heatmap-active-indicator {
+	background-color: var(--bg-tertiary);
+	color: var(--text-secondary);
+	padding: 8px;
+	border-radius: 4px;
+	margin-top: 10px;
+	font-size: 0.85rem;
+	text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+	.view-toggle-buttons {
+		flex-direction: column;
+	}
 }

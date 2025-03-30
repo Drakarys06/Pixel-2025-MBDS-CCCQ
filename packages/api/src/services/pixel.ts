@@ -1,6 +1,9 @@
+// packages/api/src/services/pixel.ts - Version corrigée
 import Pixel, { IPixel } from '../models/pixel';
 import PixelBoard from '../models/pixelboard';
 import mongoose from 'mongoose';
+// Importez correctement le service d'historique des pixels
+import * as pixelHistoryService from './pixelHistory';
 
 // Create a new pixel
 export const createPixel = async (pixelData: Partial<IPixel>): Promise<IPixel> => {
@@ -108,36 +111,47 @@ export const updatePixel = async (id: string, updates: Partial<IPixel>, userId: 
 };
 
 // Place a pixel (create or update) at specific coordinates
-export const placePixel = async (boardId: string, x: number, y: number, color: string, userId: string): Promise<IPixel> => {
+export const placePixel = async (
+	boardId: string,
+	x: number,
+	y: number,
+	color: string,
+	userId: string,
+	username: string = "Unknown User" // Default username
+): Promise<IPixel> => {
 	try {
-		// Check if board exists
+		// Vérifier si le tableau existe
 		const board = await PixelBoard.findById(boardId);
 		if (!board) {
 			throw new Error('PixelBoard not found');
 		}
 
-		// Check if coordinates are within board dimensions
+		// Vérifier si les coordonnées sont valides
 		if (x < 0 || x >= board.width || y < 0 || y >= board.length) {
-			throw new Error('Coordinates are outside the board dimensions');
+			throw new Error('Coordinates are outside the board boundaries');
 		}
 
-		// Start a session for transaction
+		// Démarrer une session pour la transaction
 		const session = await mongoose.startSession();
 		session.startTransaction();
 
 		try {
-			// Try to find an existing pixel at these coordinates
+			// Créer une entrée d'historique pour ce placement de pixel
+			await pixelHistoryService.createPixelHistoryEntry({
+				boardId,
+				x,
+				y,
+				color,
+				userId,
+				username,
+				timestamp: new Date()
+			});
+
+			// Chercher un pixel existant à ces coordonnées
 			let pixel = await Pixel.findOne({ boardId, x, y }).session(session);
 
 			if (pixel) {
-				// Check if redraw is allowed on this board
-				if (!board.redraw) {
-					await session.abortTransaction();
-					session.endSession();
-					throw new Error('Redrawing over existing pixels is not allowed on this board');
-				}
-
-				// Update existing pixel
+				// Mettre à jour le pixel existant
 				if (!pixel.modifiedBy.includes(userId)) {
 					pixel.modifiedBy.push(userId);
 				}
@@ -149,7 +163,7 @@ export const placePixel = async (boardId: string, x: number, y: number, color: s
 				pixel.lastModifiedDate = new Date();
 				await pixel.save({ session });
 			} else {
-				// Create new pixel
+				// Créer un nouveau pixel
 				pixel = new Pixel({
 					boardId,
 					x,

@@ -1,0 +1,186 @@
+/* packages/client/src/styles/features/BoardTimelapse.css */
+.timelapse-container {
+	background-color: var(--bg-secondary);
+	border-radius: 8px;
+	box-shadow: 0 2px 4px var(--shadow-color);
+	padding: 15px;
+	margin-top: 20px;
+	width: 100%;
+}
+
+.timelapse-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 15px;
+}
+
+.timelapse-header h3 {
+	margin: 0;
+	font-size: 1.2rem;
+	color: var(--text-primary);
+}
+
+.timelapse-info {
+	font-size: 0.9rem;
+	color: var(--text-secondary);
+}
+
+.timelapse-canvas-container {
+	position: relative;
+	width: 100%;
+	margin-bottom: 15px;
+	background-color: white;
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	overflow: hidden;
+	min-height: 200px;
+}
+
+.timelapse-canvas {
+	display: block;
+	width: 100%;
+	height: auto;
+	image-rendering: pixelated;
+	image-rendering: crisp-edges;
+}
+
+.timelapse-no-data {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: rgba(255, 255, 255, 0.8);
+	color: var(--text-secondary);
+	font-style: italic;
+}
+
+.timelapse-controls {
+	width: 100%;
+}
+
+.timelapse-timeline {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 15px;
+}
+
+.timeline-slider {
+	flex: 1;
+	height: 6px;
+	-webkit-appearance: none;
+	appearance: none;
+	background: var(--border-color);
+	border-radius: 3px;
+	outline: none;
+}
+
+.timeline-slider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: var(--accent-color);
+	cursor: pointer;
+}
+
+.timeline-slider::-moz-range-thumb {
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: var(--accent-color);
+	cursor: pointer;
+	border: none;
+}
+
+.timeline-slider:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.timeline-timestamp {
+	font-size: 0.8rem;
+	color: var(--text-secondary);
+	min-width: 60px;
+}
+
+.timelapse-buttons {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	flex-wrap: wrap;
+}
+
+.timelapse-button {
+	min-width: 80px;
+}
+
+.speed-controls {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-left: auto;
+}
+
+.speed-controls span {
+	font-size: 0.9rem;
+	color: var(--text-secondary);
+}
+
+.speed-buttons {
+	display: flex;
+	gap: 5px;
+}
+
+.speed-button {
+	background-color: var(--bg-tertiary);
+	border: 1px solid var(--border-color);
+	color: var(--text-secondary);
+	border-radius: 4px;
+	font-size: 0.8rem;
+	padding: 4px 8px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.speed-button:hover:not(:disabled) {
+	background-color: var(--hover-color);
+}
+
+.speed-button.active {
+	background-color: var(--accent-color);
+	color: white;
+	border-color: var(--accent-color);
+}
+
+.speed-button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+	.timelapse-header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 8px;
+	}
+
+	.timelapse-buttons {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 10px;
+	}
+
+	.speed-controls {
+		margin-left: 0;
+		width: 100%;
+		justify-content: space-between;
+	}
+}
