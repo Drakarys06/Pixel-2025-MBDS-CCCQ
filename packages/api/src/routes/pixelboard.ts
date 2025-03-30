@@ -1,6 +1,10 @@
 import express, { Request, Response } from 'express';
 import * as pixelBoardService from '../services/pixelboard';
-import { auth, optionalAuth, creatorOnly } from '../middleware/auth';
+import { auth, optionalAuth } from '../middleware/auth';
+import { hasPermission, isResourceCreator } from '../middleware/authorization';
+import { PERMISSIONS } from '../services/roleService';
+import Role from '../models/Role';
+import { DEFAULT_ROLES } from '../services/roleService';
 
 const router = express.Router();
 
@@ -35,33 +39,36 @@ router.get('/contributed-boards', auth, async (req: Request, res: Response) => {
 	}
 });
 
-// Create a new pixel board (requires authentication)
-router.post('/', auth, creatorOnly, async (req: Request, res: Response) => {
-	try {
-		// Ajouter l'ID ET le nom d'utilisateur du créateur
-		const pixelBoard = await pixelBoardService.createPixelBoard({
-			...req.body,
-			creator: req.user._id,
-			creatorUsername: req.user.username // Ajout du nom d'utilisateur
-		});
+// Create a new pixel board (requires authentication and permission)
+router.post('/',
+	auth,
+	hasPermission(PERMISSIONS.BOARD_CREATE),
+	async (req: Request, res: Response) => {
+		try {
+			// Ajouter l'ID ET le nom d'utilisateur du créateur
+			const pixelBoard = await pixelBoardService.createPixelBoard({
+				...req.body,
+				creator: req.user._id,
+				creatorUsername: req.user.username
+			});
 
-		// Incrémenter le compteur de tableaux créés par l'utilisateur (seulement si pas invité)
-		if (!req.isGuest && req.user.boardsCreated !== undefined) {
-			req.user.boardsCreated += 1;
-			await req.user.save();
+			// Incrémenter le compteur de tableaux créés par l'utilisateur (seulement si pas invité)
+			if (!req.isGuest && req.user.boardsCreated !== undefined) {
+				req.user.boardsCreated += 1;
+				await req.user.save();
+			}
+
+			res.status(201).json(pixelBoard);
+		} catch (error) {
+			if (error instanceof Error) {
+				res.status(400).json({ message: error.message });
+			} else {
+				res.status(500).json({ message: 'An unknown error occurred' });
+			}
 		}
+	});
 
-		res.status(201).json(pixelBoard);
-	} catch (error) {
-		if (error instanceof Error) {
-			res.status(400).json({ message: error.message });
-		} else {
-			res.status(500).json({ message: 'An unknown error occurred' });
-		}
-	}
-});
-
-// Get all pixel boards (optional authentication for visitor mode)
+// Get all pixel boards (optional authentication)
 router.get('/', optionalAuth, async (req: Request, res: Response) => {
 	try {
 		const pixelBoards = await pixelBoardService.getAllPixelBoards();
@@ -75,7 +82,7 @@ router.get('/', optionalAuth, async (req: Request, res: Response) => {
 	}
 });
 
-// Get a pixel board by ID (optional authentication for visitor mode)
+// Get a pixel board by ID
 router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
 	try {
 		const pixelBoard = await pixelBoardService.getPixelBoardById(req.params.id);
@@ -91,7 +98,25 @@ router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
 			});
 		}
 
-		res.json(pixelBoard);
+		// Par défaut, tous les utilisateurs peuvent voir le tableau
+		let readOnly = false;
+
+		// Si l'utilisateur n'est pas authentifié ou est en mode visiteur
+		if (!req.user || req.isGuest) {
+			// Vérifier si les visiteurs peuvent modifier ce tableau
+			if (!pixelBoard.visitor) {
+				readOnly = true;
+			}
+		} else {
+			// Tous les utilisateurs authentifiés peuvent modifier les tableaux
+			readOnly = false;
+		}
+
+		// Retourner le tableau avec l'indicateur readOnly
+		res.json({
+			...pixelBoard.toObject(),
+			readOnly
+		});
 	} catch (error) {
 		if (error instanceof Error) {
 			res.status(500).json({ message: error.message });
@@ -102,66 +127,75 @@ router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
 });
 
 // Update a pixel board (requires authentication)
-router.put('/:id', auth, async (req: Request, res: Response) => {
-	try {
-		// Vérifier si l'utilisateur est le créateur du tableau
-		const pixelBoard = await pixelBoardService.getPixelBoardById(req.params.id);
-		if (!pixelBoard) {
-			return res.status(404).json({ message: 'PixelBoard not found' });
+// MODIFICATION: Supprimé la vérification hasPermission pour permettre aux créateurs de modifier leurs propres tableaux
+router.put('/:id',
+	auth,
+	// La vérification hasPermission(PERMISSIONS.BOARD_UPDATE) a été supprimée ici
+	isResourceCreator(
+		async (req) => {
+			return await pixelBoardService.getPixelBoardById(req.params.id);
+		},
+		PERMISSIONS.BOARD_UPDATE // Permettre de contourner la vérification du créateur si l'utilisateur a cette permission
+	),
+	async (req: Request, res: Response) => {
+		try {
+			const pixelBoard = await pixelBoardService.getPixelBoardById(req.params.id);
+			if (!pixelBoard) {
+				return res.status(404).json({ message: 'PixelBoard not found' });
+			}
+
+			// S'assurer que le nom d'utilisateur du créateur n'est pas modifié
+			const updatedData = {
+				...req.body,
+				creator: pixelBoard.creator, // Conserver l'ID du créateur
+				creatorUsername: pixelBoard.creatorUsername // Conserver le nom d'utilisateur
+			};
+
+			const updatedBoard = await pixelBoardService.updatePixelBoard(req.params.id, updatedData);
+			res.json(updatedBoard);
+		} catch (error) {
+			if (error instanceof Error) {
+				res.status(400).json({ message: error.message });
+			} else {
+				res.status(500).json({ message: 'An unknown error occurred' });
+			}
 		}
+	});
 
-		if (pixelBoard.creator.toString() !== req.user._id.toString()) {
-			return res.status(403).json({ message: 'Unauthorized: Only the creator can update this board' });
+// Delete a pixel board (requires authentication and permission)
+router.delete('/:id',
+	auth,
+	hasPermission(PERMISSIONS.BOARD_DELETE),
+	isResourceCreator(
+		async (req) => {
+			return await pixelBoardService.getPixelBoardById(req.params.id);
+		},
+		PERMISSIONS.BOARD_DELETE // Permettre de contourner la vérification du créateur si l'utilisateur a cette permission
+	),
+	async (req: Request, res: Response) => {
+		try {
+			const pixelBoard = await pixelBoardService.getPixelBoardById(req.params.id);
+			if (!pixelBoard) {
+				return res.status(404).json({ message: 'PixelBoard not found' });
+			}
+
+			const deletedBoard = await pixelBoardService.deletePixelBoard(req.params.id);
+
+			// Décrémenter le compteur de tableaux créés par l'utilisateur (si pas invité)
+			if (!req.isGuest && req.user.boardsCreated !== undefined) {
+				req.user.boardsCreated -= 1;
+				if (req.user.boardsCreated < 0) req.user.boardsCreated = 0;
+				await req.user.save();
+			}
+
+			res.json({ message: 'PixelBoard deleted successfully' });
+		} catch (error) {
+			if (error instanceof Error) {
+				res.status(500).json({ message: error.message });
+			} else {
+				res.status(500).json({ message: 'An unknown error occurred' });
+			}
 		}
-
-		// S'assurer que le nom d'utilisateur du créateur n'est pas modifié
-		const updatedData = {
-			...req.body,
-			creator: pixelBoard.creator, // Conserver l'ID du créateur
-			creatorUsername: pixelBoard.creatorUsername // Conserver le nom d'utilisateur
-		};
-
-		const updatedBoard = await pixelBoardService.updatePixelBoard(req.params.id, updatedData);
-		res.json(updatedBoard);
-	} catch (error) {
-		if (error instanceof Error) {
-			res.status(400).json({ message: error.message });
-		} else {
-			res.status(500).json({ message: 'An unknown error occurred' });
-		}
-	}
-});
-
-// Delete a pixel board (requires authentication)
-router.delete('/:id', auth, async (req: Request, res: Response) => {
-	try {
-		// Vérifier si l'utilisateur est le créateur du tableau
-		const pixelBoard = await pixelBoardService.getPixelBoardById(req.params.id);
-		if (!pixelBoard) {
-			return res.status(404).json({ message: 'PixelBoard not found' });
-		}
-
-		if (pixelBoard.creator.toString() !== req.user._id.toString()) {
-			return res.status(403).json({ message: 'Unauthorized: Only the creator can delete this board' });
-		}
-
-		const deletedBoard = await pixelBoardService.deletePixelBoard(req.params.id);
-
-		// Décrémenter le compteur de tableaux créés par l'utilisateur (si pas invité)
-		if (!req.isGuest && req.user.boardsCreated !== undefined) {
-			req.user.boardsCreated -= 1;
-			if (req.user.boardsCreated < 0) req.user.boardsCreated = 0;
-			await req.user.save();
-		}
-
-		res.json({ message: 'PixelBoard deleted successfully' });
-	} catch (error) {
-		if (error instanceof Error) {
-			res.status(500).json({ message: error.message });
-		} else {
-			res.status(500).json({ message: 'An unknown error occurred' });
-		}
-	}
-});
+	});
 
 export const pixelBoardAPI = router;

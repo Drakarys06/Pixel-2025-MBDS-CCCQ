@@ -5,13 +5,17 @@ import HomePage from './components/pages/HomePage';
 import ExplorePage from './components/pages/ExplorePage';
 import CreateBoardPage from './components/pages/CreateBoardPage';
 import BoardViewPage from './components/pages/BoardViewPage';
-import MyBoardsPage from './components/pages/MyBoardsPage'; // Importer notre nouvelle page
+import MyBoardsPage from './components/pages/MyBoardsPage';
 import NotFoundPage from './components/pages/NotFoundPage';
 import LoginPage from './components/pages/LoginPage';
 import SignupPage from './components/pages/SignUpPage';
 import TemporaryProfilePage from './components/pages/ProfilePage';
+import UnauthorizedPage from './components/pages/UnauthorizedPage.tsx'; // Nouvelle page pour accès non autorisé
 import { AuthProvider } from './components/auth/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import PermissionRoute from './components/auth/PermissionRoute';
+import { PERMISSIONS } from './components/auth/permissions';
+
 // Import global stylesheets
 import './styles/index.css';
 import './styles/colors.css';
@@ -19,8 +23,8 @@ import './styles/colors.css';
 // Fonction pour nettoyer les anciennes données d'authentification de localStorage
 const cleanupLocalStorage = () => {
 	// Vérifier s'il y a des données d'authentification dans localStorage
-	const hasLocalStorageAuth = localStorage.getItem('token') ||
-		localStorage.getItem('userId') ||
+	const hasLocalStorageAuth = localStorage.getItem('token') || 
+		localStorage.getItem('userId') || 
 		localStorage.getItem('username');
 
 	// Si on trouve des données, les supprimer
@@ -35,7 +39,8 @@ const cleanupLocalStorage = () => {
 const App: React.FC = () => {
 	// Nettoyer les anciennes données de localStorage au démarrage
 	useEffect(() => {
-		cleanupLocalStorage();
+		// Commenté pour ne pas supprimer les données d'authentification à chaque rechargement
+		// cleanupLocalStorage();
 	}, []);
 
 	return (
@@ -46,28 +51,30 @@ const App: React.FC = () => {
 						<Routes>
 							{/* Routes publiques */}
 							<Route path="/" element={<HomePage />} />
-							<Route path="/explore" element={<ExplorePage />} />
 							<Route path="/login" element={<LoginPage />} />
 							<Route path="/signup" element={<SignupPage />} />
+							<Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-							{/* Routes protégées */}
+							{/* Route d'exploration - Protégée mais accessible aux visiteurs */}
+							<Route path="/explore" element={<ExplorePage />} />
+
+							{/* Board View - Accessible à tous, les permissions sont gérées à l'intérieur */}
+							<Route path="/board/:id" element={<BoardViewPage />} />
+
+							{/* Routes protégées avec permissions spécifiques */}
 							<Route path="/create" element={
-								<ProtectedRoute>
+								<PermissionRoute permission={PERMISSIONS.BOARD_CREATE}>
 									<CreateBoardPage />
-								</ProtectedRoute>
+								</PermissionRoute>
 							} />
-							<Route path="/board/:id" element={
-								<ProtectedRoute>
-									<BoardViewPage />
-								</ProtectedRoute>
-							} />
+							
 							<Route path="/boards" element={
 								<ProtectedRoute>
 									<MyBoardsPage />
 								</ProtectedRoute>
 							} />
 
-							{/* Use temporary profile page directly, not wrapped in ProtectedRoute */}
+							{/* Profil */}
 							<Route path="/profile" element={<TemporaryProfilePage />} />
 
 							{/* Route 404 */}

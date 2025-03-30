@@ -98,3 +98,56 @@
     font-size: 14px;
   }
 }
+/* Styles pour le bouton de profil amélioré */
+.profile-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(75, 85, 99, 0.3);
+  border-radius: 12px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.profile-button:hover {
+  background-color: rgba(75, 85, 99, 0.5);
+  transform: translateY(-1px);
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: white;
+}
+
+.avatar-user {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+}
+
+.avatar-guest {
+  background: linear-gradient(135deg, #4b5563, #6b7280);
+}
+
+.avatar-icon {
+  font-style: normal;
+  font-size: 18px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.username {
+  font-weight: 500;
+  color: white;
+  font-size: 14px;
+}

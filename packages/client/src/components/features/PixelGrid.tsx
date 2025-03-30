@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 import PixelTooltip from '../ui/PixelTooltip';
+import { useAuth } from '../auth/AuthContext';
+import usePermissions from '../auth/usePermissions';
 import '../../styles/ui/PixelGrid.css';
 
 interface Pixel {
@@ -51,6 +53,11 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 	showGridLines = false,
 	showHeatmap = false
 }, ref) => {
+	const { currentUser, isGuestMode } = useAuth();
+	const permissions = usePermissions();
+  const canCreatePixel = useCallback(() => {
+    return permissions.canCreatePixel();
+  }, [permissions, currentUser, isGuestMode]);
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const wrapperRef = useRef<HTMLDivElement>(null);
 	const legendCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -84,9 +91,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 		const normalizedValue = Math.min(value / maxValue, 1);
 
 		// Utiliser une fonction d'échelle logarithmique pour mieux distribuer les couleurs
-		// Cela permettra d'avoir une meilleure visualisation des différences entre les valeurs faibles
-		// tout en conservant une bonne distinction pour les valeurs élevées
-		const enhancedValue = Math.pow(normalizedValue, 0.7); // Exposant < 1 pour augmenter les valeurs faibles
+		const enhancedValue = Math.pow(normalizedValue, 0.7);
 
 		// Définir les palettes de couleurs
 		const colors = [
@@ -126,7 +131,6 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 		// Count the number of modifications for each pixel
 		pixels.forEach(pixel => {
 			if (pixel.x >= 0 && pixel.x < width && pixel.y >= 0 && pixel.y < height) {
-				// Utiliser le nouveau champ modificationCount
 				heatmapData[pixel.y][pixel.x] = pixel.modificationCount || 1;
 			}
 		});
@@ -139,9 +143,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 			}
 		}
 
-		// Mettre à jour la valeur maximale pour la légende externe
 		setMaxHeatmapValue(maxValue);
-
 		return { heatmapData, maxValue };
 	}, [pixels, width, height]);
 
@@ -298,14 +300,12 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 
 						// Add text to show the exact number of modifications for each pixel
 						if (cellSize > 15) {  // Only show numbers if cells are big enough
-							// Amélioration de la lisibilité du texte en fonction de la couleur de fond
 							const rgbMatch = heatmapColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
 
 							let textColor = 'black'; // Défaut à noir
 
 							if (rgbMatch) {
 								// Formule de luminance perçue (Rec. 709)
-								// L = 0.2126*R + 0.7152*G + 0.0722*B
 								const r = parseInt(rgbMatch[1], 10);
 								const g = parseInt(rgbMatch[2], 10);
 								const b = parseInt(rgbMatch[3], 10);
@@ -314,7 +314,6 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 								const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
 
 								// Si la luminance est inférieure à 140 (sur 255), utiliser du texte blanc, sinon noir
-								// Le seuil de 140 est ajusté pour assurer que les jaunes et couleurs claires utilisent du texte noir
 								textColor = luminance < 140 ? 'white' : 'black';
 							}
 
@@ -332,7 +331,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 				}
 			}
 		}
-	}, [pixels, cellSize, canvasSize, width, height, showGridLines, showHeatmap, calculateHeatmap]);
+	}, [pixels, cellSize, canvasSize, width, height, showGridLines, showHeatmap, calculateHeatmap, getHeatmapColor]);
 
 	// Handle tooltip size changes
 	const handleTooltipSizeChange = useCallback((width: number, height: number) => {
@@ -379,13 +378,13 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 
 	// Handle canvas click
 	const handleCanvasClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-		if (!canvasRef.current || !editable || loading || showHeatmap) return; // Prevent placing pixels in heatmap mode
+		if (!canvasRef.current || !editable || loading || showHeatmap || !canCreatePixel) return;
 
 		const coords = getPixelCoordinates(e);
 		if (coords && onPixelClick) {
 			onPixelClick(coords.x, coords.y);
 		}
-	}, [getPixelCoordinates, editable, loading, onPixelClick, showHeatmap]);
+	}, [getPixelCoordinates, editable, loading, onPixelClick, showHeatmap, canCreatePixel]);
 
 	// Handle mouse movement for tooltip
 	const handleCanvasMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -448,6 +447,15 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 		setTooltip(prev => ({ ...prev, visible: false }));
 	}, [clearTooltipTimeout]);
 
+	// Déterminer le curseur à afficher
+	const getCursor = () => {
+		if (loading) return 'wait';
+		if (showHeatmap) return 'default';
+		if (!editable) return 'not-allowed';
+		if (!canCreatePixel) return 'not-allowed';
+		return 'pointer';
+	};
+
 	return (
 		<div ref={wrapperRef} className={`pixel-grid-wrapper ${className}`}>
 			<canvas
@@ -456,7 +464,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 				height={canvasSize.height}
 				style={{
 					border: '2px solid black',
-					cursor: editable && !loading && !showHeatmap ? 'pointer' : 'default'
+					cursor: getCursor()
 				}}
 				onClick={handleCanvasClick}
 				onMouseMove={handleCanvasMouseMove}
@@ -481,6 +489,15 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 				</div>
 			)}
 
+			{/* Message quand l'utilisateur n'a pas la permission de placer des pixels */}
+			{!canCreatePixel && !showHeatmap && editable && (
+				<div className="pixel-grid-permission-overlay">
+					<div className="permission-message">
+						You don't have permission to place pixels. Please log in or request access.
+					</div>
+				</div>
+			)}
+
 			<PixelTooltip
 				visible={tooltip.visible}
 				content={tooltip.content}
@@ -488,7 +505,6 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 				y={tooltip.y}
 				onSizeChange={handleTooltipSizeChange}
 			/>
-
 		</div>
 	);
 });

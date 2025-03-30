@@ -1,3 +1,4 @@
+// AuthContext.tsx
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import authService from '../../services/authService';
 
@@ -6,14 +7,18 @@ type UserType = {
   id: string;
   username: string;
   isGuest?: boolean;
+  roles: string[];
+  permissions: string[];
 } | null;
 
 type AuthContextType = {
   currentUser: UserType;
   isLoggedIn: boolean;
   isGuestMode: boolean;
-  login: (token: string, userId: string, username: string) => void;
-  loginAsGuest: () => void;
+  hasPermission: (permission: string) => boolean;
+  hasRole: (role: string) => boolean;
+  login: (token: string, userId: string, username: string, roles: string[], permissions: string[]) => void;
+  loginAsGuest: () => Promise<void>;
   logout: () => void;
   loading: boolean;
 };
@@ -43,17 +48,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const token = localStorage.getItem('token');
         const userId = localStorage.getItem('userId');
         const username = localStorage.getItem('username');
+        const rolesString = localStorage.getItem('roles');
+        const permissionsString = localStorage.getItem('permissions');
 
         if (token && userId && username) {
           // Vérifier si c'est un token visiteur
           const isGuest = token.startsWith('guest-');
+          const roles = rolesString ? JSON.parse(rolesString) : [];
+          const permissions = permissionsString ? JSON.parse(permissionsString) : [];
           
           if (isGuest) {
             // Visiteur, pas besoin de vérifier avec le serveur
             setCurrentUser({
               id: userId,
               username: username,
-              isGuest: true
+              isGuest: true,
+              roles: ['guest'],
+              permissions: ['board:view', 'pixel:view','pixel:create']
             });
             setIsLoggedIn(true);
             setIsGuestMode(true);
@@ -65,8 +76,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               setCurrentUser({
                 id: response.user.id,
                 username: response.user.username,
-                isGuest: false
+                isGuest: false,
+                roles: 'roles' in response.user ? response.user.roles : roles,
+                permissions: 'permissions' in response.user ? response.user.permissions : permissions
               });
+              
+              // Mettre à jour les rôles et permissions dans localStorage si fournis par le serveur
+              if ('roles' in response.user && response.user.roles) {
+                localStorage.setItem('roles', JSON.stringify(response.user.roles));
+              }
+              
+              if (response.user.permissions) {
+                localStorage.setItem('permissions', JSON.stringify(response.user.permissions));
+              }
+              
               setIsLoggedIn(true);
               setIsGuestMode(false);
             } else {
@@ -93,17 +116,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   // Fonction de connexion
-  const login = (token: string, userId: string, username: string) => {
+  const login = (
+    token: string,
+    userId: string,
+    username: string,
+    roles: string[] = [],
+    permissions: string[] = []
+  ) => {
     const isGuest = token.startsWith('guest-');
     
     localStorage.setItem('token', token);
     localStorage.setItem('userId', userId);
     localStorage.setItem('username', username);
+    localStorage.setItem('roles', JSON.stringify(roles));
+    localStorage.setItem('permissions', JSON.stringify(permissions));
     
     setCurrentUser({
       id: userId,
       username: username,
-      isGuest: isGuest
+      isGuest: isGuest,
+      roles,
+      permissions
     });
     setIsLoggedIn(true);
     setIsGuestMode(isGuest);
@@ -114,10 +147,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const result = await authService.guestLogin();
       if (result.success) {
-        login(result.token, result.userId, result.username);
+        login(
+          result.token,
+          result.userId,
+          result.username,
+          ['guest'],
+          ['board:view', 'pixel:view','pixel:create']
+        );
+      } else {
+        throw new Error('Échec de la connexion visiteur');
       }
     } catch (error) {
       console.error('Erreur de connexion visiteur:', error);
+      throw error; // Propager l'erreur pour que la page de connexion puisse la gérer
     }
   };
 
@@ -126,6 +168,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     localStorage.removeItem('username');
+    localStorage.removeItem('roles');
+    localStorage.removeItem('permissions');
     
     setCurrentUser(null);
     setIsLoggedIn(false);
@@ -135,11 +179,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     window.location.href = '/login';
   };
 
+  // Fonction pour vérifier si l'utilisateur a une permission
+  const hasPermission = (permission: string): boolean => {
+    if (!currentUser || !currentUser.permissions) {
+      return false;
+    }
+    return currentUser.permissions.includes(permission);
+  };
+
+  // Fonction pour vérifier si l'utilisateur a un rôle
+  const hasRole = (role: string): boolean => {
+    if (!currentUser || !currentUser.roles) {
+      return false;
+    }
+    return currentUser.roles.includes(role);
+  };
+
   return (
     <AuthContext.Provider value={{ 
       currentUser, 
       isLoggedIn,
       isGuestMode,
+      hasPermission,
+      hasRole,
       login, 
       loginAsGuest,
       logout, 
@@ -157,6 +219,17 @@ export const useAuth = () => {
     throw new Error('useAuth doit être utilisé à l\'intérieur d\'un AuthProvider');
   }
   return context;
+};
+
+// Hooks spécifiques pour les permissions et rôles
+export const usePermission = (permission: string) => {
+  const { hasPermission } = useAuth();
+  return hasPermission(permission);
+};
+
+export const useRole = (role: string) => {
+  const { hasRole } = useAuth();
+  return hasRole(role);
 };
 
 export default AuthContext;

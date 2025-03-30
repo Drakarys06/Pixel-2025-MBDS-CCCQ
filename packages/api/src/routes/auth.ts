@@ -1,7 +1,10 @@
 import express from 'express';
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '../models/User';
+import mongoose from 'mongoose';
+import User, { IUser } from '../models/User';
+import * as roleService from '../services/roleService';
+import { auth } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -29,14 +32,34 @@ router.post('/signup', async (req: Request, res: Response) => {
     const user = new User({
       username,
       email,
-      password
+      password,
+      roles: []
     });
 
     await user.save();
+    
+    // Assigner le rôle par défaut au nouvel utilisateur
+    // Utiliser une conversion explicite pour l'ID
+    const userId = user._id instanceof mongoose.Types.ObjectId 
+      ? user._id.toString() 
+      : String(user._id);
+      
+    const defaultRoleResult = await roleService.assignDefaultRoleToUser(userId);
+    
+    // Récupérer les rôles et les permissions de l'utilisateur
+    const userWithRoles = await User.findById(userId).populate('roles');
+    
+    const roles = userWithRoles?.roles.map((role: any) => role.name) || [];
+    const permissions = userWithRoles?.roles.reduce((acc: string[], role: any) => {
+      return [...acc, ...role.permissions];
+    }, []) || [];
+    
+    // Filtrer les permissions pour n'avoir que des valeurs uniques
+    const uniquePermissions = [...new Set(permissions)];
 
     // Générer un token JWT
     const token = jwt.sign(
-      { id: user._id },
+      { id: userId },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -45,8 +68,10 @@ router.post('/signup', async (req: Request, res: Response) => {
       success: true,
       message: 'Inscription réussie',
       token,
-      userId: user._id,
-      username: user.username
+      userId: userId,
+      username: user.username,
+      roles,
+      permissions: uniquePermissions
     });
   } catch (error) {
     console.error('Erreur d\'inscription:', error);
@@ -64,7 +89,7 @@ router.post('/login', async (req: Request, res: Response) => {
     console.log('Tentative de connexion avec:', { email });
 
     // Trouver l'utilisateur par email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).populate('roles');
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -80,10 +105,23 @@ router.post('/login', async (req: Request, res: Response) => {
         message: 'Email ou mot de passe incorrect'
       });
     }
+    
+    // Extraire les noms de rôles et les permissions
+    const roles = user.roles.map((role: any) => role.name);
+    const permissions = user.roles.reduce((acc: string[], role: any) => {
+      return [...acc, ...role.permissions];
+    }, []);
+    
+    // Filtrer les permissions pour n'avoir que des valeurs uniques
+    const uniquePermissions = [...new Set(permissions)];
 
     // Générer un token JWT
+    const userId = user._id instanceof mongoose.Types.ObjectId 
+      ? user._id.toString() 
+      : String(user._id);
+      
     const token = jwt.sign(
-      { id: user._id },
+      { id: userId },
       JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -92,8 +130,10 @@ router.post('/login', async (req: Request, res: Response) => {
       success: true,
       message: 'Connexion réussie',
       token,
-      userId: user._id,
-      username: user.username
+      userId: userId,
+      username: user.username,
+      roles,
+      permissions: uniquePermissions
     });
   } catch (error) {
     console.error('Erreur de connexion:', error);
@@ -105,22 +145,10 @@ router.post('/login', async (req: Request, res: Response) => {
 });
 
 // Route pour vérifier si un token est valide
-router.get('/verify', async (req: Request, res: Response) => {
+router.get('/verify', auth, async (req: Request, res: Response) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Aucun token fourni'
-      });
-    }
-    
-    // Vérifier le token
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
-    
-    // Trouver l'utilisateur correspondant
-    const user = await User.findById(decoded.id).select('-password');
+    // Trouver l'utilisateur avec ses rôles
+    const user = await User.findById(req.user._id).select('-password').populate('roles');
     
     if (!user) {
       return res.status(404).json({
@@ -129,15 +157,30 @@ router.get('/verify', async (req: Request, res: Response) => {
       });
     }
     
+    // Extraire les noms de rôles et les permissions
+    const roles = user.roles.map((role: any) => role.name);
+    const permissions = user.roles.reduce((acc: string[], role: any) => {
+      return [...acc, ...role.permissions];
+    }, []);
+    
+    // Filtrer les permissions pour n'avoir que des valeurs uniques
+    const uniquePermissions = [...new Set(permissions)];
+    
+    const userId = user._id instanceof mongoose.Types.ObjectId 
+      ? user._id.toString() 
+      : String(user._id);
+    
     res.status(200).json({
       success: true,
       message: 'Token valide',
       user: {
-        id: user._id,
+        id: userId,
         username: user.username,
         email: user.email,
         pixelsPlaced: user.pixelsPlaced,
-        boardsCreated: user.boardsCreated
+        boardsCreated: user.boardsCreated,
+        roles,
+        permissions: uniquePermissions
       }
     });
   } catch (error) {
@@ -145,6 +188,42 @@ router.get('/verify', async (req: Request, res: Response) => {
     res.status(401).json({
       success: false,
       message: 'Token invalide ou expiré'
+    });
+  }
+});
+
+// Route pour se connecter en tant que visiteur (optionnel, si implémenté côté serveur)
+router.post('/guest-login', async (req: Request, res: Response) => {
+  try {
+    // Trouver le rôle de visiteur
+    const guestRole = await roleService.getRoleByName(roleService.DEFAULT_ROLES.GUEST);
+    
+    if (!guestRole) {
+      return res.status(500).json({
+        success: false,
+        message: 'Rôle de visiteur non trouvé'
+      });
+    }
+    
+    // Générer un identifiant et un token de visiteur
+    const guestId = 'guest-' + Math.random().toString(36).substring(2, 15);
+    const guestToken = 'guest-' + Math.random().toString(36).substring(2, 15);
+    const guestUsername = 'Visiteur-' + Math.floor(Math.random() * 10000);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Connexion visiteur réussie',
+      token: guestToken,
+      userId: guestId,
+      username: guestUsername,
+      roles: [guestRole.name],
+      permissions: guestRole.permissions
+    });
+  } catch (error) {
+    console.error('Erreur de connexion visiteur:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la connexion visiteur'
     });
   }
 });

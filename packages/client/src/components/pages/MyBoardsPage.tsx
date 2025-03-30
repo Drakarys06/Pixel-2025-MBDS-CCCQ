@@ -8,6 +8,9 @@ import Loader from '../ui/Loader';
 import Button from '../ui/Button';
 import BoardSettingsDialog from '../features/BoardSettingsDialog';
 import { useAuth } from '../auth/AuthContext';
+import usePermissions from '../auth/usePermissions';
+import PermissionGate from '../auth/PermissionGate';
+import { PERMISSIONS } from '../auth/permissions';
 import '../../styles/pages/MyBoardsPage.css';
 import '../../styles/features/BoardSettingsDialog.css';
 
@@ -41,7 +44,8 @@ const MyBoardsPage: React.FC = () => {
 	const [sortBy, setSortBy] = useState<string>('newest');
 	const [filterBy, setFilterBy] = useState<string>('all');
 	const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
-	const { isLoggedIn, currentUser } = useAuth();
+	const { isLoggedIn, currentUser, isGuestMode } = useAuth();
+	const permissions = usePermissions();
 	const navigate = useNavigate();
 
 	const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -224,6 +228,34 @@ const MyBoardsPage: React.FC = () => {
 		activeTab === TabType.CREATED ? createdBoards : contributedBoards
 	);
 
+	// Check if user is a guest - guests don't have boards
+	if (isGuestMode) {
+		return (
+			<Layout title="My Pixel Boards">
+				<div className="guest-mode-message">
+					<Alert
+						variant="info"
+						message="As a guest user, you don't have your own board collection. Create an account to start creating and managing boards!"
+					/>
+					<div className="guest-actions">
+						<Button
+							variant="primary"
+							onClick={() => navigate('/signup')}
+						>
+							Create Account
+						</Button>
+						<Button
+							variant="secondary"
+							onClick={() => navigate('/explore')}
+						>
+							Explore Boards
+						</Button>
+					</div>
+				</div>
+			</Layout>
+		);
+	}
+
 	return (
 		<Layout title="My Pixel Boards">
 			{error && <Alert variant="error" message={error} />}
@@ -285,6 +317,7 @@ const MyBoardsPage: React.FC = () => {
 			) : filteredAndSortedBoards.length > 0 ? (
 				<div className="board-grid">
 					{filteredAndSortedBoards.map(board => (
+						// Dans la section qui rend chaque carte (PixelBoardCard)
 						<PixelBoardCard
 							key={board._id}
 							id={board._id}
@@ -295,8 +328,9 @@ const MyBoardsPage: React.FC = () => {
 							time={board.time}
 							closeTime={board.closeTime}
 							creator={board.creatorUsername || board.creator}
-							// Show settings button only for boards created by the user and when in the "Created" tab
-							showSettings={activeTab === TabType.CREATED}
+							// Show settings button for boards created by the user when in the "Created" tab
+							// The user can always modify their own boards, or if they have update permission
+							showSettings={activeTab === TabType.CREATED && permissions.canUpdateOwnBoard(board.creator)}
 							onSettingsClick={handleSettingsClick}
 						/>
 					))}
@@ -313,15 +347,17 @@ const MyBoardsPage: React.FC = () => {
 			)}
 
 			{activeTab === TabType.CREATED && (
-				<div className="create-board-button-container">
-					<Button
-						variant="primary"
-						onClick={() => navigate('/create')}
-						className="create-board-button"
-					>
-						Create New Board
-					</Button>
-				</div>
+				<PermissionGate permission={PERMISSIONS.BOARD_CREATE}>
+					<div className="create-board-button-container">
+						<Button
+							variant="primary"
+							onClick={() => navigate('/create')}
+							className="create-board-button"
+						>
+							Create New Board
+						</Button>
+					</div>
+				</PermissionGate>
 			)}
 
 			{/* Settings Dialog */}
