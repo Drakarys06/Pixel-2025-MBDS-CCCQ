@@ -233,19 +233,19 @@ const MyBoardsPage: React.FC = () => {
 		return (
 			<Layout title="My Pixel Boards">
 				<div className="guest-mode-message">
-					<Alert 
-						variant="info" 
-						message="As a guest user, you don't have your own board collection. Create an account to start creating and managing boards!" 
+					<Alert
+						variant="info"
+						message="As a guest user, you don't have your own board collection. Create an account to start creating and managing boards!"
 					/>
 					<div className="guest-actions">
-						<Button 
-							variant="primary" 
+						<Button
+							variant="primary"
 							onClick={() => navigate('/signup')}
 						>
 							Create Account
 						</Button>
-						<Button 
-							variant="secondary" 
+						<Button
+							variant="secondary"
 							onClick={() => navigate('/explore')}
 						>
 							Explore Boards
@@ -317,6 +317,7 @@ const MyBoardsPage: React.FC = () => {
 			) : filteredAndSortedBoards.length > 0 ? (
 				<div className="board-grid">
 					{filteredAndSortedBoards.map(board => (
+						// Dans la section qui rend chaque carte (PixelBoardCard)
 						<PixelBoardCard
 							key={board._id}
 							id={board._id}
@@ -327,9 +328,9 @@ const MyBoardsPage: React.FC = () => {
 							time={board.time}
 							closeTime={board.closeTime}
 							creator={board.creatorUsername || board.creator}
-							// Show settings button only for boards created by the user and when in the "Created" tab
-							// and only if user has permission to update boards
-							showSettings={activeTab === TabType.CREATED && permissions.canUpdateBoard()}
+							// Show settings button for boards created by the user when in the "Created" tab
+							// The user can always modify their own boards, or if they have update permission
+							showSettings={activeTab === TabType.CREATED && permissions.canUpdateOwnBoard(board.creator)}
 							onSettingsClick={handleSettingsClick}
 						/>
 					))}

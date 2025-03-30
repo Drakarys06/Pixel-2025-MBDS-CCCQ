@@ -59,7 +59,7 @@ const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
             'Authorization': token ? `Bearer ${token}` : ''
           }
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           setPixels(data);
@@ -100,7 +100,7 @@ const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
     // Calculer l'échelle pour s'adapter à la prévisualisation
     const maxDimension = Math.max(width, length);
     const cellSize = previewSize / maxDimension;
-    
+
     // Centrer le contenu
     const offsetX = (previewSize - (width * cellSize)) / 2;
     const offsetY = (previewSize - (length * cellSize)) / 2;
@@ -108,13 +108,13 @@ const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
     // Dessiner les pixels sans espaces entre eux
     pixels.forEach(pixel => {
       ctx.fillStyle = pixel.color;
-      
+
       // Utiliser des positions exactes
       const x = Math.floor(offsetX + pixel.x * cellSize);
       const y = Math.floor(offsetY + pixel.y * cellSize);
       const w = Math.ceil(cellSize + 0.5); // Ajouter un peu pour éviter les espaces
       const h = Math.ceil(cellSize + 0.5);
-      
+
       ctx.fillRect(x, y, w, h);
     });
   }, [pixels, loading, width, length]);
@@ -122,26 +122,26 @@ const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
   // Draw a default pattern when no pixels are available
   const drawDefaultPattern = (ctx: CanvasRenderingContext2D, size: number) => {
     const colors = [
-      '#9370DB', '#90EE90', '#F0E68C', '#6495ED', 
+      '#9370DB', '#90EE90', '#F0E68C', '#6495ED',
       '#FF7F50', '#87CEEB', '#FFC0CB', '#98FB98'
     ];
-    
+
     const numCells = 4; // Grille 4x4
     const cellSize = size / numCells;
-    
+
     for (let y = 0; y < numCells; y++) {
       for (let x = 0; x < numCells; x++) {
         // Créer un motif d'échiquier
         if ((x + y) % 2 === 0) {
           const colorIndex = (x * 3 + y * 5) % colors.length;
           ctx.fillStyle = colors[colorIndex];
-          
+
           // Positions exactes sans espaces
           const exactX = Math.floor(x * cellSize);
           const exactY = Math.floor(y * cellSize);
           const exactW = Math.ceil(cellSize + 0.5);
           const exactH = Math.ceil(cellSize + 0.5);
-          
+
           ctx.fillRect(exactX, exactY, exactW, exactH);
         }
       }
@@ -181,8 +181,8 @@ const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
         {loading ? (
           <div className="pixel-preview-loading"></div>
         ) : (
-          <canvas 
-            ref={canvasRef} 
+          <canvas
+            ref={canvasRef}
             className="pixel-preview-canvas"
           />
         )}
@@ -195,14 +195,14 @@ const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
           onTimeExpired={handleTimeExpired}
         />
       </div>
-      
+
       <div className="card-body">
         <h3 className="pixel-board-title">{title}</h3>
         <div className="pixel-board-meta">
           <span>{width} x {length}</span>
           <span>Created: {formatDate(creationTime)}</span>
         </div>
-        
+
         <TimeRemaining
           creationTime={creationTime}
           durationMinutes={time}
@@ -211,30 +211,31 @@ const PixelBoardCard: React.FC<PixelBoardCardProps> = ({
           onTimeExpired={handleTimeExpired}
         />
       </div>
-      
+
       <div className="card-footer">
         <div className="pixel-board-creator">By: {displayCreator}</div>
-        {showSettings ? (
-          <div className="card-actions">
-            <button
-              className="board-settings-button"
-              onClick={handleSettingsClick}
-            >
-              Settings
-            </button>
-            <Link to={`/board/${id}`}>
-              <Button 
-                variant={isExpired ? 'secondary' : 'join'} 
-                size="sm"
-              >
-                {isExpired ? 'View Board' : 'Join Board'}
-              </Button>
-            </Link>
-          </div>
-        ) : (
+		  {showSettings ? (
+			  <div className="card-actions">
+				  <button
+					  className="board-settings-button"
+					  onClick={handleSettingsClick}
+					  title="Edit board settings"
+				  >
+					  Settings
+				  </button>
+				  <Link to={`/board/${id}`}>
+					  <Button
+						  variant={isExpired ? 'secondary' : 'join'}
+						  size="sm"
+					  >
+						  {isExpired ? 'View Board' : 'Join Board'}
+					  </Button>
+				  </Link>
+			  </div>
+		  ) : (
           <Link to={`/board/${id}`}>
-            <Button 
-              variant={isExpired ? 'secondary' : 'join'} 
+            <Button
+              variant={isExpired ? 'secondary' : 'join'}
               size="sm"
             >
               {isExpired ? 'View Board' : 'Join Board'}
