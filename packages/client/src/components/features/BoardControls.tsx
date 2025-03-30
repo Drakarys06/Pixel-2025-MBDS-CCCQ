@@ -3,6 +3,7 @@ import { ColorPicker } from '../ui/FormComponents';
 import Card from '../ui/Card';
 import Alert from '../ui/Alert';
 import Button from '../ui/Button';
+import CooldownTimer from '../ui/CooldownTimer';
 import { useAuth } from '../auth/AuthContext';
 import '../../styles/features/BoardControls.css';
 
@@ -13,22 +14,26 @@ interface BoardControlsProps {
 	disabled: boolean;
 	showGridLines: boolean;
 	onToggleGridLines: () => void;
-	// Heatmap props
 	showHeatmap: boolean;
 	onToggleHeatmap: () => void;
+	cooldownRemaining: number;
+	cooldownTotal: number;
+	onCooldownComplete?: () => void;
 }
 
 const BoardControls: React.FC<BoardControlsProps> = ({
-														 selectedColor,
-														 onColorChange,
-														 message,
-														 disabled,
-														 showGridLines,
-														 onToggleGridLines,
-														 // Heatmap props
-														 showHeatmap,
-														 onToggleHeatmap
-													 }) => {
+	selectedColor,
+	onColorChange,
+	message,
+	disabled,
+	showGridLines,
+	onToggleGridLines,
+	showHeatmap,
+	onToggleHeatmap,
+	cooldownRemaining,
+	cooldownTotal,
+	onCooldownComplete
+}) => {
 	// Utiliser le contexte d'authentification pour obtenir l'utilisateur
 	const { currentUser, isGuestMode } = useAuth();
 
@@ -39,22 +44,14 @@ const BoardControls: React.FC<BoardControlsProps> = ({
 			</div>
 
 			<div className="card-body">
-				{/* Heatmap toggle button - Now more prominent */}
-				<div className="heatmap-toggle-container">
-					<Button
-						variant={showHeatmap ? "primary" : "secondary"}
-						onClick={onToggleHeatmap}
-						className={`heatmap-toggle-button ${showHeatmap ? 'active' : ''}`}
-						fullWidth
-					>
-						{showHeatmap ? 'Exit Heatmap Mode' : 'Show Heatmap View'}
-					</Button>
-					{showHeatmap && (
-						<div className="heatmap-active-indicator">
-							Heatmap mode active - Showing frequency of modifications
-						</div>
-					)}
-				</div>
+				{/* Cooldown timer - only show if there is a cooldown */}
+				{cooldownTotal > 0 && (
+					<CooldownTimer
+						remainingSeconds={cooldownRemaining}
+						totalSeconds={cooldownTotal}
+						onCooldownComplete={onCooldownComplete}
+					/>
+				)}
 
 				<div className="controls-form">
 					{currentUser && (
@@ -75,6 +72,23 @@ const BoardControls: React.FC<BoardControlsProps> = ({
 						<li>Select a color</li>
 						<li>Click on any cell in the grid to place your pixel</li>
 					</ol>
+				</div>
+
+				{/* Heatmap toggle button - Now more prominent */}
+				<div className="heatmap-toggle-container">
+					<Button
+						variant={showHeatmap ? "primary" : "secondary"}
+						onClick={onToggleHeatmap}
+						className={`heatmap-toggle-button ${showHeatmap ? 'active' : ''}`}
+						fullWidth
+					>
+						{showHeatmap ? 'Exit Heatmap Mode' : 'Show Heatmap View'}
+					</Button>
+					{showHeatmap && (
+						<div className="heatmap-active-indicator">
+							Heatmap mode active - Showing frequency of modifications
+						</div>
+					)}
 				</div>
 
 				<div className="view-options">

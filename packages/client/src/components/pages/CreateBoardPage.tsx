@@ -120,6 +120,7 @@ const CreateBoardPage: React.FC = () => {
               <ul className="guidelines-list">
                 <li>Choose dimensions that suit your artistic vision but consider that larger boards may take longer to fill.</li>
                 <li>Set an appropriate time limit - we recommend 30 minutes for small boards and longer for larger ones.</li>
+                <li>Set a cooldown limit to prevent rapid consecutive pixel placements.</li>
                 <li>The &quot;Allow Redraw&quot; option lets users place pixels over existing ones.</li>
                 <li>Visitor mode allows viewing after the board&apos;s active time has expired.</li>
               </ul>

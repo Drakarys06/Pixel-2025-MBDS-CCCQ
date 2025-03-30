@@ -20,6 +20,7 @@ interface Pixel {
   lastModifiedDate: string;
   modifiedBy: string[];
   boardId: string;
+  modificationCount: number;
 }
 
 interface PixelBoard {
@@ -50,6 +51,8 @@ const BoardViewPage: React.FC = () => {
   const [showHeatmap, setShowHeatmap] = useState<boolean>(false);
   const [contributorsRefreshTrigger, setContributorsRefreshTrigger] = useState<number>(0);
   const pixelGridRef = useRef<PixelGridRef>(null);
+  const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
+  const [cooldownTotal, setCooldownTotal] = useState<number>(0);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -143,6 +146,7 @@ const BoardViewPage: React.FC = () => {
 
         const data = await response.json();
         setBoard(data);
+        setCooldownTotal(data.cooldown || 0);
 
         // Fetch pixels after board is loaded
         fetchPixels(id);
@@ -170,6 +174,10 @@ const BoardViewPage: React.FC = () => {
   // Handle pixel placement
   const handlePlacePixel = async (x: number, y: number) => {
     if (!id || !board || !currentUser) return;
+
+    if (cooldownRemaining > 0) {
+      return;
+    }
 
     const existingPixel = pixels.find(p => p.x === x && p.y === y);
     if (existingPixel && !board.redraw) {
@@ -219,6 +227,8 @@ const BoardViewPage: React.FC = () => {
       // Déclencher le rafraîchissement des contributeurs
       setContributorsRefreshTrigger(prev => prev + 1);
 
+      setCooldownRemaining(cooldownTotal);
+
       setTimeout(() => {
         setMessage(null);
       }, 3000);
@@ -231,6 +241,20 @@ const BoardViewPage: React.FC = () => {
     } finally {
       setPlacingPixel(false);
     }
+  };
+
+  useEffect(() => {
+    if (cooldownRemaining > 0) {
+      const timer = setInterval(() => {
+        setCooldownRemaining((prev) => Math.max(prev - 1, 0));
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [cooldownRemaining]);
+  
+  const handleCooldownComplete = () => {
+    console.log('Cooldown complete!');
   };
 
   // Check if board is expired
@@ -301,6 +325,9 @@ const BoardViewPage: React.FC = () => {
             onToggleGridLines={() => setShowGridLines(!showGridLines)}
             showHeatmap={showHeatmap}
             onToggleHeatmap={handleToggleHeatmap}
+            cooldownRemaining={cooldownRemaining}
+            cooldownTotal={cooldownTotal}
+            onCooldownComplete={handleCooldownComplete}
           />
 
           <BoardContributors

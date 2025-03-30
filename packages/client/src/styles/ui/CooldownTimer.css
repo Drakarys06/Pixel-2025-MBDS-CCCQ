@@ -1,0 +1,59 @@
+.cooldown-timer {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+    padding: 10px 15px;
+    background-color: var(--bg-tertiary);
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.cooldown-text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-align: center;
+    font-size: 1rem;
+    padding: 5px 0;
+}
+
+.cooldown-label {
+    color: var(--text-secondary);
+}
+
+.time-value {
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+.cooldown-ready {
+    color: var(--success-color);
+    font-weight: 700;
+    animation: pulse 2s infinite;
+}
+
+.cooldown-ending-soon .time-value {
+    color: orange;
+}
+
+.cooldown-complete .time-value {
+    color: var(--success-color);
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.8;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.8;
+    }
+}
