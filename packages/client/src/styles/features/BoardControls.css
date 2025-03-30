@@ -25,7 +25,8 @@
 }
 
 .heatmap-toggle-button.active {
-	background-color: #ff5722; /* A distinct orange/red color */
+	background-color: #ff5722;
+	/* A distinct orange/red color */
 	border-color: #ff5722;
 	color: white;
 	box-shadow: 0 2px 5px rgba(255, 87, 34, 0.3);
@@ -39,19 +40,34 @@
 .heatmap-active-indicator {
 	margin-top: 10px;
 	text-align: center;
-	color: #ff5722; /* Match button active color */
+	color: #ff5722;
+	/* Match button active color */
 	font-size: 0.9rem;
 	font-weight: 500;
 	animation: pulse 2s infinite;
+}
+
+.permission-notice {
+	background-color: #ffe4e1;
+	color: #d9534f;
+	border: 1px solid #d9534f;
+	border-radius: 4px;
+	padding: 10px;
+	margin: 10px 0;
+	font-size: 14px;
+	text-align: center;
+	font-weight: bold;
 }
 
 @keyframes pulse {
 	0% {
 		opacity: 0.7;
 	}
+
 	50% {
 		opacity: 1;
 	}
+
 	100% {
 		opacity: 0.7;
 	}
@@ -114,6 +130,6 @@
 }
 
 /* Style for when heatmap is active */
-.toggle-option input[type="checkbox"]:checked + .heatmap-label {
+.toggle-option input[type="checkbox"]:checked+.heatmap-label {
 	color: var(--accent-color);
 }

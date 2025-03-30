@@ -58,7 +58,6 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
   const canCreatePixel = useCallback(() => {
     return permissions.canCreatePixel();
   }, [permissions, currentUser, isGuestMode]);
-	
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const wrapperRef = useRef<HTMLDivElement>(null);
 	const legendCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -237,13 +236,11 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 
 		// Draw empty cells and/or grid lines if needed
 		if (showGridLines || showHeatmap) {
-			// Fill empty cells with light grey
 			ctx.fillStyle = '#f0f0f0';
 			for (let x = 0; x < width; x++) {
 				for (let y = 0; y < height; y++) {
 					const pixelExists = pixels.some(pixel => pixel.x === x && pixel.y === y);
 					if (!pixelExists || showHeatmap) {
-						// En mode heatmap, on colorie toutes les cellules en gris clair comme fond
 						ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
 					}
 				}
@@ -264,6 +261,25 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 					ctx.moveTo(0, y * cellSize);
 					ctx.lineTo(width * cellSize, y * cellSize);
 					ctx.stroke();
+				}
+
+				// Draw diagonal lines
+				ctx.strokeStyle = '#ddd';
+				for (let x = 0; x < width; x++) {
+					for (let y = 0; y < height; y++) {
+						const pixelExists = pixels.some(pixel => pixel.x === x && pixel.y === y);
+						if (!pixelExists) {
+							ctx.beginPath();
+							ctx.moveTo(x * cellSize, y * cellSize);
+							ctx.lineTo((x + 1) * cellSize, (y + 1) * cellSize);
+							ctx.stroke();
+				
+							ctx.beginPath();
+							ctx.moveTo((x + 1) * cellSize, y * cellSize);
+							ctx.lineTo(x * cellSize, (y + 1) * cellSize);
+							ctx.stroke();
+						}
+					}
 				}
 			}
 		}

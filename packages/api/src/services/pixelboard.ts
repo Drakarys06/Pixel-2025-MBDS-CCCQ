@@ -10,6 +10,7 @@ interface PixelBoardInput {
 	creator: string;
 	creatorUsername: string;
 	visitor?: boolean;
+	cooldown?: number;
 }
 
 // Create a new pixel board

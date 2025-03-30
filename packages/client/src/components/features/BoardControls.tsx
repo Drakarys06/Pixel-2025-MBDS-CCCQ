@@ -3,8 +3,8 @@ import { ColorPicker } from '../ui/FormComponents';
 import Card from '../ui/Card';
 import Alert from '../ui/Alert';
 import Button from '../ui/Button';
+import CooldownTimer from '../ui/CooldownTimer';
 import { useAuth } from '../auth/AuthContext';
-import usePermissions from '../auth/usePermissions';
 import PermissionGate from '../auth/PermissionGate';
 import { PERMISSIONS } from '../auth/permissions';
 import '../../styles/features/BoardControls.css';
@@ -16,9 +16,13 @@ interface BoardControlsProps {
   disabled: boolean;
   showGridLines: boolean;
   onToggleGridLines: () => void;
-  showHeatmap?: boolean;
-  onToggleHeatmap?: () => void;
+  showHeatmap: boolean;
+  onToggleHeatmap: () => void;
+  cooldownRemaining: number;
+  cooldownTotal: number;
+  onCooldownComplete?: () => void;
   boardClosed?: boolean;
+  visitorMode?: boolean;
 }
 
 const BoardControls: React.FC<BoardControlsProps> = ({
@@ -29,11 +33,14 @@ const BoardControls: React.FC<BoardControlsProps> = ({
   showGridLines,
   onToggleGridLines,
   showHeatmap = false,
-  onToggleHeatmap = () => {},
-  boardClosed = false
+  onToggleHeatmap = () => { },
+  cooldownRemaining,
+  cooldownTotal,
+  onCooldownComplete,
+  boardClosed = false,
+  visitorMode = false,
 }) => {
-  const { currentUser } = useAuth();
-  const permissions = usePermissions();
+  const { isGuestMode } = useAuth();
 
   return (
     <Card className="board-controls">
@@ -42,19 +49,52 @@ const BoardControls: React.FC<BoardControlsProps> = ({
       </div>
 
       <div className="card-body">
-        {/* Toujours visible pour tous les utilisateurs */}
-        <div className="view-options">
-          <label className="toggle-option">
-            <input
-              type="checkbox"
-              checked={showGridLines}
-              onChange={onToggleGridLines}
-            />
-            Show Grid Lines
-          </label>
-        </div>
+        {/* Explicit check for guest users */}
+        {isGuestMode && !visitorMode ? (
+          <div className="permission-notice">
+            Guest users cannot place pixels on this board.
+          </div>
+        ) : (
+          <PermissionGate
+            permission={PERMISSIONS.PIXEL_CREATE}
+            fallback={
+              <div className="permission-notice">
+                {boardClosed
+                  ? "This board is closed and no longer accepts modifications."
+                  : "You don't have permission to place pixels on this board."}
+              </div>
+            }
+          >
+            {!boardClosed && (
+              <div className="controls-form">
+                {/* Cooldown timer - only show if there is a cooldown */}
+                {cooldownTotal > 0 && (
+                  <CooldownTimer
+                    remainingSeconds={cooldownRemaining}
+                    totalSeconds={cooldownTotal}
+                    onCooldownComplete={onCooldownComplete}
+                  />
+                )}
 
-        {/* Le mode heatmap est disponible pour tous */}
+                <ColorPicker
+                  value={selectedColor}
+                  onChange={onColorChange}
+                  disabled={disabled || showHeatmap}
+                />
+
+                <div className="controls-instructions">
+                  <h4 className="instructions-title">How to Place Pixels</h4>
+                  <ol className="instructions-list">
+                    <li>Select a color</li>
+                    <li>Click on any cell in the grid to place your pixel</li>
+                  </ol>
+                </div>
+              </div>
+            )}
+          </PermissionGate>
+        )}
+
+        {/* Heatmap toggle button - Now more prominent */}
         {onToggleHeatmap && (
           <div className="heatmap-toggle-container">
             <Button
@@ -73,41 +113,16 @@ const BoardControls: React.FC<BoardControlsProps> = ({
           </div>
         )}
 
-        {/* Contrôles de placement de pixels conditionnels basés sur les permissions */}
-        <PermissionGate 
-          permission={PERMISSIONS.PIXEL_CREATE}
-          fallback={
-            <div className="permission-notice">
-              {boardClosed 
-                ? "This board is closed and no longer accepts modifications." 
-                : "You don't have permission to place pixels on this board."}
-            </div>
-          }
-        >
-          {!boardClosed && (
-            <div className="controls-form">
-              {currentUser && (
-                <div className="user-info">
-                  <p>Logged in as: {currentUser.username}</p>
-                </div>
-              )}
-
-              <ColorPicker
-                value={selectedColor}
-                onChange={onColorChange}
-                disabled={disabled || showHeatmap} // Disable color picker when heatmap is active
-              />
-
-              <div className="controls-instructions">
-                <h4 className="instructions-title">How to Place Pixels</h4>
-                <ol className="instructions-list">
-                  <li>Select a color</li>
-                  <li>Click on any cell in the grid to place your pixel</li>
-                </ol>
-              </div>
-            </div>
-          )}
-        </PermissionGate>
+        <div className="view-options">
+          <label className="toggle-option">
+            <input
+              type="checkbox"
+              checked={showGridLines}
+              onChange={onToggleGridLines}
+            />
+            Show Grid Lines
+          </label>
+        </div>
 
         {message && (
           <Alert

@@ -106,6 +106,24 @@ router.post('/board/:boardId/place',
       if (x < 0 || x >= pixelBoard.width || y < 0 || y >= pixelBoard.length) {
         return res.status(400).json({ message: 'Position is outside the board boundaries' });
       }
+      
+      // Check for cooldown if it exists
+      if (pixelBoard.cooldown > 0) {
+        const contributor = pixelBoard.contributors.find(c => c.userId === userId);
+        if (contributor && contributor.lastPixelTime) {
+          const lastPlacedAt = new Date(contributor.lastPixelTime);
+          const now = new Date();
+          const diffSeconds = (now.getTime() - lastPlacedAt.getTime()) / 1000;
+
+          if (diffSeconds < pixelBoard.cooldown) {
+            const remainingSeconds = Math.ceil(pixelBoard.cooldown - diffSeconds);
+            return res.status(429).json({
+              message: `Please wait ${remainingSeconds} seconds before placing another pixel`,
+              remainingSeconds: remainingSeconds
+            });
+          }
+        }
+      }
 
       // Placer le pixel
       const pixel = await pixelService.placePixel(
@@ -138,6 +156,7 @@ router.post('/board/:boardId/place',
       if (existingContributor) {
         // Incrémenter le compteur de pixels si l'utilisateur existe déjà
         existingContributor.pixelsCount += 1;
+        existingContributor.lastPixelTime = new Date();
       } else {
         // Si la propriété contributors n'existe pas encore, l'initialiser
         if (!pixelBoard.contributors) {
@@ -148,7 +167,8 @@ router.post('/board/:boardId/place',
         pixelBoard.contributors.push({
           userId,
           username,
-          pixelsCount: 1
+          pixelsCount: 1,
+          lastPixelTime: new Date()
         });
       }
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Input, Checkbox } from '../ui/FormComponents';
+import TimeInput from '../ui/TimeInput';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 import '../../styles/features/CreateBoardForm.css';
@@ -11,7 +12,7 @@ export interface BoardFormData {
   time: number;
   redraw: boolean;
   visitor: boolean;
-  // Le champ creator a été supprimé car il sera géré par le backend
+  cooldown: number;
 }
 
 interface CreateBoardFormProps {
@@ -26,17 +27,25 @@ const CreateBoardForm: React.FC<CreateBoardFormProps> = ({ onSubmit, loading }) 
     width: 16,
     time: 30,
     redraw: false,
-    visitor: false
+    visitor: false,
+    cooldown: 0
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    
+
     setFormData(prevState => ({
       ...prevState,
-      [name]: type === 'checkbox' ? checked : 
-              type === 'number' ? parseInt(value, 10) : 
-              value
+      [name]: type === 'checkbox' ? checked :
+        type === 'number' ? parseInt(value, 10) :
+          value
+    }));
+  };
+
+  const handleCooldownChange = (totalSeconds: number) => {
+    setFormData(prevState => ({
+      ...prevState,
+      cooldown: totalSeconds
     }));
   };
 
@@ -50,7 +59,7 @@ const CreateBoardForm: React.FC<CreateBoardFormProps> = ({ onSubmit, loading }) 
       <div className="card-header">
         <h2 className="create-board-title">Create New Pixel Board</h2>
       </div>
-      
+
       <div className="card-body">
         <Form onSubmit={handleSubmit}>
           <Input
@@ -103,6 +112,17 @@ const CreateBoardForm: React.FC<CreateBoardFormProps> = ({ onSubmit, loading }) 
             placeholder="How long will the board be active?"
           />
 
+          <TimeInput
+            label="Cooldown between pixel placements"
+            value={formData.cooldown}
+            onChange={handleCooldownChange}
+            maxTime={86400} // 24 hours in seconds
+            minTime={0}
+            placeholder="Set time between pixel placements (0 for no limit)"
+            name="cooldown"
+            id="cooldown"
+          />
+
           <div className="form-checkboxes">
             <Checkbox
               label="Allow users to redraw over existing pixels"
@@ -122,10 +142,10 @@ const CreateBoardForm: React.FC<CreateBoardFormProps> = ({ onSubmit, loading }) 
           </div>
 
           <div className="form-actions">
-            <Button 
-              type="submit" 
-              variant="primary" 
-              disabled={loading} 
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={loading}
               fullWidth
             >
               {loading ? 'Creating...' : 'Create Pixel Board'}

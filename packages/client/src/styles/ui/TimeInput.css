@@ -1,0 +1,75 @@
+.time-input-container {
+    margin-bottom: 1rem;
+}
+
+.time-input-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.time-input-fields {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.time-input-field {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.time-input-number {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    text-align: center;
+    font-size: 1rem;
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+}
+
+.time-input-number:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+}
+
+.time-input-number::-webkit-inner-spin-button,
+.time-input-number::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.time-input-label-unit {
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 480px) {
+    .time-input-fields {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .time-input-field {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 0.25rem 0;
+    }
+
+    .time-input-number {
+        width: 70%;
+    }
+
+    .time-input-label-unit {
+        margin-top: 0;
+        width: 25%;
+        text-align: right;
+    }
+}

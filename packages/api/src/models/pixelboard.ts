@@ -12,10 +12,12 @@ export interface IPixelBoard extends Document {
 	creator: string; // ID de l'utilisateur créateur
 	creatorUsername: string; // Nom d'utilisateur du créateur
 	visitor: boolean;
+	cooldown: number;
 	contributors: Array<{
 		userId: string;
 		username: string;
 		pixelsCount: number;
+		lastPixelTime?: Date;
 	}>;
 }
 
@@ -68,6 +70,10 @@ const PixelBoardSchema: Schema = new Schema({
 		type: Boolean,
 		default: false
 	},
+	cooldown: {
+		type: Number,
+		default: 0
+	},
 	contributors: [{
 		userId: {
 			type: String,
@@ -80,6 +86,10 @@ const PixelBoardSchema: Schema = new Schema({
 		pixelsCount: {
 			type: Number,
 			default: 1
+		},
+		lastPixelTime: {
+			type: Date,
+			default: Date.now
 		}
 	}]
 }, {

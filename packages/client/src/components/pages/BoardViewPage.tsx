@@ -4,7 +4,7 @@ import Layout from '../layout/Layout';
 import PixelGrid, { PixelGridRef } from '../features/PixelGrid';
 import BoardInfo from '../features/BoardInfo';
 import BoardControls from '../features/BoardControls';
-import BoardContributors from '../features/BoardContributors';
+import BoardContributors, { Contributor } from '../features/BoardContributors';
 import Alert from '../ui/Alert';
 import Loader from '../ui/Loader';
 import ExportCanvas from '../ui/ExportCanvas';
@@ -22,7 +22,7 @@ interface Pixel {
   lastModifiedDate: string;
   modifiedBy: string[];
   boardId: string;
-  modificationCount?: number;
+  modificationCount: number;
 }
 
 interface PixelBoard {
@@ -36,6 +36,8 @@ interface PixelBoard {
   creationTime: string;
   creator: string;
   creatorUsername?: string;
+  contributors: Contributor[];
+  cooldown: number;
   visitor: boolean;
   readOnly?: boolean;
 }
@@ -55,9 +57,11 @@ const BoardViewPage: React.FC = () => {
   const [showHeatmap, setShowHeatmap] = useState<boolean>(false);
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
   const pixelGridRef = useRef<PixelGridRef>(null);
+  const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
+  const [cooldownTotal, setCooldownTotal] = useState<number>(0);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-  
+
   const boardConnectionRef = useRef(false);
 
   // WebSocket setup (from main branch)
@@ -92,7 +96,7 @@ const BoardViewPage: React.FC = () => {
             return [...prev, pixelData];
           }
         });
-        
+
         // Refresh contributors when new pixel is placed via WebSocket
         setRefreshTrigger(prev => prev + 1);
       });
@@ -127,7 +131,7 @@ const BoardViewPage: React.FC = () => {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Failed to fetch pixels');
       }
-      
+
       const data = await response.json();
       setPixels(data);
     } catch (err) {
@@ -138,7 +142,7 @@ const BoardViewPage: React.FC = () => {
   // Fetch board details
   useEffect(() => {
     const fetchBoardDetails = async () => {
-      if (!id) return;
+      if (!id) return; // Remove the currentUser check
 
       setLoading(true);
       try {
@@ -149,7 +153,7 @@ const BoardViewPage: React.FC = () => {
             'Authorization': token ? `Bearer ${token}` : ''
           }
         });
-        
+
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(errorData.message || 'Failed to fetch board details');
@@ -157,6 +161,7 @@ const BoardViewPage: React.FC = () => {
 
         const data = await response.json();
         setBoard(data);
+        setCooldownTotal(data.cooldown || 0);
 
         // Fetch pixels after board is loaded
         fetchPixels(id);
@@ -170,6 +175,24 @@ const BoardViewPage: React.FC = () => {
 
     fetchBoardDetails();
   }, [id, API_URL, fetchPixels]);
+
+  useEffect(() => {
+    if (!board || !currentUser || !board.contributors) return;
+
+    const userContributor = board.contributors.find(
+      (contributor) => contributor.userId === currentUser.id
+    );
+
+    if (userContributor && userContributor.lastPixelTime) {
+      const lastPixelTime = new Date(userContributor.lastPixelTime).getTime();
+      const currentTime = Date.now();
+      const elapsedTime = Math.floor((currentTime - lastPixelTime) / 1000);
+      const remainingCooldown = Math.max(board.cooldown - elapsedTime, 0);
+
+      setCooldownRemaining(remainingCooldown);
+      console.log('Remaining cooldown:', remainingCooldown);
+    }
+  }, [board, currentUser]);
 
   // Set up polling for real-time updates as fallback (every 10 seconds)
   useEffect(() => {
@@ -198,6 +221,10 @@ const BoardViewPage: React.FC = () => {
         text: 'You do not have permission to place pixels',
         type: 'error'
       });
+      return;
+    }
+
+    if (cooldownRemaining > 0) {
       return;
     }
 
@@ -250,6 +277,8 @@ const BoardViewPage: React.FC = () => {
 
       setMessage({ text: 'Pixel placed successfully!', type: 'success' });
 
+      setCooldownRemaining(cooldownTotal);
+
       setTimeout(() => {
         setMessage(null);
       }, 3000);
@@ -262,6 +291,20 @@ const BoardViewPage: React.FC = () => {
     } finally {
       setPlacingPixel(false);
     }
+  };
+
+  useEffect(() => {
+    if (cooldownRemaining > 0) {
+      const timer = setInterval(() => {
+        setCooldownRemaining((prev) => Math.max(prev - 1, 0));
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [cooldownRemaining]);
+
+  const handleCooldownComplete = () => {
+    console.log('Cooldown complete!');
   };
 
   // Check if board is expired
@@ -280,19 +323,19 @@ const BoardViewPage: React.FC = () => {
   // Check if the user can modify the board
   const canModifyBoard = (): boolean => {
     if (!board || !currentUser) return false;
-    
+
     // Check if board is expired or closed
     if (isBoardExpired()) return false;
-    
+
     // Check if user has permission to create pixels
     if (!permissions.canCreatePixel()) return false;
-    
+
     // For visitor-restricted boards, check if visitor mode is enabled
     if (permissions.isGuest() && !board.visitor) return false;
-    
+
     // If readOnly flag is set on the board (from server), respect it
     if (board.readOnly) return false;
-    
+
     return true;
   };
 
@@ -354,12 +397,16 @@ const BoardViewPage: React.FC = () => {
             onToggleGridLines={() => setShowGridLines(!showGridLines)}
             showHeatmap={showHeatmap}
             onToggleHeatmap={toggleHeatmap}
+            cooldownRemaining={cooldownRemaining}
+            cooldownTotal={cooldownTotal}
+            onCooldownComplete={handleCooldownComplete}
             boardClosed={boardClosed}
+            visitorMode={board.visitor}
           />
 
           {/* Ajouter le composant de contributeurs */}
-          <BoardContributors 
-            boardId={board._id} 
+          <BoardContributors
+            boardId={board._id}
             refreshTrigger={refreshTrigger}
           />
 
