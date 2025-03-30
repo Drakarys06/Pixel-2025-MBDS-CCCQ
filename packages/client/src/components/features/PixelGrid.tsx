@@ -464,7 +464,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 	// Handle zoom in
 	const handleZoomIn = useCallback(() => {
 		setZoomLevel(prev => {
-			const newZoom = Math.min(prev * 1.2, 5); // Limit max zoom to 5x
+			const newZoom = Math.min(prev * 1.2, 50); // Limit max zoom to 5x
 			// Adjust pan to maintain center when zooming
 			if (canvasRef.current) {
 				const centerX = canvasRef.current.width / 2;
@@ -670,7 +670,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 			
 			// Determine zoom direction and calculate new zoom level
 			const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9; // Zoom in or out
-			const newZoomLevel = Math.min(Math.max(zoomLevel * zoomFactor, 0.5), 5); // Limit zoom between 0.5x and 5x
+			const newZoomLevel = Math.min(Math.max(zoomLevel * zoomFactor, 0.5), 50); // Limit zoom between 0.5x and 5x
 			
 			// Update zoom level
 			setZoomLevel(newZoomLevel);
