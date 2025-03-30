@@ -376,7 +376,7 @@ const BoardViewPage: React.FC = () => {
             showGridLines={showGridLines}
             onToggleGridLines={() => setShowGridLines(!showGridLines)}
             showHeatmap={showHeatmap}
-            onToggleHeatmap={handleToggleHeatmap}
+            onToggleHeatmap={toggleHeatmap}
             cooldownRemaining={cooldownRemaining}
             cooldownTotal={cooldownTotal}
             onCooldownComplete={handleCooldownComplete}

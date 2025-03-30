@@ -62,12 +62,6 @@ const BoardControls: React.FC<BoardControlsProps> = ({
         >
           {!boardClosed && (
             <div className="controls-form">
-              {currentUser && (
-                <div className="user-info">
-                  <p>Logged in as: {currentUser.username}</p>
-                </div>
-              )}
-              
               {/* Cooldown timer - only show if there is a cooldown */}
               {cooldownTotal > 0 && (
                 <CooldownTimer
