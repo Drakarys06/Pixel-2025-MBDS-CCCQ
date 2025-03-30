@@ -7,7 +7,8 @@
 		"dev": "vite",
 		"build": "vite build",
 		"lint": "eslint .",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"prod": "VITE_API_URL=http://2.15.254.45:8000 vite --host 0.0.0.0"
 	},
 	"dependencies": {
 		"axios": "^1.8.3",

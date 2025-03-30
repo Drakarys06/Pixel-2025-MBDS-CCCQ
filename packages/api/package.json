@@ -16,7 +16,8 @@
 		"start": "ts-node-dev --respawn --transpile-only src/index.ts",
 		"build": "tsc",
 		"lint": "eslint .",
-		"serve": "node dist/index.js"
+		"serve": "node dist/index.js",
+		"prod": "HOST=0.0.0.0 ts-node-dev --respawn --transpile-only src/index.ts"
 	},
 	"devDependencies": {
 		"@types/bcryptjs": "^2.4.6",
