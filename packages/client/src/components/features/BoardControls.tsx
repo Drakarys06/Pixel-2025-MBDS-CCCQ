@@ -22,6 +22,7 @@ interface BoardControlsProps {
   cooldownTotal: number;
   onCooldownComplete?: () => void;
   boardClosed?: boolean;
+  visitorMode?: boolean;
 }
 
 const BoardControls: React.FC<BoardControlsProps> = ({
@@ -36,7 +37,8 @@ const BoardControls: React.FC<BoardControlsProps> = ({
   cooldownRemaining,
   cooldownTotal,
   onCooldownComplete,
-  boardClosed = false
+  boardClosed = false,
+  visitorMode = false,
 }) => {
   const { isGuestMode } = useAuth();
 
@@ -48,7 +50,7 @@ const BoardControls: React.FC<BoardControlsProps> = ({
 
       <div className="card-body">
         {/* Explicit check for guest users */}
-        {isGuestMode ? (
+        {isGuestMode && !visitorMode ? (
           <div className="permission-notice">
             Guest users cannot place pixels on this board.
           </div>
@@ -77,7 +79,7 @@ const BoardControls: React.FC<BoardControlsProps> = ({
                 <ColorPicker
                   value={selectedColor}
                   onChange={onColorChange}
-                  disabled={disabled || showHeatmap} // Disable color picker when heatmap is active
+                  disabled={disabled || showHeatmap}
                 />
 
                 <div className="controls-instructions">

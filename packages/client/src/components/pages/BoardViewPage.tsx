@@ -381,6 +381,7 @@ const BoardViewPage: React.FC = () => {
             cooldownTotal={cooldownTotal}
             onCooldownComplete={handleCooldownComplete}
             boardClosed={boardClosed}
+            visitorMode={board.visitor}
           />
 
           {/* Ajouter le composant de contributeurs */}
