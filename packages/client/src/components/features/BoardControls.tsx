@@ -1,9 +1,10 @@
+// packages/client/src/components/features/BoardControls.tsx - Version complète
 import React from 'react';
 import Card from '../ui/Card';
 import Alert from '../ui/Alert';
 import Button from '../ui/Button';
 import CooldownTimer from '../ui/CooldownTimer';
-import EnhancedColorPicker from '../ui/EnhancedColorPicker'; // Importez le nouveau composant
+import EnhancedColorPicker from '../ui/EnhancedColorPicker';
 import { useAuth } from '../auth/AuthContext';
 import PermissionGate from '../auth/PermissionGate';
 import { PERMISSIONS } from '../auth/permissions';
@@ -23,6 +24,8 @@ interface BoardControlsProps {
 	onCooldownComplete?: () => void;
 	boardClosed?: boolean;
 	visitorMode?: boolean;
+	showTimelapse?: boolean; // New prop for timelapse state
+	onToggleTimelapse?: () => void; // New callback for timelapse toggle
 }
 
 const BoardControls: React.FC<BoardControlsProps> = ({
@@ -39,6 +42,8 @@ const BoardControls: React.FC<BoardControlsProps> = ({
 														 onCooldownComplete,
 														 boardClosed = false,
 														 visitorMode = false,
+														 showTimelapse = false,
+														 onToggleTimelapse = () => { },
 													 }) => {
 	const { isGuestMode } = useAuth();
 
@@ -65,7 +70,7 @@ const BoardControls: React.FC<BoardControlsProps> = ({
 							</div>
 						}
 					>
-						{!boardClosed && (
+						{!boardClosed && !showTimelapse && (
 							<div className="controls-form">
 								{/* Cooldown timer - only show if there is a cooldown */}
 								{cooldownTotal > 0 && (
@@ -89,22 +94,38 @@ const BoardControls: React.FC<BoardControlsProps> = ({
 
 				{/* View Options section */}
 				<div className="view-options-section">
-					{/* Heatmap toggle button */}
-					{onToggleHeatmap && (
-						<div className="heatmap-toggle-container">
-							<Button
-								variant={showHeatmap ? "primary" : "secondary"}
-								onClick={onToggleHeatmap}
-								className={`heatmap-toggle-button ${showHeatmap ? 'active' : ''}`}
-								fullWidth
-							>
-								{showHeatmap ? 'Exit Heatmap Mode' : 'Show Heatmap View'}
-							</Button>
-							{showHeatmap && (
-								<div className="heatmap-active-indicator">
-									Heatmap mode active - Showing frequency of modifications
-								</div>
-							)}
+					<div className="view-toggle-buttons">
+						{/* Timelapse toggle button */}
+						<Button
+							variant={showTimelapse ? "primary" : "secondary"}
+							onClick={onToggleTimelapse}
+							className={`view-toggle-button ${showTimelapse ? 'active' : ''}`}
+							fullWidth
+						>
+							{showTimelapse ? 'Exit Timelapse Mode' : 'Show Timelapse'}
+						</Button>
+
+						{/* Heatmap toggle button */}
+						<Button
+							variant={showHeatmap ? "primary" : "secondary"}
+							onClick={onToggleHeatmap}
+							className={`view-toggle-button ${showHeatmap ? 'active' : ''}`}
+							fullWidth
+							disabled={showTimelapse}
+						>
+							{showHeatmap ? 'Exit Heatmap Mode' : 'Show Heatmap View'}
+						</Button>
+					</div>
+
+					{showTimelapse && (
+						<div className="mode-active-indicator">
+							Timelapse mode active - Watch the board evolution
+						</div>
+					)}
+
+					{showHeatmap && (
+						<div className="mode-active-indicator">
+							Heatmap mode active - Showing frequency of modifications
 						</div>
 					)}
 
