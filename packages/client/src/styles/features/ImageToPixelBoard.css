@@ -1,0 +1,258 @@
+.image-converter-container {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	width: 100%;
+}
+
+@media (min-width: 992px) {
+	.image-converter-container {
+		flex-direction: row;
+	}
+
+	.upload-card {
+		flex: 1;
+	}
+
+	.result-card {
+		flex: 1;
+	}
+}
+
+.file-drop-area {
+	border: 2px dashed var(--border-color);
+	border-radius: 8px;
+	padding: 20px;
+	text-align: center;
+	margin-bottom: 20px;
+	transition: all 0.3s;
+	position: relative;
+	cursor: pointer;
+}
+
+.file-drop-area:hover {
+	border-color: var(--accent-color);
+	background-color: rgba(66, 133, 244, 0.05);
+}
+
+.file-drop-area.has-file {
+	border-color: var(--accent-color);
+	background-color: rgba(66, 133, 244, 0.05);
+}
+
+.file-input {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	opacity: 0;
+	cursor: pointer;
+}
+
+.file-label {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	font-weight: 500;
+	color: var(--text-secondary);
+	padding: 30px 0;
+	cursor: pointer;
+	gap: 10px;
+}
+
+.upload-icon {
+	font-size: 2.5rem;
+	margin-bottom: 10px;
+	opacity: 0.7;
+}
+
+.selected-file-name {
+	font-weight: bold;
+	color: var(--accent-color);
+	margin-bottom: 5px;
+}
+
+.change-file-prompt {
+	font-size: 0.9rem;
+	opacity: 0.8;
+}
+
+.image-preview-container {
+	margin-bottom: 20px;
+	text-align: center;
+}
+
+.image-preview-container h4 {
+	margin-bottom: 10px;
+	color: var(--text-primary);
+}
+
+.image-preview {
+	max-width: 100%;
+	max-height: 300px;
+	border-radius: 8px;
+	box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.image-info {
+	margin-top: 8px;
+	font-size: 0.9rem;
+	color: var(--text-secondary);
+}
+
+.pixelate-controls {
+	margin-top: 20px;
+}
+
+.control-group {
+	margin-bottom: 15px;
+}
+
+.control-group label {
+	display: block;
+	margin-bottom: 8px;
+	font-weight: 500;
+}
+
+.slider-container {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.size-slider {
+	flex: 1;
+	height: 5px;
+	-webkit-appearance: none;
+	appearance: none;
+	border-radius: 5px;
+	background: var(--border-color);
+	outline: none;
+}
+
+.size-slider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: var(--accent-color);
+	cursor: pointer;
+	transition: all 0.2s;
+}
+
+.size-slider::-webkit-slider-thumb:hover {
+	transform: scale(1.2);
+}
+
+.size-slider::-moz-range-thumb {
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: var(--accent-color);
+	cursor: pointer;
+	transition: all 0.2s;
+	border: none;
+}
+
+.size-slider::-moz-range-thumb:hover {
+	transform: scale(1.2);
+}
+
+.size-input {
+	width: 60px;
+	padding: 5px 8px;
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	font-size: 14px;
+	background-color: var(--input-bg);
+	color: var(--text-primary);
+	text-align: center;
+}
+
+.size-help {
+	display: block;
+	font-size: 0.8rem;
+	color: var(--text-secondary);
+	margin-top: 5px;
+}
+
+.process-button {
+	width: 100%;
+	margin-top: 10px;
+}
+
+.process-description {
+	margin-top: 8px;
+	font-size: 0.85rem;
+	color: var(--text-secondary);
+	text-align: center;
+	font-style: italic;
+}
+
+.pixelated-preview-container {
+	text-align: center;
+	margin-bottom: 20px;
+}
+
+.pixelated-preview-container h4 {
+	margin-bottom: 10px;
+	color: var(--text-primary);
+}
+
+.pixelated-preview {
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	image-rendering: pixelated;
+	image-rendering: crisp-edges;
+	box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.create-board-form {
+	margin-top: 20px;
+}
+
+.form-section-title {
+	margin-bottom: 15px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--border-color);
+	color: var(--text-primary);
+	font-size: 1.1rem;
+}
+
+.board-options {
+	margin: 15px 0;
+}
+
+.create-board-button {
+	width: 100%;
+	margin-top: 20px;
+}
+
+.no-data-message {
+	padding: 40px 20px;
+	text-align: center;
+	color: var(--text-secondary);
+	font-style: italic;
+	background-color: var(--bg-tertiary);
+	border-radius: 8px;
+}
+
+.hidden-canvas-container {
+	position: absolute;
+	left: -9999px;
+	top: -9999px;
+}
+
+/* Add a little animation for the progress indication */
+@keyframes pulse {
+	0% { opacity: 0.6; }
+	50% { opacity: 1; }
+	100% { opacity: 0.6; }
+}
+
+.create-board-button:disabled {
+	animation: pulse 1.5s infinite ease-in-out;
+}
