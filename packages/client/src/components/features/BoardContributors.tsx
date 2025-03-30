@@ -3,10 +3,11 @@ import Card from '../ui/Card';
 import Loader from '../ui/Loader';
 import '../../styles/features/BoardContributors.css';
 
-interface Contributor {
+export interface Contributor {
 	userId: string;
 	username: string;
 	pixelsCount: number;
+	lastPixelTime: Date;
 }
 
 interface BoardContributorsProps {
