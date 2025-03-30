@@ -1,4 +1,4 @@
-// packages/client/src/components/features/BoardTimelapse.tsx - Version améliorée avec historique
+// packages/client/src/components/features/BoardTimelapse.tsx
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Button from '../ui/Button';
 import Loader from '../ui/Loader';
@@ -76,7 +76,8 @@ const BoardTimelapse: React.FC<BoardTimelapseProps> = ({ width, height, boardId 
 		fetchPixelHistory();
 	}, [boardId, API_URL]);
 
-	// Prepare the timelapse frames by grouping history entries
+	// Prepare the timelapse frames based on fixed number of pixels per frame
+	// rather than time intervals
 	useEffect(() => {
 		if (pixelHistory.length === 0) return;
 
@@ -85,18 +86,22 @@ const BoardTimelapse: React.FC<BoardTimelapseProps> = ({ width, height, boardId 
 			new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
 		);
 
-		// Group history into frames - each frame represents the board state at a specific time
-		// For simplicity, we'll create frames at regular intervals
-		const frameCount = Math.min(100, sortedHistory.length); // Limit to 100 frames maximum
+		// Create frames based on fixed number of pixels per frame
 		const historyLength = sortedHistory.length;
 
-		const frames: PixelHistoryEntry[][] = [];
-		const pixelsPerFrame = Math.ceil(historyLength / frameCount);
+		// Determine how many pixels to show per frame
+		// We want to aim for approximately 100 frames total
+		const targetFrameCount = Math.min(100, historyLength);
+		const pixelsPerFrame = Math.max(1, Math.ceil(historyLength / targetFrameCount));
 
-		// Build cumulative frames (each frame includes all preceding entries)
-		for (let i = 0; i < frameCount; i++) {
-			const frameEndIndex = Math.min((i + 1) * pixelsPerFrame, historyLength);
-			frames.push(sortedHistory.slice(0, frameEndIndex));
+		// Build cumulative frames
+		const frames: PixelHistoryEntry[][] = [];
+
+		for (let i = 0; i < historyLength; i += pixelsPerFrame) {
+			// Create a frame with all pixels up to this point
+			// This ensures each frame builds upon the previous
+			const endIndex = Math.min(i + pixelsPerFrame, historyLength);
+			frames.push(sortedHistory.slice(0, endIndex));
 		}
 
 		setTimelineFrames(frames);
@@ -213,12 +218,27 @@ const BoardTimelapse: React.FC<BoardTimelapseProps> = ({ width, height, boardId 
 			const container = canvasRef.current.parentElement;
 			if (!container) return;
 
-			const containerWidth = container.clientWidth;
+			// Calculate the optimal canvas size based on container and board dimensions
+			const containerWidth = container.clientWidth - 30; // Accounting for padding
+			const containerHeight = container.clientHeight - 30;
 			const aspectRatio = width / height;
 
-			// Set canvas size maintaining aspect ratio
-			canvasRef.current.width = containerWidth;
-			canvasRef.current.height = containerWidth / aspectRatio;
+			// Calculate dimensions that fit within the container
+			let canvasWidth, canvasHeight;
+
+			if (containerWidth / containerHeight > aspectRatio) {
+				// Container is wider than needed, constrain by height
+				canvasHeight = containerHeight;
+				canvasWidth = canvasHeight * aspectRatio;
+			} else {
+				// Container is taller than needed, constrain by width
+				canvasWidth = containerWidth;
+				canvasHeight = canvasWidth / aspectRatio;
+			}
+
+			// Set canvas size
+			canvasRef.current.width = canvasWidth;
+			canvasRef.current.height = canvasHeight;
 
 			renderFrame();
 		};
@@ -258,18 +278,41 @@ const BoardTimelapse: React.FC<BoardTimelapseProps> = ({ width, height, boardId 
 		setCurrentFrame(frameIndex);
 	};
 
-	// Format time for display
-	const formatTimestamp = (index: number): string => {
-		if (timelineFrames.length === 0 || index >= timelineFrames.length) return '00:00';
+	// Format frame number for display
+	const formatFrameNumber = (index: number): string => {
+		if (timelineFrames.length === 0 || index >= timelineFrames.length) return '0';
 
-		const historyEntries = timelineFrames[index];
-		if (historyEntries.length === 0) return '00:00';
+		// Return the frame number (1-based for display)
+		return `Frame ${index + 1}`;
+	};
 
-		// Get timestamp of the most recent entry in this frame
-		const lastEntry = historyEntries[historyEntries.length - 1];
-		const date = new Date(lastEntry.timestamp);
+	// Get the pixel count for the current frame
+	const getCurrentFramePixelCount = (): number => {
+		if (timelineFrames.length === 0 || currentFrame >= timelineFrames.length) return 0;
 
-		return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+		const currentFrameEntries = timelineFrames[currentFrame];
+		const uniquePositions = new Set<string>();
+
+		// Count unique pixel positions rather than total actions
+		currentFrameEntries.forEach(entry => {
+			uniquePositions.add(`${entry.x},${entry.y}`);
+		});
+
+		return uniquePositions.size;
+	};
+
+	// Calculate total unique pixels from the entire history (not just the current frame)
+	const getTotalUniquePixels = (): number => {
+		if (pixelHistory.length === 0) return 0;
+
+		const uniquePositions = new Set<string>();
+
+		// Count unique positions across the entire history
+		pixelHistory.forEach(entry => {
+			uniquePositions.add(`${entry.x},${entry.y}`);
+		});
+
+		return uniquePositions.size;
 	};
 
 	if (loading) {
@@ -298,6 +341,9 @@ const BoardTimelapse: React.FC<BoardTimelapseProps> = ({ width, height, boardId 
 		);
 	}
 
+	// Calculate total unique pixels across all history once
+	const totalUniquePixels = getTotalUniquePixels();
+
 	return (
 		<div className="timelapse-container">
 			<div className="timelapse-header">
@@ -305,8 +351,8 @@ const BoardTimelapse: React.FC<BoardTimelapseProps> = ({ width, height, boardId 
 				<div className="timelapse-info">
 					{timelineFrames.length > 0 ? (
 						<span>
-              {currentFrame + 1} of {timelineFrames.length} frames | {timelineFrames[currentFrame]?.length || 0} pixels
-            </span>
+							Frame {currentFrame + 1} of {timelineFrames.length} | {getCurrentFramePixelCount()} of {totalUniquePixels} pixels
+						</span>
 					) : (
 						<span>No timelapse data available</span>
 					)}
@@ -324,7 +370,7 @@ const BoardTimelapse: React.FC<BoardTimelapseProps> = ({ width, height, boardId 
 
 			<div className="timelapse-controls">
 				<div className="timelapse-timeline">
-					<span className="timeline-timestamp">{formatTimestamp(0)}</span>
+					<span className="timeline-timestamp">{formatFrameNumber(0)}</span>
 					<input
 						type="range"
 						min="0"
@@ -334,7 +380,7 @@ const BoardTimelapse: React.FC<BoardTimelapseProps> = ({ width, height, boardId 
 						className="timeline-slider"
 						disabled={timelineFrames.length <= 1}
 					/>
-					<span className="timeline-timestamp">{formatTimestamp(timelineFrames.length - 1)}</span>
+					<span className="timeline-timestamp">{formatFrameNumber(timelineFrames.length - 1)}</span>
 				</div>
 
 				<div className="timelapse-buttons">
@@ -376,9 +422,11 @@ const BoardTimelapse: React.FC<BoardTimelapseProps> = ({ width, height, boardId 
 				</div>
 
 				<div className="frame-info">
-          <span>
-            Showing pixel history from {pixelHistory.length > 0 ? new Date(pixelHistory[0].timestamp).toLocaleDateString() : 'N/A'} to {pixelHistory.length > 0 ? new Date(pixelHistory[pixelHistory.length - 1].timestamp).toLocaleDateString() : 'N/A'}
-          </span>
+					<span>
+						Showing evolution of {pixelHistory.length} pixel placements from
+						{pixelHistory.length > 0 ? ` ${new Date(pixelHistory[0].timestamp).toLocaleDateString()}` : ' N/A'} to
+						{pixelHistory.length > 0 ? ` ${new Date(pixelHistory[pixelHistory.length - 1].timestamp).toLocaleDateString()}` : ' N/A'}
+					</span>
 				</div>
 			</div>
 		</div>
