@@ -21,7 +21,10 @@
 	"scripts": {
 		"start:client": "npm run dev --workspace=client",
 		"start:api": "npm run start --workspace=api",
-		"all": "npm install && concurrently \"npm run start:api\" \"npm run start:client\""
+		"prod:client": "npm run prod --workspace=client",
+		"prod:api": "npm run prod --workspace=api",
+		"all": "npm install && concurrently \"npm run start:api\" \"npm run start:client\"",
+		"prod": "npm install && concurrently \"npm run prod:api\" \"npm run prod:client\""
 	},
 	"engines": {
 		"node": ">=18.0.0"
