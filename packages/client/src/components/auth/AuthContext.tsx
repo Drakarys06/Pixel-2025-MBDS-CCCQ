@@ -152,7 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           result.userId,
           result.username,
           ['guest'],
-          ['board:view', 'pixel:view']
+          ['board:view', 'pixel:view','pixel:create']
         );
       } else {
         throw new Error('Échec de la connexion visiteur');
