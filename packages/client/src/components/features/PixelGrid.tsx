@@ -41,6 +41,7 @@ interface TooltipState {
 	width: number;
 	height: number;
 }
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 	width,
@@ -273,7 +274,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 							ctx.moveTo(x * cellSize, y * cellSize);
 							ctx.lineTo((x + 1) * cellSize, (y + 1) * cellSize);
 							ctx.stroke();
-				
+
 							ctx.beginPath();
 							ctx.moveTo((x + 1) * cellSize, y * cellSize);
 							ctx.lineTo(x * cellSize, (y + 1) * cellSize);
@@ -387,6 +388,8 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 	}, [getPixelCoordinates, editable, loading, onPixelClick, showHeatmap, canCreatePixel]);
 
 	// Handle mouse movement for tooltip
+	// Inside PixelGrid.tsx, modify the handleCanvasMouseMove function:
+
 	const handleCanvasMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
 		if (!canvasRef.current) return;
 
@@ -412,34 +415,91 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 			return `${day}/${month}/${year} ${hours}:${minutes}`;
 		};
 
-		let tooltipContent = `(${pixel.x}, ${pixel.y})`;
+		// Fetch the board to get contributor information
+		const fetchContributors = async () => {
+			try {
+				const token = localStorage.getItem('token');
+				const response = await fetch(`${API_URL}/api/pixels/board/${pixel.boardId}/contributors`, {
+					headers: {
+						'Authorization': token ? `Bearer ${token}` : ''
+					}
+				});
 
-		// En mode heatmap, montrer les statistiques en premier
-		if (showHeatmap) {
-			tooltipContent += `\nModifications: ${pixel.modificationCount || 1}`;
-			tooltipContent += `\nUtilisateurs uniques: ${new Set(pixel.modifiedBy).size}`;
-			tooltipContent += `\nCouleur actuelle: ${pixel.color}`;
-			tooltipContent += `\nDernière modification: ${formatDate(pixel.lastModifiedDate)}`;
-		} else {
-			// En mode normal, priorité à la couleur et aux informations standard
-			tooltipContent += `\nCouleur: ${pixel.color}`;
-			tooltipContent += `\n${formatDate(pixel.lastModifiedDate)}`;
-			// Compter le nombre d'utilisateurs uniques
-			const uniqueUsers = new Set(pixel.modifiedBy);
-			tooltipContent += `\nPar: ${Array.from(uniqueUsers).join(', ')}`;
-		}
+				if (response.ok) {
+					const contributors = await response.json();
 
+					// Create a map of userIds to usernames
+					const userMap = contributors.reduce((map, contributor) => {
+						map[contributor.userId] = contributor.username;
+						return map;
+					}, {});
+
+					// Format tooltip content with usernames
+					let tooltipContent = `(${pixel.x}, ${pixel.y})`;
+
+					// In heatmap mode, show statistics first
+					if (showHeatmap) {
+						tooltipContent += `\nModifications: ${pixel.modificationCount || 1}`;
+						tooltipContent += `\nUnique users: ${new Set(pixel.modifiedBy).size}`;
+						tooltipContent += `\nCurrent color: ${pixel.color}`;
+						tooltipContent += `\nLast modified: ${formatDate(pixel.lastModifiedDate)}`;
+					} else {
+						// In normal mode, prioritize color and standard information
+						tooltipContent += `\nColor: ${pixel.color}`;
+						tooltipContent += `\n${formatDate(pixel.lastModifiedDate)}`;
+
+						// Format contributors with usernames instead of IDs
+						const usernames = pixel.modifiedBy.map(userId => {
+							return userMap[userId] || userId; // Fallback to ID if username not found
+						});
+						const uniqueUsernames = [...new Set(usernames)];
+						tooltipContent += `\nBy: ${uniqueUsernames.join(', ')}`;
+					}
+
+					setTooltip({
+						visible: true,
+						x: e.clientX,
+						y: e.clientY,
+						content: tooltipContent,
+						width: 0,
+						height: 0
+					});
+				}
+			} catch (error) {
+				console.error('Error fetching contributors for tooltip:', error);
+
+				// Fallback to IDs if we can't fetch usernames
+				let tooltipContent = `(${pixel.x}, ${pixel.y})`;
+				tooltipContent += `\nColor: ${pixel.color}`;
+				tooltipContent += `\n${formatDate(pixel.lastModifiedDate)}`;
+				tooltipContent += `\nBy: ${Array.from(new Set(pixel.modifiedBy)).join(', ')}`;
+
+				setTooltip({
+					visible: true,
+					x: e.clientX,
+					y: e.clientY,
+					content: tooltipContent,
+					width: 0,
+					height: 0
+				});
+			}
+		};
+
+		// Show a simple tooltip immediately while the full one loads
+		setTooltip({
+			visible: true,
+			x: e.clientX,
+			y: e.clientY,
+			content: `(${pixel.x}, ${pixel.y})\nLoading details...`,
+			width: 0,
+			height: 0
+		});
+
+		// Clear any existing timeout and set a new one
 		tooltipTimeoutRef.current = window.setTimeout(() => {
-			setTooltip({
-				visible: true,
-				x: e.clientX,
-				y: e.clientY,
-				content: tooltipContent,
-				width: 0,
-				height: 0
-			});
-		}, 300);
-	}, [getPixelCoordinates, pixels, clearTooltipTimeout, showHeatmap]);
+			fetchContributors();
+		}, 100);
+	}, [getPixelCoordinates, pixels, clearTooltipTimeout, showHeatmap, API_URL]);
 
 	// Handle mouse leaving the canvas
 	const handleCanvasMouseLeave = useCallback(() => {

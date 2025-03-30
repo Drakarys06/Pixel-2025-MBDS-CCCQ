@@ -1,3 +1,4 @@
+/* packages/client/src/styles/pages/HomePage.css */
 .home-container {
 	display: flex;
 	flex-direction: column;
@@ -113,7 +114,7 @@
 
 .boards-grid {
 	display: grid;
-	grid-template-columns: repeat(1, 1fr);
+	grid-template-columns: repeat(4, 1fr);
 	gap: 15px;
 	position: relative;
 }
@@ -146,23 +147,17 @@
 	text-align: center;
 	color: var(--text-secondary);
 	border-radius: 8px;
+	grid-column: 1 / -1;
 }
 
 /* Medium screens */
-@media (min-width: 768px) {
+@media (max-width: 1024px) {
 	.boards-grid {
-		grid-template-columns: repeat(3, 1fr);
+		grid-template-columns: repeat(2, 1fr);
 	}
 }
 
-/* Larger screens */
-@media (min-width: 1200px) {
-	.boards-grid {
-		grid-template-columns: repeat(4, 1fr);
-	}
-}
-
-/* Mobile adjustments */
+/* Smaller screens */
 @media (max-width: 767px) {
 	.home-container {
 		gap: 15px;
@@ -190,5 +185,9 @@
 
 	.home-boards-container {
 		gap: 20px;
+	}
+
+	.boards-grid {
+		grid-template-columns: repeat(1, 1fr);
 	}
 }

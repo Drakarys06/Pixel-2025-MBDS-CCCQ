@@ -1,3 +1,4 @@
+// packages/api/src/routes/stats.ts
 import express from 'express';
 import { Request, Response } from 'express';
 import User from '../models/User';
@@ -14,49 +15,103 @@ router.get('/home', async (_req: Request, res: Response) => {
 		// Get board count
 		const boardCount = await PixelBoard.countDocuments();
 
-		// Get recent active boards (not closed, sorted by creation date)
+		// Get current time for comparison
 		const now = new Date();
-		const activeBoards = await PixelBoard.find({
-			closeTime: null,
-			$expr: {
-				$gt: [
-					{ $add: [{ $toDate: "$creationTime" }, { $multiply: ["$time", 60000] }] },
-					now
-				]
-			}
-		})
-			.sort({ creationTime: -1 })
-			.limit(3);
 
-		// Get recent completed boards (closed or expired, sorted by closing date)
+		// Pour obtenir les tableaux avec le moins de temps restant, nous devons utiliser l'agrégation
+		const activeBoards = await PixelBoard.aggregate([
+			{
+				$match: {
+					closeTime: null,
+					$expr: {
+						$gt: [
+							{ $add: [{ $toDate: "$creationTime" }, { $multiply: ["$time", 60000] }] },
+							now
+						]
+					}
+				}
+			},
+			{
+				$addFields: {
+					endTime: { $add: [{ $toDate: "$creationTime" }, { $multiply: ["$time", 60000] }] },
+					timeRemaining: {
+						$subtract: [
+							{ $add: [{ $toDate: "$creationTime" }, { $multiply: ["$time", 60000] }] },
+							now
+						]
+					}
+				}
+			},
+			{
+				$sort: { timeRemaining: 1 } // Tri par temps restant (du plus court au plus long)
+			},
+			{
+				$limit: 4
+			}
+		]);
+
+		// Get recently closed boards (with explicit closeTime, newest closures first)
 		const completedBoardsWithCloseTime = await PixelBoard.find({
 			closeTime: { $ne: null }
 		})
-			.sort({ closeTime: -1 })
-			.limit(3);
+			.sort({ closeTime: -1 }) // Tri par date de fermeture (les plus récents d'abord)
+			.limit(4);
 
-		// Also get boards that have expired naturally without being explicitly closed
-		const expiredBoards = await PixelBoard.find({
-			closeTime: null,
-			$expr: {
-				$lte: [
-					{ $add: [{ $toDate: "$creationTime" }, { $multiply: ["$time", 60000] }] },
-					now
-				]
+		// Get boards that have expired naturally without being explicitly closed
+		// Using aggregation to sort them by most recently expired
+		const expiredBoards = await PixelBoard.aggregate([
+			{
+				$match: {
+					closeTime: null,
+					$expr: {
+						$lte: [
+							{ $add: [{ $toDate: "$creationTime" }, { $multiply: ["$time", 60000] }] },
+							now
+						]
+					}
+				}
+			},
+			{
+				$addFields: {
+					expiryTime: { $add: [{ $toDate: "$creationTime" }, { $multiply: ["$time", 60000] }] }
+				}
+			},
+			{
+				$sort: { expiryTime: -1 } // Tri par date d'expiration (les plus récents d'abord)
+			},
+			{
+				$limit: 4
 			}
-		})
-			.sort({ creationTime: -1 })
-			.limit(3);
+		]);
 
-		// Combine, sort and limit to 3 boards
-		const allCompletedBoards = [...completedBoardsWithCloseTime, ...expiredBoards];
-		const completedBoards = allCompletedBoards
+		// Combine both types of completed boards
+		let completedBoardsWithConvertedDates = [];
+
+		// Convertir les tableaux avec closeTime explicite en format standard
+		const formattedClosedBoards = completedBoardsWithCloseTime.map(board => {
+			// Convertir le document Mongoose en objet standard
+			const boardObj = board.toObject ? board.toObject() : board;
+			return {
+				...boardObj,
+				// Utiliser closeTime comme date d'expiration
+				expiryDate: boardObj.closeTime
+			};
+		});
+
+		// Combiner les deux types de tableaux
+		completedBoardsWithConvertedDates = [
+			...formattedClosedBoards,
+			...expiredBoards
+		];
+
+		// Trier tous les tableaux par date d'expiration décroissante (les plus récents d'abord)
+		const completedBoards = completedBoardsWithConvertedDates
 			.sort((a, b) => {
-				const aDate = a.closeTime ? new Date(a.closeTime) : new Date(new Date(a.creationTime).getTime() + a.time * 60000);
-				const bDate = b.closeTime ? new Date(b.closeTime) : new Date(new Date(b.creationTime).getTime() + b.time * 60000);
+				const aDate = new Date(a.expiryTime || a.expiryDate);
+				const bDate = new Date(b.expiryTime || b.expiryDate);
 				return bDate.getTime() - aDate.getTime();
 			})
-			.slice(0, 3);
+			.slice(0, 4); // Limiter à 4 tableaux
 
 		res.json({
 			userCount,

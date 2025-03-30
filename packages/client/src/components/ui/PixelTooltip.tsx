@@ -9,15 +9,15 @@ interface PixelTooltipProps {
   onSizeChange?: (width: number, height: number) => void;
 }
 
-const PixelTooltip: React.FC<PixelTooltipProps> = ({ 
-  visible, 
-  content, 
-  x, 
+const PixelTooltip: React.FC<PixelTooltipProps> = ({
+  visible,
+  content,
+  x,
   y,
-  onSizeChange 
+  onSizeChange
 }) => {
   const tooltipRef = useRef<HTMLDivElement>(null);
-  
+
   useEffect(() => {
     if (visible && tooltipRef.current && onSizeChange) {
       const { offsetWidth, offsetHeight } = tooltipRef.current;
@@ -31,18 +31,18 @@ const PixelTooltip: React.FC<PixelTooltipProps> = ({
     const offset = 10;
     const tooltipWidth = tooltipRef.current?.offsetWidth || 200;
     const tooltipHeight = tooltipRef.current?.offsetHeight || 100;
-    
+
     let posX = x - offset;
     let posY = y + offset;
-    
+
     if (posX + tooltipWidth > window.innerWidth) {
       posX = x - tooltipWidth - offset;
     }
-    
+
     if (posY + tooltipHeight > window.innerHeight) {
       posY = y - tooltipHeight - offset;
     }
-    
+
     return { left: posX + 'px', top: posY + 'px' };
   };
 
