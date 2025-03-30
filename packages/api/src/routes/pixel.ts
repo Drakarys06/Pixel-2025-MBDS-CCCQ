@@ -12,7 +12,7 @@ const router = express.Router();
 router.get('/', optionalAuth, async (req: Request, res: Response) => {
   try {
     const boardId = req.query.boardId as string;
-    
+
     // Si on filtre par boardId, vérifier si le tableau autorise les visiteurs
     if (boardId) {
       const pixelBoard = await pixelBoardService.getPixelBoardById(boardId);
@@ -28,7 +28,7 @@ router.get('/', optionalAuth, async (req: Request, res: Response) => {
         });
       }
     }
-    
+
     // Tous les utilisateurs peuvent voir les pixels, même en mode lecture seule
     const pixels = await pixelService.getAllPixels(boardId);
     res.json(pixels);
@@ -48,7 +48,7 @@ router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
     if (!pixel) {
       return res.status(404).json({ message: 'Pixel not found' });
     }
-    
+
     res.json(pixel);
   } catch (error) {
     if (error instanceof Error) {
@@ -60,8 +60,8 @@ router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
 });
 
 // Place a pixel (create or update) at specific coordinates on a board (requires authentication)
-router.post('/board/:boardId/place', 
-  auth, 
+router.post('/board/:boardId/place',
+  auth,
   // Nous avons supprimé la vérification de permission ici pour la gérer à l'intérieur de la route
   // hasPermission(PERMISSIONS.PIXEL_CREATE),
   async (req: Request, res: Response) => {
@@ -80,12 +80,12 @@ router.post('/board/:boardId/place',
       if (!pixelBoard) {
         return res.status(404).json({ message: 'PixelBoard not found' });
       }
-      
+
       // Vérifier si le tableau est fermé
       if (pixelBoard.closeTime && new Date() > new Date(pixelBoard.closeTime)) {
         return res.status(403).json({ message: 'This board is closed and no longer accepts modifications' });
       }
-      
+
       // D'abord vérifier si c'est un invité et si le tableau autorise les invités
       if (req.isGuest) {
         if (!pixelBoard.visitor) {
@@ -95,9 +95,9 @@ router.post('/board/:boardId/place',
         // Pour les utilisateurs non invités, vérifier la permission normalement
         const hasPermission = await req.user.hasPermission(PERMISSIONS.PIXEL_CREATE);
         if (!hasPermission) {
-          return res.status(403).json({ 
-            success: false, 
-            message: 'Forbidden: Insufficient permissions to place pixels' 
+          return res.status(403).json({
+            success: false,
+            message: 'Forbidden: Insufficient permissions to place pixels'
           });
         }
       }
@@ -106,7 +106,7 @@ router.post('/board/:boardId/place',
       if (x < 0 || x >= pixelBoard.width || y < 0 || y >= pixelBoard.length) {
         return res.status(400).json({ message: 'Position is outside the board boundaries' });
       }
-      
+
       // Check for cooldown if it exists
       if (pixelBoard.cooldown > 0) {
         const contributor = pixelBoard.contributors.find(c => c.userId === userId);
@@ -127,10 +127,10 @@ router.post('/board/:boardId/place',
 
       // Placer le pixel
       const pixel = await pixelService.placePixel(
-        boardId, 
-        parseInt(x as unknown as string), 
-        parseInt(y as unknown as string), 
-        color, 
+        boardId,
+        parseInt(x as unknown as string),
+        parseInt(y as unknown as string),
+        color,
         userId
       );
 
@@ -162,7 +162,7 @@ router.post('/board/:boardId/place',
         if (!pixelBoard.contributors) {
           pixelBoard.contributors = [];
         }
-        
+
         // Ajouter un nouveau contributeur s'il n'existe pas encore
         pixelBoard.contributors.push({
           userId,
@@ -174,13 +174,13 @@ router.post('/board/:boardId/place',
 
       // Sauvegarder les modifications du tableau
       await pixelBoard.save();
-      
+
       // Incrémenter le compteur de pixels placés pour les utilisateurs authentifiés (non-invités)
       if (!req.isGuest && req.user.pixelsPlaced !== undefined) {
         req.user.pixelsPlaced += 1;
         await req.user.save();
       }
-      
+
       res.status(201).json(pixel);
     } catch (error) {
       if (error instanceof Error) {
@@ -192,8 +192,8 @@ router.post('/board/:boardId/place',
 });
 
 // Delete a pixel (requires authentication and permission)
-router.delete('/:id', 
-  auth, 
+router.delete('/:id',
+  auth,
   hasPermission(PERMISSIONS.PIXEL_DELETE),
   async (req: Request, res: Response) => {
     try {
@@ -201,22 +201,22 @@ router.delete('/:id',
       if (!pixel) {
         return res.status(404).json({ message: 'Pixel not found' });
       }
-      
+
       // Vérifier si l'utilisateur a les droits de modification
       const pixelBoard = await pixelBoardService.getPixelBoardById(pixel.boardId.toString());
       if (!pixelBoard) {
         return res.status(404).json({ message: 'PixelBoard not found' });
       }
-      
+
       // Seul le créateur du tableau ou les modificateurs du pixel peuvent le supprimer
       const isCreator = pixelBoard.creator.toString() === req.user._id.toString();
       const isModifier = pixel.modifiedBy.includes(req.user._id.toString());
       const hasDeletePermission = await req.user.hasPermission(PERMISSIONS.PIXEL_DELETE);
-      
+
       if (!isCreator && !isModifier && !hasDeletePermission) {
         return res.status(403).json({ message: 'You do not have permission to delete this pixel' });
       }
-      
+
       const deletedPixel = await pixelService.deletePixel(req.params.id);
       res.json({ message: 'Pixel deleted successfully', pixel: deletedPixel });
     } catch (error) {

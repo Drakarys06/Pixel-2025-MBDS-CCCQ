@@ -1,0 +1,101 @@
+/* Styles simplifiés pour le color picker - à placer dans src/styles/ui/EnhancedColorPicker.css */
+.enhanced-color-picker {
+	margin-bottom: 15px;
+}
+
+.color-picker-container {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	background-color: var(--bg-secondary);
+	padding: 12px;
+	border-radius: 8px;
+	box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.color-picker-controls {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.form-color-picker {
+	width: 40px;
+	height: 40px;
+	border: none;
+	border-radius: 50%;
+	cursor: pointer;
+	background-color: transparent;
+	padding: 2px;
+	box-shadow: 0 2px 5px var(--shadow-color);
+	transition: transform 0.2s ease;
+}
+
+.form-color-picker:hover {
+	transform: scale(1.05);
+}
+
+.form-color-picker::-webkit-color-swatch-wrapper {
+	padding: 0;
+	border-radius: 50%;
+}
+
+.form-color-picker::-webkit-color-swatch {
+	border: none;
+	border-radius: 50%;
+}
+
+.form-color-picker::-moz-color-swatch {
+	border: none;
+	border-radius: 50%;
+}
+
+.color-hex-input {
+	flex: 1;
+	padding: 8px 10px;
+	border: 1px solid var(--border-color);
+	border-radius: 6px;
+	font-family: monospace;
+	text-align: center;
+	background-color: var(--bg-primary);
+	color: var(--text-primary);
+	transition: border-color 0.2s ease;
+	font-size: 0.9rem;
+}
+
+.color-hex-input:focus {
+	outline: none;
+	border-color: var(--accent-color);
+}
+
+.preset-colors {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.preset-color {
+	width: 24px;
+	height: 24px;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+	border: 1px solid var(--border-color);
+}
+
+.preset-color:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.preset-color.selected {
+	border: 2px solid var(--accent-color);
+	box-shadow: 0 0 0 1px var(--accent-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+	.color-picker-controls {
+		flex-wrap: wrap;
+	}
+}

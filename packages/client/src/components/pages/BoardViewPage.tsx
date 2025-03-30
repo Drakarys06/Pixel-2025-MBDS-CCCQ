@@ -11,7 +11,6 @@ import ExportCanvas from '../ui/ExportCanvas';
 import websocketService from '../../services/websocketService';
 import { useAuth } from '../auth/AuthContext';
 import usePermissions from '../auth/usePermissions';
-import { PERMISSIONS } from '../auth/permissions';
 import '../../styles/pages/BoardViewPage.css';
 
 interface Pixel {
@@ -384,6 +383,7 @@ const BoardViewPage: React.FC = () => {
         closeTime={board.closeTime}
         redraw={board.redraw}
         pixelCount={pixels.length}
+		visitor={board.visitor}
       />
 
       <div className="board-view-content">

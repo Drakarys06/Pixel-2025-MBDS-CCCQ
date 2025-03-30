@@ -22,6 +22,12 @@ const Navbar: React.FC<NavbarProps> = ({ logoText = 'PixelBoard' }) => {
 		// La redirection est gérée dans la fonction logout
 	};
 
+	// Get first letter of username for avatar
+	const getInitial = () => {
+		if (!currentUser || !currentUser.username) return '?';
+		return currentUser.username.charAt(0).toUpperCase();
+	};
+
 	return (
 		<header className="navbar">
 			<nav className="navbar-content">
@@ -64,15 +70,13 @@ const Navbar: React.FC<NavbarProps> = ({ logoText = 'PixelBoard' }) => {
 						<div className="navbar-auth">
 							<Link to="/profile" className="profile-button">
 								<div className={`user-avatar ${isGuestMode ? 'avatar-guest' : 'avatar-user'}`}>
-									{isGuestMode ? (
-										<i className="avatar-icon guest-icon">👤</i>
-									) : (
-										<i className="avatar-icon user-icon">👤</i>
-									)}
+									{getInitial()}
 								</div>
 								<div className="user-info">
 									<span className="username">{currentUser?.username}</span>
-									<RoleBadge compact={true} />
+									<span className={`role-badge ${isGuestMode ? 'badge-guest' : 'badge-user'}`}>
+										{isGuestMode ? 'GUEST' : 'USER'}
+									</span>
 								</div>
 							</Link>
 							<Button variant="secondary" size="sm" onClick={handleLogout}>
