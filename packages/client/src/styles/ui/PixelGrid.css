@@ -16,6 +16,51 @@ canvas {
 	object-fit: contain; /* Assure que le ratio est conservé */
 }
 
+/* Styles for zoom controls */
+.zoom-controls {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	z-index: 10;
+	background-color: rgba(255, 255, 255, 0.7);
+	border-radius: 5px;
+	padding: 5px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.zoom-button {
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	border: 1px solid var(--border-color);
+	background-color: var(--bg-secondary);
+	color: var(--text-primary);
+	font-size: 18px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: background-color 0.2s;
+}
+
+.zoom-button:hover {
+	background-color: var(--hover-color);
+}
+
+.reset-button {
+	font-size: 16px;
+}
+
+.zoom-level {
+	font-size: 12px;
+	text-align: center;
+	padding: 3px 0;
+	color: var(--text-primary);
+}
+
 /* Styles pour la grille externe */
 .board-grid-container {
 	background-color: var(--bg-secondary);

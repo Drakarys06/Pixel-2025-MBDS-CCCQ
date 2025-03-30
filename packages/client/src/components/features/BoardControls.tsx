@@ -92,6 +92,12 @@ const BoardControls: React.FC<BoardControlsProps> = ({
 					</PermissionGate>
 				)}
 
+				{/* Board control */}
+				<div className="zoom-move-instructions">
+					Use mouse wheel to zoom<br />
+					Right-click + drag to move around
+				</div>
+
 				{/* View Options section */}
 				<div className="view-options-section">
 					<div className="view-toggle-buttons">
