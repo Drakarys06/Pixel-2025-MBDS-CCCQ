@@ -33,9 +33,11 @@ export const auth = async (req: Request, res: Response, next: NextFunction): Pro
     
     // Vérifier si c'est un token visiteur (commence par "guest-")
     if (token.startsWith('guest-')) {
+      const guestNumber = token.substring(6, 11);
+      const guestUsername = `Guest-${guestNumber}`;
       req.user = {
         _id: token,
-        username: 'Guest',
+        username: guestUsername,
         roles: ['guest']
       };
       req.isGuest = true;
@@ -85,9 +87,11 @@ export const optionalAuth = async (req: Request, res: Response, next: NextFuncti
     
     // Vérifier si c'est un token visiteur
     if (token.startsWith('guest-')) {
+      const guestNumber: string = token.substring(6, 11);
+      const guestUsername = `Guest-${guestNumber}`;
       req.user = {
         _id: token,
-        username: 'Guest',
+        username: guestUsername,
         roles: ['guest']
       };
       req.isGuest = true;
