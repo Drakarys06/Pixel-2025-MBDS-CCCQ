@@ -1,0 +1,92 @@
+/* Styles pour la liste d'activités */
+.activity-list {
+    margin-top: 1rem;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: var(--bg-primary);
+  }
+  
+  .activity-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s;
+  }
+  
+  .activity-item:last-child {
+    border-bottom: none;
+  }
+  
+  .activity-item:hover {
+    background-color: var(--bg-hover, rgba(0, 0, 0, 0.05));
+  }
+  
+  .activity-date {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-left: auto;
+  }
+  
+  /* Style pour les confirmations de suppression */
+  .delete-confirmation {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 90%;
+    width: 400px;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .delete-confirmation h3 {
+    color: #e53935;
+    margin-top: 0;
+  }
+  
+  .delete-confirmation-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .delete-confirmation-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+  
+  .delete-confirm-input {
+    margin-top: 1rem;
+  }
+  
+  .delete-confirm-input label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .delete-confirm-input input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+  }
+  
+  .delete-confirm-input input:focus {
+    outline: none;
+    border-color: #e53935;
+    box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.2);
+  }
