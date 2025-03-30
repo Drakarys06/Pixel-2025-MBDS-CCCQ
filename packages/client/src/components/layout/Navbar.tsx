@@ -2,7 +2,11 @@ import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import ThemeToggle from '../ui/ThemeToggle';
 import Button from '../ui/Button';
+import RoleBadge from '../ui/RoleBadge';
 import { useAuth } from '../auth/AuthContext';
+import usePermissions from '../auth/usePermissions';
+import PermissionGate from '../auth/PermissionGate';
+import { PERMISSIONS } from '../auth/permissions';
 import '../../styles/layout/Navbar.css';
 
 interface NavbarProps {
@@ -10,7 +14,8 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ logoText = 'PixelBoard' }) => {
-	const { isLoggedIn, currentUser, logout } = useAuth();
+	const { isLoggedIn, currentUser, logout, isGuestMode } = useAuth();
+	const permissions = usePermissions();
 
 	const handleLogout = () => {
 		logout();
@@ -20,11 +25,12 @@ const Navbar: React.FC<NavbarProps> = ({ logoText = 'PixelBoard' }) => {
 	return (
 		<header className="navbar">
 			<nav className="navbar-content">
-				{/* Rediriger vers / (home) au lieu de /explore */}
+				{/* Logo */}
 				<Link to="/" className="navbar-logo">
 					{logoText}
 				</Link>
 
+				{/* Navigation links */}
 				<div className="navbar-links">
 					<NavLink to="/explore" className={({isActive}) =>
 						isActive ? "navbar-link active" : "navbar-link"
@@ -32,28 +38,42 @@ const Navbar: React.FC<NavbarProps> = ({ logoText = 'PixelBoard' }) => {
 						Explore
 					</NavLink>
 
+					{/* Conditionnellement afficher le lien Create si l'utilisateur a la permission */}
+					<PermissionGate permission={PERMISSIONS.BOARD_CREATE}>
+						<NavLink to="/create" className={({isActive}) =>
+							isActive ? "navbar-link active" : "navbar-link"
+						}>
+							Create
+						</NavLink>
+					</PermissionGate>
+
+					{/* Lien My Boards toujours visible pour les utilisateurs connectés */}
 					{isLoggedIn && (
-						<>
-							<NavLink to="/create" className={({isActive}) =>
-								isActive ? "navbar-link active" : "navbar-link"
-							}>
-								Create
-							</NavLink>
-							<NavLink to="/boards" className={({isActive}) =>
-								isActive ? "navbar-link active" : "navbar-link"
-							}>
-								My Boards
-							</NavLink>
-						</>
+						<NavLink to="/boards" className={({isActive}) =>
+							isActive ? "navbar-link active" : "navbar-link"
+						}>
+							My Boards
+						</NavLink>
 					)}
 				</div>
 
+				{/* Right side actions */}
 				<div className="navbar-actions">
 					{isLoggedIn ? (
 						// Utilisateur connecté - afficher profil et déconnexion
 						<div className="navbar-auth">
-							<Link to="/profile">
-								<Button variant="login" size="sm">{currentUser?.username}</Button>
+							<Link to="/profile" className="profile-button">
+								<div className={`user-avatar ${isGuestMode ? 'avatar-guest' : 'avatar-user'}`}>
+									{isGuestMode ? (
+										<i className="avatar-icon guest-icon">👤</i>
+									) : (
+										<i className="avatar-icon user-icon">👤</i>
+									)}
+								</div>
+								<div className="user-info">
+									<span className="username">{currentUser?.username}</span>
+									<RoleBadge compact={true} />
+								</div>
 							</Link>
 							<Button variant="secondary" size="sm" onClick={handleLogout}>
 								Log out

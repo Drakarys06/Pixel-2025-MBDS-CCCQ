@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import ThemeToggle from '../ui/ThemeToggle';
 import { useAuth } from '../auth/AuthContext';
+import authService from '../../services/authService';
 import '../../styles/pages/LoginPage.css';
 
 const LoginPage: React.FC = () => {
@@ -10,7 +11,7 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { login, isLoggedIn } = useAuth();
+  const { login, loginAsGuest, isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -30,28 +31,33 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Échec de la connexion');
-      }
+      // Use authService instead of direct fetch
+      const data = await authService.login(email, password);
 
       // Login successful - update auth context
-      login(data.token, data.userId, data.username);
+      login(data.token, data.userId, data.username, data.roles || [], data.permissions || []);
       
       // Redirect to the page they were trying to access, or home page
       navigate(from, { replace: true });
     } catch (err) {
-      console.error('Erreur de connexion:', err);
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue lors de la connexion');
+      console.error('Login error:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred during login');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Guest login function
+  const handleGuestLogin = async () => {
+    setError('');
+    setIsLoading(true);
+    
+    try {
+      await loginAsGuest();
+      navigate(from, { replace: true });
+    } catch (err) {
+      console.error('Guest login error:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred during guest login');
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +77,7 @@ const LoginPage: React.FC = () => {
         </div>
         
         <div className="login-form-container">
-          <h2>Connectez-vous à PixelBoard</h2>
+          <h2>Sign in to PixelBoard</h2>
           
           {error && <div className="login-error">{error}</div>}
           
@@ -84,19 +90,19 @@ const LoginPage: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="Entrez votre email"
+                placeholder="Enter your email"
               />
             </div>
             
             <div className="form-group">
-              <label htmlFor="password">Mot de passe</label>
+              <label htmlFor="password">Password</label>
               <input 
                 type="password" 
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="Entrez votre mot de passe"
+                placeholder="Enter your password"
               />
             </div>
             
@@ -105,12 +111,23 @@ const LoginPage: React.FC = () => {
               className="login-button"
               disabled={isLoading}
             >
-              {isLoading ? 'Connexion...' : 'Se connecter'}
+              {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
           
+          <div className="login-guest">
+            <p>or</p>
+            <button 
+              onClick={handleGuestLogin}
+              className="guest-button"
+              disabled={isLoading}
+            >
+              Continue as guest
+            </button>
+          </div>
+          
           <div className="login-footer">
-            <p>Vous n'avez pas de compte? <Link to="/signup">S'inscrire</Link></p>
+            <p>Don't have an account? <Link to="/signup">Sign up</Link></p>
           </div>
         </div>
       </div>

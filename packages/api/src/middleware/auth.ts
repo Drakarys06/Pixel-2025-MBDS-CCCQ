@@ -1,3 +1,4 @@
+// middleware/auth.ts
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
@@ -5,7 +6,6 @@ import User from '../models/User';
 // JWT Secret (devrait être dans les variables d'environnement en production)
 const JWT_SECRET = 'pixelboard-secret-key-change-in-production';
 
-// Extension du type Request pour inclure l'utilisateur
 declare global {
   namespace Express {
     interface Request {
@@ -20,23 +20,23 @@ declare global {
 export const auth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // Récupérer le token depuis l'en-tête Authorization
-    const authHeader = req.header('Authorization');
+    const token = req.header('Authorization')?.replace('Bearer ', '');
     
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!token) {
       res.status(401).json({
         success: false,
-        message: 'Accès refusé. Aucun token fourni'
+        message: 'Authentication required',
+        redirectTo: '/login'
       });
       return;
     }
-    
-    const token = authHeader.replace('Bearer ', '');
     
     // Vérifier si c'est un token visiteur (commence par "guest-")
     if (token.startsWith('guest-')) {
       req.user = {
         _id: token,
-        username: 'Visiteur',
+        username: 'Guest',
+        roles: ['guest']
       };
       req.isGuest = true;
       req.token = token;
@@ -47,12 +47,12 @@ export const auth = async (req: Request, res: Response, next: NextFunction): Pro
     const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
     
     // Trouver l'utilisateur correspondant
-    const user = await User.findById(decoded.id).select('-password');
+    const user = await User.findById(decoded.id).select('-password').populate('roles');
     
     if (!user) {
       res.status(404).json({
         success: false,
-        message: 'Utilisateur non trouvé'
+        message: 'User not found'
       });
       return;
     }
@@ -64,10 +64,11 @@ export const auth = async (req: Request, res: Response, next: NextFunction): Pro
     
     next();
   } catch (error) {
-    console.error('Erreur d\'authentification:', error);
+    console.error('Authentication error:', error);
     res.status(401).json({
       success: false,
-      message: 'Accès refusé. Token invalide'
+      message: 'Invalid token',
+      redirectTo: '/login'
     });
   }
 };
@@ -75,20 +76,19 @@ export const auth = async (req: Request, res: Response, next: NextFunction): Pro
 // Middleware d'authentification optionnel (pour les routes accessibles aux visiteurs)
 export const optionalAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const authHeader = req.header('Authorization');
+    const token = req.header('Authorization')?.replace('Bearer ', '');
     
     // Si aucun token n'est fourni, continuer sans définir l'utilisateur
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!token) {
       return next();
     }
-    
-    const token = authHeader.replace('Bearer ', '');
     
     // Vérifier si c'est un token visiteur
     if (token.startsWith('guest-')) {
       req.user = {
         _id: token,
-        username: 'Visiteur',
+        username: 'Guest',
+        roles: ['guest']
       };
       req.isGuest = true;
       req.token = token;
@@ -100,7 +100,7 @@ export const optionalAuth = async (req: Request, res: Response, next: NextFuncti
       const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
       
       // Trouver l'utilisateur correspondant
-      const user = await User.findById(decoded.id).select('-password');
+      const user = await User.findById(decoded.id).select('-password').populate('roles');
       
       if (user) {
         req.user = user;
@@ -116,16 +116,4 @@ export const optionalAuth = async (req: Request, res: Response, next: NextFuncti
     // En cas d'erreur, continuer sans définir l'utilisateur
     next();
   }
-};
-
-// Middleware pour restreindre l'accès aux créateurs (non-visiteurs)
-export const creatorOnly = (req: Request, res: Response, next: NextFunction): Response | void => {
-  if (!req.user || req.isGuest) {
-    return res.status(403).json({
-      success: false,
-      message: 'Les visiteurs ne peuvent pas créer de tableaux'
-    });
-  }
-  
-  next();
 };

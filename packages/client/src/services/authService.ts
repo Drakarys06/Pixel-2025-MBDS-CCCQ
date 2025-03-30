@@ -8,6 +8,8 @@ export interface LoginResponse {
   token: string;
   userId: string;
   username: string;
+  roles?: string[];
+  permissions?: string[];
 }
 
 export interface AuthCheckResponse {
@@ -20,6 +22,8 @@ export interface AuthCheckResponse {
     pixelsPlaced: number;
     boardsCreated: number;
     isGuest?: boolean;
+    roles?: string[];
+    permissions?: string[];
   };
 }
 
@@ -50,6 +54,8 @@ const authService = {
       localStorage.removeItem('token');
       localStorage.removeItem('userId');
       localStorage.removeItem('username');
+      localStorage.removeItem('roles');
+      localStorage.removeItem('permissions');
 
       return { success: false, message: 'Invalid or expired token' };
     }
@@ -77,15 +83,30 @@ const authService = {
    * Connecte l'utilisateur en tant que visiteur
    */
   guestLogin: async (): Promise<LoginResponse> => {
-    const guestToken = 'guest-' + Math.random().toString(36).substring(2, 15);
-    const guestId = guestToken;
-    return {
-      success: true,
-      message: 'Connecté en tant que visiteur',
-      token: guestToken,
-      userId: guestId,
-      username: 'Visiteur'
-    };
+    try {
+      // Dans un environnement réel, vous pourriez faire une requête au serveur
+      // pour enregistrer le visiteur et obtenir un token valide
+      // const response = await axios.post(`${API_URL}/auth/guest-login`);
+      // return response.data;
+      
+      // Simulation de la réponse du serveur
+      const guestToken = 'guest-' + Math.random().toString(36).substring(2, 15);
+      const guestId = 'guest-' + Math.random().toString(36).substring(2, 15);
+      const guestUsername = 'Visiteur-' + Math.floor(Math.random() * 10000);
+      
+      return {
+        success: true,
+        message: 'Connecté en tant que visiteur',
+        token: guestToken,
+        userId: guestId,
+        username: guestUsername,
+        roles: ['guest'],
+        permissions: ['board:view', 'pixel:view']
+      };
+    } catch (error: any) {
+      console.error('Erreur lors de la connexion en tant que visiteur:', error);
+      throw new Error('Impossible de se connecter en tant que visiteur');
+    }
   },
 
   /**
@@ -95,6 +116,7 @@ const authService = {
     const token = localStorage.getItem('token');
     return token ? token.startsWith('guest-') : false;
   },
+  
   /**
    * Inscrit un nouvel utilisateur
    */
@@ -148,6 +170,8 @@ const authService = {
           localStorage.removeItem('token');
           localStorage.removeItem('userId');
           localStorage.removeItem('username');
+          localStorage.removeItem('roles');
+          localStorage.removeItem('permissions');
           // Rediriger vers la page de connexion
           window.location.href = '/login';
         }

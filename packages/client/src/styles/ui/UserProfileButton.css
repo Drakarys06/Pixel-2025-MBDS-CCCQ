@@ -1,0 +1,68 @@
+/* UserProfileButton.css */
+.profile-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: rgba(75, 85, 99, 0.3);
+    border-radius: 12px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .profile-button:hover {
+    background-color: rgba(75, 85, 99, 0.5);
+    transform: translateY(-1px);
+  }
+  
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    color: white;
+  }
+  
+  .avatar-user {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  }
+  
+  .avatar-guest {
+    background: linear-gradient(135deg, #4b5563, #6b7280);
+  }
+  
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+  }
+  
+  .username {
+    font-weight: 500;
+    color: white;
+    font-size: 14px;
+  }
+  
+  .role-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+  }
+  
+  .badge-user {
+    background-color: #3b82f6;
+    color: white;
+  }
+  
+  .badge-guest {
+    background-color: #64748b;
+    color: white;
+  }
