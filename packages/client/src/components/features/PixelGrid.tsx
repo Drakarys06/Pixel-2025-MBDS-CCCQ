@@ -405,6 +405,14 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 			return;
 		}
 
+		const formatGuestUsername = (userId: string, username?: string): string => {
+			if (userId.startsWith('guest-')) {
+			  const guestNumber = userId.substring(6, 11);
+			  return `Guest-${guestNumber}`;
+			}
+			return username || userId;
+		  };
+
 		const formatDate = (dateString: string) => {
 			const date = new Date(dateString);
 			const day = String(date.getDate()).padStart(2, '0');
@@ -450,7 +458,9 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 
 						// Format contributors with usernames instead of IDs
 						const usernames = pixel.modifiedBy.map(userId => {
-							return userMap[userId] || userId; // Fallback to ID if username not found
+							const formattedId = formatGuestUsername(userId);
+
+							return userMap[userId] || formattedId;
 						});
 						const uniqueUsernames = [...new Set(usernames)];
 						tooltipContent += `\nBy: ${uniqueUsernames.join(', ')}`;
@@ -472,7 +482,16 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 				let tooltipContent = `(${pixel.x}, ${pixel.y})`;
 				tooltipContent += `\nColor: ${pixel.color}`;
 				tooltipContent += `\n${formatDate(pixel.lastModifiedDate)}`;
-				tooltipContent += `\nBy: ${Array.from(new Set(pixel.modifiedBy)).join(', ')}`;
+
+				const formattedUsernames = pixel.modifiedBy.map(userId => {
+					if (userId.startsWith('guest-')) {
+					  const guestNumber = userId.substring(6, 11);
+					  return `Guest-${guestNumber}`;
+					}
+					return userId;
+				  });
+
+				tooltipContent += `\nBy: ${Array.from(new Set(formattedUsernames)).join(', ')}`;
 
 				setTooltip({
 					visible: true,

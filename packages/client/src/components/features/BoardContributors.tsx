@@ -22,6 +22,15 @@ const BoardContributors: React.FC<BoardContributorsProps> = ({ boardId, refreshT
 
 	const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+	// Fonction utilitaire pour formater les noms d'utilisateurs visiteurs
+	const formatGuestUsername = (userId: string, username: string): string => {
+		if (userId.startsWith('guest-') && (username === 'Guest' || !username)) {
+			const guestNumber = userId.substring(6, 11);
+			return `Guest-${guestNumber}`;
+		}
+		return 'Guest-' + userId.substring(6, 11);
+	};
+
 	// Fonction de récupération des contributeurs
 	const fetchContributors = async () => {
 		if (!boardId) return;
@@ -42,7 +51,14 @@ const BoardContributors: React.FC<BoardContributorsProps> = ({ boardId, refreshT
 			}
 
 			const data = await response.json();
-			setContributors(data);
+			
+			// Formater les noms des utilisateurs visiteurs avant de mettre à jour l'état
+			const formattedContributors = data.map((contributor: Contributor) => ({
+				...contributor,
+				username: formatGuestUsername(contributor.userId, contributor.username)
+			}));
+			
+			setContributors(formattedContributors);
 		} catch (err) {
 			console.error('Error fetching contributors:', err);
 			setError(err instanceof Error ? err.message : 'Failed to load contributors');

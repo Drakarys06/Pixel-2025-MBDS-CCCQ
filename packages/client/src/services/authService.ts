@@ -84,15 +84,13 @@ const authService = {
    */
   guestLogin: async (): Promise<LoginResponse> => {
     try {
-      // Dans un environnement réel, vous pourriez faire une requête au serveur
-      // pour enregistrer le visiteur et obtenir un token valide
-      // const response = await axios.post(`${API_URL}/auth/guest-login`);
-      // return response.data;
+      // Générer un token aléatoire
+      const randomString = Math.random().toString(36).substring(2, 15);
+      const guestToken = 'guest-' + randomString;
       
-      // Simulation de la réponse du serveur
-      const guestToken = 'guest-' + Math.random().toString(36).substring(2, 15);
-      const guestId = 'guest-' + Math.random().toString(36).substring(2, 15);
-      const guestUsername = 'Visiteur-' + Math.floor(Math.random() * 10000);
+      // Utiliser le même token comme ID, et extraire une partie pour le nom d'utilisateur
+      const guestId = guestToken;
+      const guestUsername = `Guest-${randomString.substring(0, 5)}`;
       
       return {
         success: true,
@@ -101,14 +99,13 @@ const authService = {
         userId: guestId,
         username: guestUsername,
         roles: ['guest'],
-        permissions: ['board:view', 'pixel:view']
+        permissions: ['board:view', 'pixel:view', 'pixel:create']
       };
     } catch (error: any) {
       console.error('Erreur lors de la connexion en tant que visiteur:', error);
       throw new Error('Impossible de se connecter en tant que visiteur');
     }
   },
-
   /**
    * Vérifie si l'utilisateur est en mode visiteur
    */
