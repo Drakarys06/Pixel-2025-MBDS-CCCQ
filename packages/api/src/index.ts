@@ -5,6 +5,9 @@ import cors from 'cors';
 import connectDB from './db/mongoose';
 import { api } from './api';
 
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
+
 const app = express();
 const port = 8000;
 
@@ -14,10 +17,22 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (_req: Request, res: Response) => {
-	res.json('Hello World!');
-});
 app.use('/api', api);
+
+const options = {
+	definition: {
+	  openapi: '3.0.0',
+	  info: {
+		title: 'Pixelboard API',
+		version: '1.0.0',
+	  },
+	},
+	apis: ['./src/routes/*.js'],
+  };
+
+const swaggerSpec = swaggerJsdoc(options);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const httpServer = createServer(app);
 
