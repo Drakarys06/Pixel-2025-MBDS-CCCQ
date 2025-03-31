@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../layout/Layout';
 import CreateBoardForm, { BoardFormData } from '../features/CreateBoardForm';
 import Alert from '../ui/Alert';
@@ -590,7 +590,7 @@ const CreateBoardPage: React.FC = () => {
 									<li><strong>Time limit:</strong> Set 30 minutes for small boards, longer for larger creations.</li>
 									<li><strong>Cooldown:</strong> Add a cooldown to prevent rapid consecutive placements and give everyone a chance.</li>
 									<li><strong>Redraw option:</strong> Allow users to place pixels over existing ones for evolving creations.</li>
-									<li><strong>Visitor mode:</strong> Enable viewing after the board's active time expires to showcase your community's work.</li>
+									<li><strong>Visitor mode:</strong> Enable viewing after the board&apos;s active time expires to showcase your community&apos;s work.</li>
 								</ul>
 							</div>
 						</Card>
