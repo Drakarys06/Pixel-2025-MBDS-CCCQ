@@ -201,6 +201,7 @@ const ProfilePage: React.FC = () => {
   // Soumettre le changement de mot de passe
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     setPasswordError(null);
     setPasswordSuccess(null);
 
@@ -217,6 +218,7 @@ const ProfilePage: React.FC = () => {
 
     try {
       const token = localStorage.getItem('token');
+      
       const response = await fetch(`${API_URL}/api/users/password`, {
         method: 'PUT',
         headers: {
@@ -228,10 +230,11 @@ const ProfilePage: React.FC = () => {
           newPassword: passwordData.newPassword
         })
       });
+      
+      const data = await response.json();
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update password');
+        throw new Error(data.message || 'Failed to update password');
       }
 
       setPasswordSuccess('Password updated successfully');
@@ -247,7 +250,7 @@ const ProfilePage: React.FC = () => {
         setPasswordSuccess(null);
       }, 3000);
     } catch (err) {
-      console.error('Error updating password:', err);
+      console.error("Error details:", err);
       setPasswordError(err instanceof Error ? err.message : 'Failed to update password');
     }
   };
@@ -292,62 +295,101 @@ const ProfilePage: React.FC = () => {
     );
   }
 
-  // Contenu principal du profil à passer au Layout
-  const profileContent = (
-    <>
-      <div className="profile-card">
-        <h1 className="profile-title">Your Profile</h1>
+  return (
+    <Layout title="Profile">
+      <div className="profile-content">
+        {/* Messages globaux */}
+        <div className="profile-messages">
+          {error && <div className="message error">{error}</div>}
+          {passwordSuccess && <div className="message success">{passwordSuccess}</div>}
+          {profileSuccess && <div className="message success">{profileSuccess}</div>}
+        </div>
 
-        {error && (
-          <div className="message error">
-            {error}
-          </div>
-        )}
+        {/* BLOC 1: Informations de base du profil */}
+        <div className="profile-block profile-info-block">
+          <h2 className="block-title">Profile Information</h2>
+          <div className="profile-card">
+            <div className="info-grid">
+              <div className="info-row">
+                <span className="info-label">Username</span>
+                <span className="info-value">{currentUser?.username}</span>
+              </div>
 
-        {passwordSuccess && (
-          <div className="message success">
-            {passwordSuccess}
-          </div>
-        )}
+              <div className="info-row">
+                <span className="info-label">Email</span>
+                <span className="info-value">{currentUser?.email}</span>
+              </div>
 
-        {profileSuccess && (
-          <div className="message success">
-            {profileSuccess}
-          </div>
-        )}
+              <div className="info-row">
+                <span className="info-label">Account Type</span>
+                <span className="info-value">
+                  {currentUser?.roles.includes('admin') 
+                    ? 'Administrator' 
+                    : currentUser?.roles.includes('moderator') 
+                      ? 'Moderator' 
+                      : 'Regular User'}
+                </span>
+              </div>
 
-        <div className="profile-info">
-          <div className="info-row">
-            <span className="info-label">Username</span>
-            <span className="info-value">{currentUser?.username}</span>
-          </div>
-
-          <div className="info-row">
-            <span className="info-label">Email</span>
-            <span className="info-value">{currentUser?.email}</span>
-          </div>
-
-          <div className="info-row">
-            <span className="info-label">Account Type</span>
-            <span className="info-value">
-              {currentUser?.roles.includes('admin') 
-                ? 'Administrator' 
-                : currentUser?.roles.includes('moderator') 
-                  ? 'Moderator' 
-                  : 'Regular User'}
-            </span>
-          </div>
-
-          {stats?.joinDate && (
-            <div className="info-row">
-              <span className="info-label">Member Since</span>
-              <span className="info-value">{formatDate(stats.joinDate)}</span>
+              {stats?.joinDate && (
+                <div className="info-row">
+                  <span className="info-label">Member Since</span>
+                  <span className="info-value">{formatDate(stats.joinDate)}</span>
+                </div>
+              )}
             </div>
-          )}
 
-          {/* Section des statistiques */}
-          <div className="stats-section">
-            <h3>Your Statistics</h3>
+            {/* Boutons d'action */}
+            <div className="profile-actions">
+              {showEditProfile ? (
+                <button 
+                  className="btn-cancel" 
+                  onClick={() => setShowEditProfile(false)}
+                >
+                  Cancel Edit
+                </button>
+              ) : (
+                <button 
+                  className="btn-edit" 
+                  onClick={() => {
+                    setProfileData({
+                      username: currentUser?.username || '',
+                      email: currentUser?.email || ''
+                    });
+                    setShowEditProfile(true);
+                    setShowChangePassword(false);
+                  }}
+                >
+                  Edit Profile
+                </button>
+              )}
+              
+              {showChangePassword ? (
+                <button 
+                  className="btn-cancel" 
+                  onClick={() => setShowChangePassword(false)}
+                >
+                  Cancel
+                </button>
+              ) : (
+                <button 
+                  className="btn-edit" 
+                  onClick={() => {
+                    setShowChangePassword(true);
+                    setShowEditProfile(false);
+                  }}
+                >
+                  Change Password
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* BLOC 2: Statistiques de l'utilisateur */}
+        <div className="profile-block stats-block">
+          <h2 className="block-title">User Statistics</h2>
+          <div className="stats-card">
             <div className="stats-grid">
               <div className="stat-box">
                 <div className="stat-value">{stats?.pixelsPlaced || 0}</div>
@@ -369,203 +411,156 @@ const ProfilePage: React.FC = () => {
               )}
             </div>
           </div>
+        </div>
 
-          {/* Activité récente */}
-          {recentActivity.length > 0 && (
-            <div className="stats-section">
-              <h3>Recent Activity</h3>
-              <div className="activity-list">
-                {recentActivity.map((activity) => (
-                  <div key={activity.id} className="activity-item">
-                    <div className="activity-color" style={{
-                      display: 'inline-block',
-                      width: '16px',
-                      height: '16px',
-                      backgroundColor: activity.color,
-                      marginRight: '8px',
-                      borderRadius: '3px',
-                    }}></div>
-                    <span>
-                      Placed pixel on <Link to={`/board/${activity.boardId}`} style={{ color: 'var(--accent-color)' }}>{activity.boardTitle}</Link> {getRelativeTime(activity.date)}
-                    </span>
-                  </div>
-                ))}
+        {/* BLOC 3: Activité récente et formulaires */}
+        <div className="profile-block activity-forms-block">
+          <h2 className="block-title">Recent Activity & Settings</h2>
+          <div className="activity-forms-card">
+            {/* Section activité récente */}
+            {recentActivity.length > 0 && (
+              <div className="activity-section">
+                <h3>Recent Activity</h3>
+                <div className="activity-list">
+                  {recentActivity.map((activity) => (
+                    <div key={activity.id} className="activity-item">
+                      <div className="activity-color" style={{
+                        display: 'inline-block',
+                        width: '16px',
+                        height: '16px',
+                        backgroundColor: activity.color,
+                        marginRight: '8px',
+                        borderRadius: '3px',
+                      }}></div>
+                      <span>
+                        Placed pixel on <Link to={`/board/${activity.boardId}`} style={{ color: 'var(--accent-color)' }}>{activity.boardTitle}</Link> {getRelativeTime(activity.date)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-
-          {/* Boutons d'action */}
-          <div className="profile-actions">
-            {showEditProfile ? (
-              <button 
-                className="btn-cancel" 
-                onClick={() => setShowEditProfile(false)}
-              >
-                Cancel Edit
-              </button>
-            ) : (
-              <button 
-                className="btn-edit" 
-                onClick={() => {
-                  setProfileData({
-                    username: currentUser?.username || '',
-                    email: currentUser?.email || ''
-                  });
-                  setShowEditProfile(true);
-                  setShowChangePassword(false);
-                }}
-              >
-                Edit Profile
-              </button>
             )}
-            
-            {showChangePassword ? (
-              <button 
-                className="btn-cancel" 
-                onClick={() => setShowChangePassword(false)}
-              >
-                Cancel
-              </button>
-            ) : (
-              <button 
-                className="btn-edit" 
-                onClick={() => {
-                  setShowChangePassword(true);
-                  setShowEditProfile(false);
-                }}
-              >
-                Change Password
-              </button>
+
+            {/* Formulaire d'édition de profil */}
+            {showEditProfile && (
+              <div className="form-section">
+                <h3>Edit Profile Information</h3>
+                {profileError && (
+                  <div className="message error">
+                    {profileError}
+                  </div>
+                )}
+                <form className="profile-form" onSubmit={handleProfileSubmit}>
+                  <div className="form-group">
+                    <label htmlFor="username">Username</label>
+                    <input
+                      type="text"
+                      id="username"
+                      name="username"
+                      value={profileData.username}
+                      onChange={handleProfileChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="email">Email</label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={profileData.email}
+                      onChange={handleProfileChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="profile-actions">
+                    <button 
+                      type="button" 
+                      className="btn-cancel"
+                      onClick={() => setShowEditProfile(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="btn-save"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* Formulaire de changement de mot de passe */}
+            {showChangePassword && (
+              <div className="form-section">
+                <h3>Change Password</h3>
+                {passwordError && (
+                  <div className="message error">
+                    {passwordError}
+                  </div>
+                )}
+                <form className="profile-form" onSubmit={handlePasswordSubmit}>
+                  <div className="form-group">
+                    <label htmlFor="currentPassword">Current Password</label>
+                    <input
+                      type="password"
+                      id="currentPassword"
+                      name="currentPassword"
+                      value={passwordData.currentPassword}
+                      onChange={handlePasswordChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="newPassword">New Password</label>
+                    <input
+                      type="password"
+                      id="newPassword"
+                      name="newPassword"
+                      value={passwordData.newPassword}
+                      onChange={handlePasswordChange}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="confirmPassword">Confirm New Password</label>
+                    <input
+                      type="password"
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      value={passwordData.confirmPassword}
+                      onChange={handlePasswordChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="profile-actions">
+                    <button 
+                      type="button" 
+                      className="btn-cancel"
+                      onClick={() => setShowChangePassword(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="btn-save"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                </form>
+              </div>
             )}
           </div>
-
-          {/* Formulaire d'édition de profil */}
-          {showEditProfile && (
-            <div className="form-section">
-              <h3>Edit Profile Information</h3>
-              {profileError && (
-                <div className="message error">
-                  {profileError}
-                </div>
-              )}
-              <form className="profile-form" onSubmit={handleProfileSubmit}>
-                <div className="form-group">
-                  <label htmlFor="username">Username</label>
-                  <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    value={profileData.username}
-                    onChange={handleProfileChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="email">Email</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={profileData.email}
-                    onChange={handleProfileChange}
-                    required
-                  />
-                </div>
-
-                <div className="profile-actions">
-                  <button 
-                    type="button" 
-                    className="btn-cancel"
-                    onClick={() => setShowEditProfile(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="btn-save"
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {/* Formulaire de changement de mot de passe */}
-          {showChangePassword && (
-            <div className="form-section">
-              <h3>Change Password</h3>
-              {passwordError && (
-                <div className="message error">
-                  {passwordError}
-                </div>
-              )}
-              <form className="profile-form" onSubmit={handlePasswordSubmit}>
-                <div className="form-group">
-                  <label htmlFor="currentPassword">Current Password</label>
-                  <input
-                    type="password"
-                    id="currentPassword"
-                    name="currentPassword"
-                    value={passwordData.currentPassword}
-                    onChange={handlePasswordChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="newPassword">New Password</label>
-                  <input
-                    type="password"
-                    id="newPassword"
-                    name="newPassword"
-                    value={passwordData.newPassword}
-                    onChange={handlePasswordChange}
-                    required
-                    minLength={6}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="confirmPassword">Confirm New Password</label>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    value={passwordData.confirmPassword}
-                    onChange={handlePasswordChange}
-                    required
-                  />
-                </div>
-
-                <div className="profile-actions">
-                  <button 
-                    type="button" 
-                    className="btn-cancel"
-                    onClick={() => setShowChangePassword(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="btn-save"
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
         </div>
-      </div>
-    </>
-  );
-
-  return (
-    <Layout title="My Profile">
-      <div className="profile-content">
-        {profileContent}
       </div>
     </Layout>
   );
