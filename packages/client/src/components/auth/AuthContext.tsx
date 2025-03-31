@@ -6,6 +6,7 @@ import authService from '../../services/authService';
 type UserType = {
   id: string;
   username: string;
+  email?: string;
   isGuest?: boolean;
   roles: string[];
   permissions: string[];
@@ -21,6 +22,7 @@ type AuthContextType = {
   loginAsGuest: () => Promise<void>;
   logout: () => void;
   loading: boolean;
+  updateUser: (updatedUser: Partial<UserType>) => void; // Nouvelle fonction
 };
 
 // Création du contexte
@@ -76,6 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               setCurrentUser({
                 id: response.user.id,
                 username: response.user.username,
+                email: response.user.email,
                 isGuest: false,
                 roles: 'roles' in response.user ? response.user.roles : roles,
                 permissions: 'permissions' in response.user ? response.user.permissions : permissions
@@ -179,6 +182,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     window.location.href = '/login';
   };
 
+  // Fonction pour mettre à jour les informations de l'utilisateur
+  const updateUser = (updatedUser: Partial<UserType>) => {
+    if (!currentUser) return;
+    
+    // Créer un nouvel objet utilisateur avec les valeurs mises à jour
+    const newUserData = {
+      ...currentUser,
+      ...updatedUser
+    };
+    
+    // Mettre à jour le state
+    setCurrentUser(newUserData);
+    
+    // Mettre à jour localStorage si nécessaire
+    if (updatedUser && updatedUser.username) {
+      localStorage.setItem('username', updatedUser.username);
+    }
+    
+    // Mettre à jour les rôles et permissions si nécessaire
+    if (updatedUser && updatedUser.roles) {
+      localStorage.setItem('roles', JSON.stringify(updatedUser.roles));
+    }
+    
+    if (updatedUser && updatedUser.permissions) {
+      localStorage.setItem('permissions', JSON.stringify(updatedUser.permissions));
+    }
+  };
+
   // Fonction pour vérifier si l'utilisateur a une permission
   const hasPermission = (permission: string): boolean => {
     if (!currentUser || !currentUser.permissions) {
@@ -205,7 +236,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       login, 
       loginAsGuest,
       logout, 
-      loading
+      loading,
+      updateUser
     }}>
       {children}
     </AuthContext.Provider>

@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import DeleteConfirmation from '../profile/DeleteConfirmation';
 import Layout from '../layout/Layout';
-import '../../styles/pages/Profile.css'; // Utilise le CSS existant
-import '../../styles/components/ActivityList.css'; // Pour les styles d'activité
+import '../../styles/pages/Profile.css';
+import '../../styles/components/ActivityList.css';
 
 // Service pour les appels API
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -32,7 +31,7 @@ interface ActivityItem {
 }
 
 const ProfilePage: React.FC = () => {
-  const { currentUser, isLoggedIn, logout } = useAuth();
+  const { currentUser, isLoggedIn, logout, updateUser } = useAuth();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -40,8 +39,8 @@ const ProfilePage: React.FC = () => {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
   
+  // États pour le changement de mot de passe
   const [showChangePassword, setShowChangePassword] = useState(false);
-  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -50,12 +49,27 @@ const ProfilePage: React.FC = () => {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
 
-  // Rediriger si non connecté
+  // États pour l'édition du profil
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [profileData, setProfileData] = useState({
+    username: currentUser?.username || '',
+    email: currentUser?.email || ''
+  });
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [profileSuccess, setProfileSuccess] = useState<string | null>(null);
+
+  // Rediriger si non connecté et initialiser les données du profil
   useEffect(() => {
     if (!isLoggedIn) {
       navigate('/login', { state: { from: '/profile' } });
+    } else if (currentUser) {
+      // Initialiser les données du profil avec les informations actuelles
+      setProfileData({
+        username: currentUser.username || '',
+        email: currentUser.email || ''
+      });
     }
-  }, [isLoggedIn, navigate]);
+  }, [isLoggedIn, navigate, currentUser]);
 
   // Récupérer les stats de l'utilisateur
   useEffect(() => {
@@ -104,9 +118,75 @@ const ProfilePage: React.FC = () => {
     fetchUserData();
   }, [currentUser, API_URL]);
 
-  // Gérer la déconnexion
-  const handleLogout = () => {
-    logout();
+  // Gérer les changements dans le formulaire de profil
+  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setProfileData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Soumettre les modifications du profil
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfileError(null);
+    setProfileSuccess(null);
+
+    // Valider les champs
+    if (!profileData.username.trim() || !profileData.email.trim()) {
+      setProfileError("Username and email are required");
+      return;
+    }
+
+    // Validation simple de l'email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(profileData.email)) {
+      setProfileError("Please enter a valid email address");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/api/users/${currentUser?.id}/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          username: profileData.username,
+          email: profileData.email
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update profile');
+      }
+
+      const result = await response.json();
+      
+      if (result.success && result.user && currentUser) {
+        // Mettre à jour le contexte d'authentification
+        updateUser({
+          ...currentUser,
+          username: result.user.username,
+          email: result.user.email
+        });
+      }
+
+      setProfileSuccess('Profile updated successfully');
+
+      // Masquer le formulaire après succès
+      setTimeout(() => {
+        setShowEditProfile(false);
+        setProfileSuccess(null);
+      }, 3000);
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      setProfileError(err instanceof Error ? err.message : 'Failed to update profile');
+    }
   };
 
   // Gérer le changement de mot de passe
@@ -172,48 +252,6 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  // Gérer la suppression du compte
-  const handleDeleteAccount = async () => {
-    setShowDeleteAccount(true);
-  };
-
-  // Confirmer la suppression du compte
-  const confirmDeleteAccount = async () => {
-    if (!currentUser) return;
-    
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/users/${currentUser.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to delete account');
-      }
-      
-      // Supprimer les données locales
-      localStorage.removeItem('token');
-      localStorage.removeItem('userId');
-      localStorage.removeItem('username');
-      localStorage.removeItem('roles');
-      localStorage.removeItem('permissions');
-      
-      // Rediriger vers la page d'accueil
-      navigate('/', { 
-        state: { 
-          message: 'Your account has been successfully deleted',
-          messageType: 'success' 
-        }
-      });
-    } catch (err) {
-      console.error('Error deleting account:', err);
-      setError(err instanceof Error ? err.message : 'Failed to delete account');
-    }
-  };
-
   // Formater la date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -269,6 +307,12 @@ const ProfilePage: React.FC = () => {
         {passwordSuccess && (
           <div className="message success">
             {passwordSuccess}
+          </div>
+        )}
+
+        {profileSuccess && (
+          <div className="message success">
+            {profileSuccess}
           </div>
         )}
 
@@ -352,6 +396,29 @@ const ProfilePage: React.FC = () => {
 
           {/* Boutons d'action */}
           <div className="profile-actions">
+            {showEditProfile ? (
+              <button 
+                className="btn-cancel" 
+                onClick={() => setShowEditProfile(false)}
+              >
+                Cancel Edit
+              </button>
+            ) : (
+              <button 
+                className="btn-edit" 
+                onClick={() => {
+                  setProfileData({
+                    username: currentUser?.username || '',
+                    email: currentUser?.email || ''
+                  });
+                  setShowEditProfile(true);
+                  setShowChangePassword(false);
+                }}
+              >
+                Edit Profile
+              </button>
+            )}
+            
             {showChangePassword ? (
               <button 
                 className="btn-cancel" 
@@ -362,23 +429,68 @@ const ProfilePage: React.FC = () => {
             ) : (
               <button 
                 className="btn-edit" 
-                onClick={() => setShowChangePassword(true)}
+                onClick={() => {
+                  setShowChangePassword(true);
+                  setShowEditProfile(false);
+                }}
               >
                 Change Password
               </button>
             )}
-            <button 
-              className="btn-logout" 
-              onClick={handleDeleteAccount}
-              style={{ 
-                backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                borderColor: '#e53935',
-                color: '#e53935' 
-              }}
-            >
-              Delete Account
-            </button>
           </div>
+
+          {/* Formulaire d'édition de profil */}
+          {showEditProfile && (
+            <div className="form-section">
+              <h3>Edit Profile Information</h3>
+              {profileError && (
+                <div className="message error">
+                  {profileError}
+                </div>
+              )}
+              <form className="profile-form" onSubmit={handleProfileSubmit}>
+                <div className="form-group">
+                  <label htmlFor="username">Username</label>
+                  <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    value={profileData.username}
+                    onChange={handleProfileChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="email">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={profileData.email}
+                    onChange={handleProfileChange}
+                    required
+                  />
+                </div>
+
+                <div className="profile-actions">
+                  <button 
+                    type="button" 
+                    className="btn-cancel"
+                    onClick={() => setShowEditProfile(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="btn-save"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
 
           {/* Formulaire de changement de mot de passe */}
           {showChangePassword && (
@@ -447,15 +559,6 @@ const ProfilePage: React.FC = () => {
           )}
         </div>
       </div>
-
-      {/* Confirmation de suppression de compte */}
-      {showDeleteAccount && currentUser && (
-        <DeleteConfirmation
-          username={currentUser.username}
-          onCancel={() => setShowDeleteAccount(false)}
-          onConfirm={confirmDeleteAccount}
-        />
-      )}
     </>
   );
 
