@@ -6,8 +6,8 @@ export interface IPixel extends Document {
 	y: number;
 	color: string;
 	lastModifiedDate: Date;
-	modifiedBy: string[]; // Array of users who modified this pixel
-	boardId: mongoose.Types.ObjectId; // Reference to the parent PixelBoard
+	modifiedBy: string[];
+	boardId: mongoose.Types.ObjectId;
 	modificationCount: number;
 }
 
@@ -42,8 +42,8 @@ const PixelSchema: Schema = new Schema({
 		required: [true, 'Board ID is required']
 	},
 	modificationCount: {
-        type: Number,
-        default: 1
+		type: Number,
+		default: 1
 	}
 }, {
 	timestamps: true,
@@ -55,7 +55,7 @@ const PixelSchema: Schema = new Schema({
 PixelSchema.index({ x: 1, y: 1, boardId: 1 }, { unique: true });
 
 // Update lastModifiedDate whenever a pixel is modified
-PixelSchema.pre('save', function(next) {
+PixelSchema.pre('save', function (next) {
 	const pixel = this as IPixel;
 	pixel.lastModifiedDate = new Date();
 	next();

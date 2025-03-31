@@ -55,14 +55,11 @@ const UserSchema: Schema = new Schema({
 });
 
 // Password hashing middleware
-UserSchema.pre<IUser>('save', async function(next) {
-  // Only hash the password if it has been modified (or is new)
+UserSchema.pre<IUser>('save', async function (next) {
   if (!this.isModified('password')) return next();
 
   try {
-    // Generate a salt
     const salt = await bcrypt.genSalt(10);
-    // Hash the password along with the new salt
     this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
@@ -71,7 +68,7 @@ UserSchema.pre<IUser>('save', async function(next) {
 });
 
 // Method to compare password for login
-UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
+UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
   try {
     return await bcrypt.compare(candidatePassword, this.password);
   } catch (error) {
@@ -80,18 +77,16 @@ UserSchema.methods.comparePassword = async function(candidatePassword: string): 
 };
 
 // Method to check if user has a specific permission
-UserSchema.methods.hasPermission = async function(permission: string): Promise<boolean> {
+UserSchema.methods.hasPermission = async function (permission: string): Promise<boolean> {
   try {
     const user = this as IUser;
-    
-    // Populate roles if not already populated
+
     if (!user.populated('roles')) {
       await user.populate('roles');
     }
-    
+
     const userRoles = user.roles as IRole[];
-    
-    // Check if any of the user's roles have the required permission
+
     return userRoles.some(role => role.permissions.includes(permission));
   } catch (error) {
     console.error('Error checking permission:', error);
@@ -100,18 +95,16 @@ UserSchema.methods.hasPermission = async function(permission: string): Promise<b
 };
 
 // Method to check if user has a specific role
-UserSchema.methods.hasRole = async function(roleName: string): Promise<boolean> {
+UserSchema.methods.hasRole = async function (roleName: string): Promise<boolean> {
   try {
     const user = this as IUser;
-    
-    // Populate roles if not already populated
+
     if (!user.populated('roles')) {
       await user.populate('roles');
     }
-    
+
     const userRoles = user.roles as IRole[];
-    
-    // Check if user has the specified role
+
     return userRoles.some(role => role.name === roleName);
   } catch (error) {
     console.error('Error checking role:', error);
