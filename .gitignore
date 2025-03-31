@@ -26,3 +26,4 @@ cdk.out
 .vscode/
 *yarn.lock
 *.env
+package-lock.json
