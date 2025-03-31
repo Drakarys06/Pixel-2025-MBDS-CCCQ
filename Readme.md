@@ -109,7 +109,7 @@ npm run lint
 - ✅ Déploiement du projet en ligne (🦁 Moyen) - Clément COLIN
 - ✅ Mode replay pour la visualisation du dessin (🥷 Difficile) - Nicolas QUATELA 
 - ❌ SuperPixelBoard montrant toutes les créations (🐵 Facile)
-- ❌ Téléchargement et conversion d'images en pixel art (🦁 Moyen)
+- ✅ Téléchargement et conversion d'images en pixel art (🦁 Moyen)
 
 🐵 = Facile, 🦁 = Moyen, 🥷 = Difficile
 
