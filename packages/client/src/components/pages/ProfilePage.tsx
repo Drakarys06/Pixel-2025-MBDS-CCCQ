@@ -33,7 +33,7 @@ interface ActivityItem {
 }
 
 const ProfilePage: React.FC = () => {
-	const { currentUser, isLoggedIn, isGuestMode, logout, updateUser } = useAuth();
+	const { currentUser, isLoggedIn, isGuestMode, updateUser } = useAuth();
 	const navigate = useNavigate();
 
 	// Redirect to login if user is not logged in or is a guest

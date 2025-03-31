@@ -175,7 +175,7 @@ const BoardContributors: React.FC<BoardContributorsProps> = ({ boardId, refreshT
 			<div className="card-body">
 				{contributors.length === 0 ? (
 					<div className="no-contributors">
-						Aucun pixel n'a encore été placé sur ce tableau.
+						Aucun pixel n&apos;a encore été placé sur ce tableau.
 					</div>
 				) : (
 					<>
