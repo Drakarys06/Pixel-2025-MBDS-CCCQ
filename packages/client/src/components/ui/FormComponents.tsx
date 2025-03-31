@@ -1,7 +1,6 @@
 import React from 'react';
 import '../../styles/ui/FormComponents.css';
 
-// Input component
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 	label?: string;
 	error?: string;
@@ -9,13 +8,13 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input: React.FC<InputProps> = ({
-												label,
-												error,
-												fullWidth = true,
-												className = '',
-												id,
-												...rest
-											}) => {
+	label,
+	error,
+	fullWidth = true,
+	className = '',
+	id,
+	...rest
+}) => {
 	const inputId = id || `input-${Math.random().toString(36).substring(2, 9)}`;
 	const inputClasses = [
 		'form-input',
@@ -48,15 +47,15 @@ interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>
 }
 
 export const Select: React.FC<SelectProps> = ({
-												  label,
-												  error,
-												  options,
-												  fullWidth = true,
-												  className = '',
-												  id,
-												  onChange,
-												  ...rest
-											  }) => {
+	label,
+	error,
+	options,
+	fullWidth = true,
+	className = '',
+	id,
+	onChange,
+	...rest
+}) => {
 	const selectId = id || `select-${Math.random().toString(36).substring(2, 9)}`;
 	const selectClasses = [
 		'form-select',
@@ -98,12 +97,12 @@ interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>
 }
 
 export const Checkbox: React.FC<CheckboxProps> = ({
-													  label,
-													  error,
-													  className = '',
-													  id,
-													  ...rest
-												  }) => {
+	label,
+	error,
+	className = '',
+	id,
+	...rest
+}) => {
 	const checkboxId = id || `checkbox-${Math.random().toString(36).substring(2, 9)}`;
 	const checkboxClasses = [
 		'form-checkbox',
@@ -135,14 +134,14 @@ interface ColorPickerProps extends Omit<React.InputHTMLAttributes<HTMLInputEleme
 }
 
 export const ColorPicker: React.FC<ColorPickerProps> = ({
-															label,
-															error,
-															showHexInput = true,
-															id,
-															value,
-															onChange,
-															...rest
-														}) => {
+	label,
+	error,
+	showHexInput = true,
+	id,
+	value,
+	onChange,
+	...rest
+}) => {
 	const colorId = id || `color-${Math.random().toString(36).substring(2, 9)}`;
 	const [hexValue, setHexValue] = React.useState(value as string || '#000000');
 
@@ -208,11 +207,11 @@ interface FormProps extends React.FormHTMLAttributes<HTMLFormElement> {
 }
 
 export const Form: React.FC<FormProps> = ({
-											  children,
-											  onSubmit,
-											  className = '',
-											  ...rest
-										  }) => {
+	children,
+	onSubmit,
+	className = '',
+	...rest
+}) => {
 	const formClasses = ['form', className].filter(Boolean).join(' ');
 
 	const handleSubmit = (e: React.FormEvent) => {

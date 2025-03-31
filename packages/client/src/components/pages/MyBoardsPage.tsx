@@ -328,8 +328,6 @@ const MyBoardsPage: React.FC = () => {
 							time={board.time}
 							closeTime={board.closeTime}
 							creator={board.creatorUsername || board.creator}
-							// Show settings button for boards created by the user when in the "Created" tab
-							// The user can always modify their own boards, or if they have update permission
 							showSettings={activeTab === TabType.CREATED && permissions.canUpdateOwnBoard(board.creator)}
 							onSettingsClick={handleSettingsClick}
 						/>

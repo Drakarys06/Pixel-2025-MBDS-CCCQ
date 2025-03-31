@@ -1,17 +1,17 @@
 import React from 'react';
-import '../../styles/ui/EnhancedColorPicker.css';
+import '../../styles/ui/ColorPicker.css';
 
-interface EnhancedColorPickerProps {
+interface ColorPickerProps {
 	selectedColor: string;
 	onColorChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 	disabled?: boolean;
 }
 
-const EnhancedColorPicker: React.FC<EnhancedColorPickerProps> = ({
-																	 selectedColor,
-																	 onColorChange,
-																	 disabled = false
-																 }) => {
+const ColorPicker: React.FC<ColorPickerProps> = ({
+	selectedColor,
+	onColorChange,
+	disabled = false
+}) => {
 	// Couleurs prédéfinies populaires
 	const presetColors = [
 		'#000000', // Noir
@@ -37,7 +37,7 @@ const EnhancedColorPicker: React.FC<EnhancedColorPickerProps> = ({
 	};
 
 	return (
-		<div className="enhanced-color-picker">
+		<div className="color-picker">
 			<div className="color-picker-container">
 				<div className="color-picker-controls">
 					<input
@@ -75,4 +75,4 @@ const EnhancedColorPicker: React.FC<EnhancedColorPickerProps> = ({
 	);
 };
 
-export default EnhancedColorPicker;
+export default ColorPicker;

@@ -3,7 +3,7 @@ import '../../styles/ui/TimeInput.css';
 
 interface TimeInputProps {
 	label: string;
-	value: number; // Valeur totale en secondes
+	value: number;
 	onChange: (totalSeconds: number) => void;
 	maxTime?: number;
 	minTime?: number;
@@ -11,28 +11,28 @@ interface TimeInputProps {
 	id?: string;
 	name?: string;
 	placeholder?: string;
-	includeDays?: boolean; // Nouvelle propriété pour afficher les jours
+	includeDays?: boolean;
 }
 
 const TimeInput: React.FC<TimeInputProps> = ({
-												 label,
-												 value,
-												 onChange,
-												 maxTime = 86400, // 24h par défaut
-												 minTime = 0,
-												 required = false,
-												 id,
-												 name,
-												 placeholder,
-												 includeDays = false
-											 }) => {
+	label,
+	value,
+	onChange,
+	maxTime = 86400, // 24h par défaut
+	minTime = 0,
+	required = false,
+	id,
+	name,
+	placeholder,
+	includeDays = false
+}) => {
 	// Constantes pour les conversions
 	const SECONDS_PER_DAY = 86400;
 	const SECONDS_PER_HOUR = 3600;
 	const SECONDS_PER_MINUTE = 60;
 
 	// Limites
-	const MAX_DAYS = 365; // Maximum 365 jours
+	const MAX_DAYS = 365;
 	const maxDays = Math.min(MAX_DAYS, Math.floor(maxTime / SECONDS_PER_DAY));
 
 	// Convertir les secondes en jours, heures, minutes, secondes
@@ -95,7 +95,7 @@ const TimeInput: React.FC<TimeInputProps> = ({
 
 	const handleMinutesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const newMinutes = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
-		if (isNaN(newMinutes) || newMinutes > 99) return; // Accepter jusqu'à 99 minutes
+		if (isNaN(newMinutes) || newMinutes > 99) return;
 
 		setIsInternalChange(true);
 		setMinutes(newMinutes);
@@ -155,7 +155,7 @@ const TimeInput: React.FC<TimeInputProps> = ({
 						value={minutes}
 						onChange={handleMinutesChange}
 						min={0}
-						max={99} // Accepter jusqu'à 99 minutes
+						max={99}
 						placeholder="0"
 						required={required}
 						className="time-input-number"

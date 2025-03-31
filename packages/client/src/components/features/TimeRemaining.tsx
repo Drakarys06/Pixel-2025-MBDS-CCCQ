@@ -19,14 +19,14 @@ interface TimeData {
 }
 
 const TimeRemaining: React.FC<TimeRemainingProps> = ({
-														 creationTime,
-														 durationMinutes,
-														 closeTime,
-														 showProgressBar = true,
-														 className = '',
-														 badge = false,
-														 onTimeExpired
-													 }) => {
+	creationTime,
+	durationMinutes,
+	closeTime,
+	showProgressBar = true,
+	className = '',
+	badge = false,
+	onTimeExpired
+}) => {
 	const [timeData, setTimeData] = useState<TimeData>({
 		timeRemaining: "Calculating...",
 		isExpired: false,
@@ -86,10 +86,8 @@ const TimeRemaining: React.FC<TimeRemainingProps> = ({
 	}, [creationTime, durationMinutes, closeTime, onTimeExpired]);
 
 	useEffect(() => {
-		// Calculate time data initially
 		calculateTime();
 
-		// Update every 10 seconds
 		const timer = setInterval(() => {
 			calculateTime();
 		}, 10000);

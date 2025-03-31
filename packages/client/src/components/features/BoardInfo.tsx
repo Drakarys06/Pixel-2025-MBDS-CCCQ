@@ -17,17 +17,17 @@ interface BoardInfoProps {
 }
 
 const BoardInfo: React.FC<BoardInfoProps> = ({
-												 title,
-												 creator,
-												 width,
-												 height,
-												 creationTime,
-												 duration,
-												 closeTime,
-												 redraw,
-												 pixelCount,
-												 visitor
-											 }) => {
+	title,
+	creator,
+	width,
+	height,
+	creationTime,
+	duration,
+	closeTime,
+	redraw,
+	pixelCount,
+	visitor
+}) => {
 	// Format date
 	const formatDate = (dateString: string) => {
 		const date = new Date(dateString);
@@ -88,28 +88,28 @@ const BoardInfo: React.FC<BoardInfoProps> = ({
 				<div className="board-meta-item">
 					<span className="meta-label">Redraw allowed</span>
 					<span className="meta-value">
-            {redraw ? (
-				<span className="status-badge status-enabled">Yes</span>
-			) : (
-				<span className="status-badge status-disabled">No</span>
-			)}
-          </span>
+						{redraw ? (
+							<span className="status-badge status-enabled">Yes</span>
+						) : (
+							<span className="status-badge status-disabled">No</span>
+						)}
+					</span>
 				</div>
 
 				<div className="board-meta-item">
 					<span className="meta-label">Visitor mode</span>
 					<span className="meta-value">
-            {visitor ? (
-				<span className="status-badge status-visitor">Enabled</span>
-			) : (
-				<span className="status-badge status-visitor-disabled">Disabled</span>
-			)}
-          </span>
+						{visitor ? (
+							<span className="status-badge status-visitor">Enabled</span>
+						) : (
+							<span className="status-badge status-visitor-disabled">Disabled</span>
+						)}
+					</span>
 				</div>
 
 				<div className="board-meta-item">
 					<span className="meta-label">Pixels remaining</span>
-					<span className="meta-value">{(width*height - pixelCount).toLocaleString()} / {width*height} </span>
+					<span className="meta-value">{(width * height - pixelCount).toLocaleString()} / {width * height} </span>
 				</div>
 			</div>
 		</div>

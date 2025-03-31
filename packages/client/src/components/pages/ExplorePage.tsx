@@ -53,7 +53,6 @@ const ExplorePage: React.FC = () => {
 			setLoading(true);
 			setError(null);
 			try {
-				// Récupérer le token d'authentification depuis localStorage
 				const token = localStorage.getItem('token');
 
 				const response = await fetch(`${API_URL}/api/pixelboards`, {
