@@ -1,10 +1,9 @@
-// packages/client/src/components/features/BoardControls.tsx - Version complète
 import React from 'react';
 import Card from '../ui/Card';
 import Alert from '../ui/Alert';
 import Button from '../ui/Button';
 import CooldownTimer from '../ui/CooldownTimer';
-import EnhancedColorPicker from '../ui/EnhancedColorPicker';
+import ColorPicker from '../ui/ColorPicker';
 import { useAuth } from '../auth/AuthContext';
 import PermissionGate from '../auth/PermissionGate';
 import { PERMISSIONS } from '../auth/permissions';
@@ -24,27 +23,27 @@ interface BoardControlsProps {
 	onCooldownComplete?: () => void;
 	boardClosed?: boolean;
 	visitorMode?: boolean;
-	showTimelapse?: boolean; // New prop for timelapse state
-	onToggleTimelapse?: () => void; // New callback for timelapse toggle
+	showTimelapse?: boolean;
+	onToggleTimelapse?: () => void;
 }
 
 const BoardControls: React.FC<BoardControlsProps> = ({
-														 selectedColor,
-														 onColorChange,
-														 message,
-														 disabled,
-														 showGridLines,
-														 onToggleGridLines,
-														 showHeatmap = false,
-														 onToggleHeatmap = () => { },
-														 cooldownRemaining,
-														 cooldownTotal,
-														 onCooldownComplete,
-														 boardClosed = false,
-														 visitorMode = false,
-														 showTimelapse = false,
-														 onToggleTimelapse = () => { },
-													 }) => {
+	selectedColor,
+	onColorChange,
+	message,
+	disabled,
+	showGridLines,
+	onToggleGridLines,
+	showHeatmap = false,
+	onToggleHeatmap = () => { },
+	cooldownRemaining,
+	cooldownTotal,
+	onCooldownComplete,
+	boardClosed = false,
+	visitorMode = false,
+	showTimelapse = false,
+	onToggleTimelapse = () => { },
+}) => {
 	const { isGuestMode } = useAuth();
 
 	return (
@@ -81,8 +80,8 @@ const BoardControls: React.FC<BoardControlsProps> = ({
 									/>
 								)}
 
-								{/* Enhanced Color Picker */}
-								<EnhancedColorPicker
+								{/* Color Picker */}
+								<ColorPicker
 									selectedColor={selectedColor}
 									onColorChange={onColorChange}
 									disabled={disabled || showHeatmap}

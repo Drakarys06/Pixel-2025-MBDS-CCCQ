@@ -1,4 +1,3 @@
-// packages/client/src/components/features/BoardTimelapse.tsx
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Button from '../ui/Button';
 import Loader from '../ui/Loader';
@@ -219,7 +218,7 @@ const BoardTimelapse: React.FC<BoardTimelapseProps> = ({ width, height, boardId 
 			if (!container) return;
 
 			// Calculate the optimal canvas size based on container and board dimensions
-			const containerWidth = container.clientWidth - 30; // Accounting for padding
+			const containerWidth = container.clientWidth - 30;
 			const containerHeight = container.clientHeight - 30;
 			const aspectRatio = width / height;
 

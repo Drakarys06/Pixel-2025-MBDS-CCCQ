@@ -1,4 +1,3 @@
-/* Style pour mettre les filtres sur une seule ligne */
 .explore-filter {
   display: flex;
   align-items: center;
@@ -30,7 +29,6 @@
   max-width: 300px;
 }
 
-/* Assurez-vous que les inputs et selects ont la bonne largeur */
 .filter-options .form-input,
 .filter-options .form-select,
 .search-box .form-input {

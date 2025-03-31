@@ -54,6 +54,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 	showGridLines = false,
 	showHeatmap = false
 }, ref) => {
+	PixelGrid.displayName = 'PixelGrid';
 	const { currentUser, isGuestMode } = useAuth();
 	const permissions = usePermissions();
 	const canCreatePixel = useCallback(() => {
@@ -80,7 +81,6 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 	const [pan, setPan] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
 	const [isPanning, setIsPanning] = useState<boolean>(false);
 	const [dragStart, setDragStart] = useState<{ x: number, y: number } | null>(null);
-	const [lastClickTime, setLastClickTime] = useState<number>(0);
 
 	// Extract pixel coordinate calculation to a reusable function
 	const getPixelCoordinates = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -90,7 +90,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 		// Adjust for zoom level and pan position
 		const adjustedX = (e.clientX - rect.left - pan.x) / zoomLevel;
 		const adjustedY = (e.clientY - rect.top - pan.y) / zoomLevel;
-		
+
 		return {
 			x: Math.floor(adjustedX / cellSize),
 			y: Math.floor(adjustedY / cellSize)
@@ -105,7 +105,6 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 		// Utiliser une fonction d'échelle logarithmique pour mieux distribuer les couleurs
 		const enhancedValue = Math.pow(normalizedValue, 0.7);
 
-		// Définir les palettes de couleurs
 		const colors = [
 			[0, 0, 255],      // Bleu
 			[0, 128, 255],    // Bleu ciel
@@ -137,10 +136,8 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 
 	// Calculate heatmap data
 	const calculateHeatmap = useCallback(() => {
-		// Create a 2D array to store the frequency of modifications for each pixel
 		const heatmapData: number[][] = Array(height).fill(0).map(() => Array(width).fill(0));
 
-		// Count the number of modifications for each pixel
 		pixels.forEach(pixel => {
 			if (pixel.x >= 0 && pixel.x < width && pixel.y >= 0 && pixel.y < height) {
 				heatmapData[pixel.y][pixel.x] = pixel.modificationCount || 1;
@@ -235,7 +232,6 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 		const ctx = canvasRef.current.getContext('2d');
 		if (!ctx) return;
 
-		// Apply transformation for zoom and pan
 		ctx.save();
 		ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
 		ctx.translate(pan.x, pan.y);
@@ -243,7 +239,6 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 
 		// Si mode heatmap, on ne dessine pas les pixels normaux d'abord
 		if (!showHeatmap) {
-			// Draw regular pixels (only in normal mode)
 			pixels.forEach(pixel => {
 				ctx.fillStyle = pixel.color;
 				ctx.fillRect(pixel.x * cellSize, pixel.y * cellSize, cellSize, cellSize);
@@ -304,12 +299,10 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 		if (showHeatmap) {
 			const { heatmapData, maxValue } = calculateHeatmap();
 
-			// Draw heatmap cells (completely replacing the original colors)
 			for (let y = 0; y < height; y++) {
 				for (let x = 0; x < width; x++) {
 					const value = heatmapData[y][x];
 					if (value > 0) {
-						// Utiliser une couleur pleine (non transparente) pour remplacer complètement la couleur d'origine
 						const heatmapColor = getHeatmapColor(value, maxValue);
 						ctx.fillStyle = heatmapColor;
 						ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
@@ -318,18 +311,15 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 						if (cellSize * zoomLevel > 15) {  // Only show numbers if cells are big enough
 							const rgbMatch = heatmapColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
 
-							let textColor = 'black'; // Défaut à noir
+							let textColor = 'black';
 
 							if (rgbMatch) {
-								// Formule de luminance perçue (Rec. 709)
 								const r = parseInt(rgbMatch[1], 10);
 								const g = parseInt(rgbMatch[2], 10);
 								const b = parseInt(rgbMatch[3], 10);
 
-								// Calculer la luminance (valeur entre 0 et 255)
 								const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
 
-								// Si la luminance est inférieure à 140 (sur 255), utiliser du texte blanc, sinon noir
 								textColor = luminance < 140 ? 'white' : 'black';
 							}
 
@@ -350,7 +340,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 
 		// Draw a border around the entire grid
 		ctx.strokeStyle = '#000000';
-		ctx.lineWidth = 3 / zoomLevel; // Make the border thicker but scale with zoom
+		ctx.lineWidth = 3 / zoomLevel;
 		ctx.strokeRect(0, 0, width * cellSize, height * cellSize);
 
 		// Restore context to clear transformations
@@ -378,7 +368,6 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 	useImperativeHandle(ref, () => ({
 		getCanvas: () => canvasRef.current,
 		exportCanvas: () => {
-			// Create a clean canvas for export without grid lines or heatmap
 			const exportCanvas = document.createElement('canvas');
 			exportCanvas.width = width;
 			exportCanvas.height = height;
@@ -414,29 +403,25 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 		if (isPanning && dragStart && canvasRef.current) {
 			const dx = e.clientX - dragStart.x;
 			const dy = e.clientY - dragStart.y;
-			
-			// Calculate the bounds to keep at least 25% of the canvas in view
+
 			const canvasWidth = canvasRef.current.width;
 			const canvasHeight = canvasRef.current.height;
 			const gridWidth = width * cellSize * zoomLevel;
 			const gridHeight = height * cellSize * zoomLevel;
-			
-			// Calculate new pan position
+
 			const newPanX = pan.x + dx;
 			const newPanY = pan.y + dy;
-			
-			// Apply constraints to keep grid partially visible
+
 			const minX = -gridWidth + canvasWidth * 0.25;
 			const maxX = canvasWidth * 0.75;
 			const minY = -gridHeight + canvasHeight * 0.25;
 			const maxY = canvasHeight * 0.75;
-			
-			// Apply constrained pan
+
 			setPan({
 				x: Math.min(Math.max(newPanX, minX), maxX),
 				y: Math.min(Math.max(newPanY, minY), maxY)
 			});
-			
+
 			setDragStart({ x: e.clientX, y: e.clientY });
 		}
 	}, [isPanning, dragStart, canvasRef, pan, width, height, cellSize, zoomLevel]);
@@ -448,11 +433,10 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 			setIsPanning(false);
 			setDragStart(null);
 		}
+
 		// For left button release (pixel placement)
 		else if (e.button === 0) {
-			// Place pixel only if it's a valid position
 			if (canvasRef.current && !loading && !showHeatmap && canCreatePixel() && editable) {
-				// Get the pixel coordinates and place a pixel
 				const coords = getPixelCoordinates(e);
 				if (coords && onPixelClick && coords.x >= 0 && coords.x < width && coords.y >= 0 && coords.y < height) {
 					onPixelClick(coords.x, coords.y);
@@ -465,11 +449,11 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 	const handleZoomIn = useCallback(() => {
 		setZoomLevel(prev => {
 			const newZoom = Math.min(prev * 1.2, 50); // Limit max zoom to 5x
-			// Adjust pan to maintain center when zooming
+
 			if (canvasRef.current) {
 				const centerX = canvasRef.current.width / 2;
 				const centerY = canvasRef.current.height / 2;
-				// Adjust pan to keep the center point stable
+
 				setPan(prevPan => ({
 					x: centerX - ((centerX - prevPan.x) * (newZoom / prev)),
 					y: centerY - ((centerY - prevPan.y) * (newZoom / prev))
@@ -483,11 +467,11 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 	const handleZoomOut = useCallback(() => {
 		setZoomLevel(prev => {
 			const newZoom = Math.max(prev / 1.2, 0.5); // Limit min zoom to 0.5x
-			// Adjust pan to maintain center when zooming
+
 			if (canvasRef.current) {
 				const centerX = canvasRef.current.width / 2;
 				const centerY = canvasRef.current.height / 2;
-				// Adjust pan to keep the center point stable
+
 				setPan(prevPan => ({
 					x: centerX - ((centerX - prevPan.x) * (newZoom / prev)),
 					y: centerY - ((centerY - prevPan.y) * (newZoom / prev))
@@ -501,13 +485,9 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 	const handleResetView = useCallback(() => {
 		setZoomLevel(1);
 		setPan({ x: 0, y: 0 });
-		// Also reset any panning state
 		setIsPanning(false);
 		setDragStart(null);
 	}, []);
-
-	// Handle canvas mouse movement for tooltip
-	// Inside PixelGrid.tsx, modify the handleCanvasMouseMove function:
 
 	const handleCanvasTooltipMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
 		if (!canvasRef.current || isPanning) return;
@@ -529,11 +509,11 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 
 		const formatGuestUsername = (userId: string, username?: string): string => {
 			if (userId.startsWith('guest-')) {
-			  const guestNumber = userId.substring(6, 11);
-			  return `Guest-${guestNumber}`;
+				const guestNumber = userId.substring(6, 11);
+				return `Guest-${guestNumber}`;
 			}
 			return username || userId;
-		  };
+		};
 
 		const formatDate = (dateString: string) => {
 			const date = new Date(dateString);
@@ -574,11 +554,10 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 						tooltipContent += `\nCurrent color: ${pixel.color}`;
 						tooltipContent += `\nLast modified: ${formatDate(pixel.lastModifiedDate)}`;
 					} else {
-						// In normal mode, prioritize color and standard information
+
 						tooltipContent += `\nColor: ${pixel.color}`;
 						tooltipContent += `\n${formatDate(pixel.lastModifiedDate)}`;
 
-						// Format contributors with usernames instead of IDs
 						const usernames = pixel.modifiedBy.map(userId => {
 							const formattedId = formatGuestUsername(userId);
 
@@ -607,11 +586,11 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 
 				const formattedUsernames = pixel.modifiedBy.map(userId => {
 					if (userId.startsWith('guest-')) {
-					  const guestNumber = userId.substring(6, 11);
-					  return `Guest-${guestNumber}`;
+						const guestNumber = userId.substring(6, 11);
+						return `Guest-${guestNumber}`;
 					}
 					return userId;
-				  });
+				});
 
 				tooltipContent += `\nBy: ${Array.from(new Set(formattedUsernames)).join(', ')}`;
 
@@ -654,42 +633,35 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		if (!canvas) return;
-		
-		// Function to handle wheel events with non-passive listener
+
 		const wheelHandler = (e: WheelEvent) => {
 			e.preventDefault();
-			
-			// Get mouse position relative to canvas
+
 			const rect = canvas.getBoundingClientRect();
 			const mouseX = e.clientX - rect.left;
 			const mouseY = e.clientY - rect.top;
-			
-			// Calculate position in the grid coordinates before zoom
+
 			const gridX = (mouseX - pan.x) / zoomLevel;
 			const gridY = (mouseY - pan.y) / zoomLevel;
-			
+
 			// Determine zoom direction and calculate new zoom level
 			const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9; // Zoom in or out
 			const newZoomLevel = Math.min(Math.max(zoomLevel * zoomFactor, 0.5), 50); // Limit zoom between 0.5x and 5x
-			
-			// Update zoom level
+
 			setZoomLevel(newZoomLevel);
-			
-			// Calculate new pan to keep the point under the mouse in the same position
+
 			const newPanX = mouseX - gridX * newZoomLevel;
 			const newPanY = mouseY - gridY * newZoomLevel;
-			
-			// Apply the new pan
+
 			setPan({
 				x: newPanX,
 				y: newPanY
 			});
 		};
-		
+
 		// Add wheel event with the { passive: false } option
 		canvas.addEventListener('wheel', wheelHandler, { passive: false });
-		
-		// Clean up
+
 		return () => {
 			canvas.removeEventListener('wheel', wheelHandler);
 		};
@@ -701,7 +673,6 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 		return false;
 	}, []);
 
-	// Déterminer le curseur à afficher
 	const getCursor = () => {
 		if (loading) return 'wait';
 		if (showHeatmap) return 'default';
@@ -715,30 +686,30 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 		<div ref={wrapperRef} className={`pixel-grid-wrapper ${className}`}>
 			{/* Zoom controls */}
 			<div className="zoom-controls">
-				<button 
-					className="zoom-button" 
-					onClick={handleZoomIn} 
+				<button
+					className="zoom-button"
+					onClick={handleZoomIn}
 					title="Zoom In"
 				>
 					+
 				</button>
-				<button 
-					className="zoom-button" 
-					onClick={handleZoomOut} 
+				<button
+					className="zoom-button"
+					onClick={handleZoomOut}
 					title="Zoom Out"
 				>
 					-
 				</button>
-				<button 
-					className="zoom-button reset-button" 
-					onClick={handleResetView} 
+				<button
+					className="zoom-button reset-button"
+					onClick={handleResetView}
 					title="Reset View"
 				>
 					↺
 				</button>
 				<div className="zoom-level">{Math.round(zoomLevel * 100)}%</div>
 			</div>
-			
+
 			<canvas
 				ref={canvasRef}
 				width={canvasSize.width}
@@ -779,7 +750,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 			{!canCreatePixel && !showHeatmap && editable && (
 				<div className="pixel-grid-permission-overlay">
 					<div className="permission-message">
-						You don't have permission to place pixels. Please log in or request access.
+						You don&apos;t have permission to place pixels. Please log in or request access.
 					</div>
 				</div>
 			)}

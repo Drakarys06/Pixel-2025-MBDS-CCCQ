@@ -19,14 +19,14 @@ interface TimeData {
 }
 
 const TimeRemaining: React.FC<TimeRemainingProps> = ({
-														 creationTime,
-														 durationMinutes,
-														 closeTime,
-														 showProgressBar = true,
-														 className = '',
-														 badge = false,
-														 onTimeExpired
-													 }) => {
+	creationTime,
+	durationMinutes,
+	closeTime,
+	showProgressBar = true,
+	className = '',
+	badge = false,
+	onTimeExpired
+}) => {
 	const [timeData, setTimeData] = useState<TimeData>({
 		timeRemaining: "Calculating...",
 		isExpired: false,
@@ -62,19 +62,16 @@ const TimeRemaining: React.FC<TimeRemainingProps> = ({
 
 		// Format the time remaining in days, hours, minutes
 		const remainingSeconds = Math.floor(remainingMs / 1000);
-		const remainingDays = Math.floor(remainingSeconds / 86400); // 86400 seconds in a day
+		const remainingDays = Math.floor(remainingSeconds / 86400);
 		const remainingHours = Math.floor((remainingSeconds % 86400) / 3600);
 		const remainingMinutes = Math.floor((remainingSeconds % 3600) / 60);
 
 		let timeString;
 		if (remainingDays > 0) {
-			// If days, show days and hours (don't need minutes)
 			timeString = `${remainingDays}d ${remainingHours}h`;
 		} else if (remainingHours > 0) {
-			// If hours but no days, show hours and minutes
 			timeString = `${remainingHours}h ${remainingMinutes}m`;
 		} else {
-			// Only minutes remaining
 			timeString = `${remainingMinutes}m`;
 		}
 

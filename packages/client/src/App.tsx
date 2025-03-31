@@ -20,22 +20,6 @@ import { PERMISSIONS } from './components/auth/permissions';
 import './styles/index.css';
 import './styles/colors.css';
 
-// Fonction pour nettoyer les anciennes données d'authentification de localStorage
-const cleanupLocalStorage = () => {
-	// Vérifier s'il y a des données d'authentification dans localStorage
-	const hasLocalStorageAuth = localStorage.getItem('token') || 
-		localStorage.getItem('userId') || 
-		localStorage.getItem('username');
-
-	// Si on trouve des données, les supprimer
-	if (hasLocalStorageAuth) {
-		localStorage.removeItem('token');
-		localStorage.removeItem('userId');
-		localStorage.removeItem('username');
-		console.log('Anciennes données d\'authentification supprimées de localStorage');
-	}
-};
-
 const App: React.FC = () => {
 	// Nettoyer les anciennes données de localStorage au démarrage
 	useEffect(() => {

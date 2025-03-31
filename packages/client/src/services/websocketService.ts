@@ -1,4 +1,5 @@
 import { io, Socket } from 'socket.io-client';
+import { PixelData } from '../components/features/PixelForm';
 
 export const EVENTS = {
     JOIN_BOARD: 'joinBoard',
@@ -60,7 +61,7 @@ class WebSocketService {
     }
 
     // Listener for pixel placed events
-    onPixelPlaced(callback: (pixelData: any) => void): void {
+    onPixelPlaced(callback: (pixelData: PixelData) => void): void {
         if (!this.socket) {
             console.log("Cannot listen for pixel events: socket not connected");
             return;

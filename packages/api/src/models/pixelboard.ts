@@ -9,8 +9,8 @@ export interface IPixelBoard extends Document {
 	redraw: boolean;
 	closeTime: Date;
 	creationTime: Date;
-	creator: string; // ID de l'utilisateur créateur
-	creatorUsername: string; // Nom d'utilisateur du créateur
+	creator: string;
+	creatorUsername: string;
 	visitor: boolean;
 	cooldown: number;
 	contributors: Array<{
@@ -99,7 +99,7 @@ const PixelBoardSchema: Schema = new Schema({
 });
 
 // Add validation for date relationships
-PixelBoardSchema.pre('validate', function(next) {
+PixelBoardSchema.pre('validate', function (next) {
 	const pixelBoard = this as unknown as IPixelBoard;
 
 	if (pixelBoard.closeTime && pixelBoard.creationTime) {

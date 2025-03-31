@@ -30,6 +30,11 @@
   color: #e53935;
 }
 
+.message.info {
+  background-color: rgba(33, 150, 243, 0.1);
+  color: #1e88e5;
+}
+
 /* Styles communs pour les trois blocs */
 .profile-block {
   background-color: var(--bg-secondary);
@@ -236,12 +241,41 @@
   box-shadow: 0 0 0 2px rgba(147, 112, 219, 0.2);
 }
 
+.form-group input:disabled {
+  background-color: var(--disabled-bg);
+  color: var(--disabled-color);
+  cursor: not-allowed;
+}
+
+/* Styles pour le message "loading" */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.25rem;
+}
+
+/* Styles pour le mode visiteur */
+.guest-mode-message {
+  margin: 2rem auto;
+  max-width: 600px;
+  text-align: center;
+}
+
+.guest-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
 /* Adaptations responsives */
 @media (max-width: 768px) {
   .profile-content {
     padding: 1rem;
   }
-  
+
   .stats-grid {
     grid-template-columns: 1fr;
   }

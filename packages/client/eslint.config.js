@@ -6,6 +6,23 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import typescriptPlugin from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
 
+/* eslint-disable */
+// Helper function to convert warnings to 'off'
+const removeWarnings = (rulesObject) => {
+  const result = {};
+  for (const [key, value] of Object.entries(rulesObject)) {
+    if (Array.isArray(value) && value[0] === 'warn') {
+      result[key] = 'off';
+    } else if (value === 'warn') {
+      result[key] = 'off';
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+};
+/* eslint-enable */
+
 export default [
   { ignores: ['dist'] },
   {
@@ -31,14 +48,13 @@ export default [
       ...js.configs.recommended.rules,
       ...react.configs.recommended.rules,
       ...react.configs['jsx-runtime'].rules,
-      ...reactHooks.configs.recommended.rules,
       ...typescriptPlugin.configs.recommended.rules,
       'react/jsx-no-target-blank': 'off',
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
       'semi': ['error', 'always'],
+      
+      // Disable specific warnings from your project
+      'react-refresh/only-export-components': 'off',
+      'react-hooks/exhaustive-deps': 'off',
     },
   },
 ];

@@ -53,7 +53,6 @@ const ExplorePage: React.FC = () => {
 			setLoading(true);
 			setError(null);
 			try {
-				// Récupérer le token d'authentification depuis localStorage
 				const token = localStorage.getItem('token');
 
 				const response = await fetch(`${API_URL}/api/pixelboards`, {
@@ -121,9 +120,6 @@ const ExplorePage: React.FC = () => {
 
 		// Apply status filter
 		if (filterBy !== 'all') {
-			// Get current time for comparison
-			const now = new Date();
-
 			result = result.filter(board => {
 				const isExpired = isBoardExpired(board);
 
@@ -263,10 +259,10 @@ const ExplorePage: React.FC = () => {
 						<div className="permission-note">
 							{!isLoggedIn ? (
 								<span>
-                  <a href="/login" className="text-link">Log in</a> or <a href="/signup" className="text-link">sign up</a> to create your own boards!
-                </span>
+									<a href="/login" className="text-link">Log in</a> or <a href="/signup" className="text-link">sign up</a> to create your own boards!
+								</span>
 							) : (
-								<span>Your current role doesn't allow board creation.</span>
+								<span>Your current role doesn&apos;t allow board creation.</span>
 							)}
 						</div>
 					}

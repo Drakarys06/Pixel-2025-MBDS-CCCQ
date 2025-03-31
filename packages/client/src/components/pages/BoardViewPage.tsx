@@ -1,4 +1,3 @@
-// Modified BoardViewPage.tsx to include the timelapse component
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import Layout from '../layout/Layout';
@@ -6,7 +5,7 @@ import PixelGrid, { PixelGridRef } from '../features/PixelGrid';
 import BoardInfo from '../features/BoardInfo';
 import BoardControls from '../features/BoardControls';
 import BoardContributors, { Contributor } from '../features/BoardContributors';
-import BoardTimelapse from '../features/BoardTimelapse'; // Import the new component
+import BoardTimelapse from '../features/BoardTimelapse';
 import Alert from '../ui/Alert';
 import Loader from '../ui/Loader';
 import ExportCanvas from '../ui/ExportCanvas';
@@ -56,7 +55,7 @@ const BoardViewPage: React.FC = () => {
 	const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 	const [showGridLines, setShowGridLines] = useState<boolean>(false);
 	const [showHeatmap, setShowHeatmap] = useState<boolean>(false);
-	const [showTimelapse, setShowTimelapse] = useState<boolean>(false); // New state for timelapse visibility
+	const [showTimelapse, setShowTimelapse] = useState<boolean>(false);
 	const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
 	const pixelGridRef = useRef<PixelGridRef>(null);
 	const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
