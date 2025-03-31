@@ -33,7 +33,7 @@ interface ActivityItem {
 }
 
 const ProfilePage: React.FC = () => {
-  const { currentUser, isLoggedIn, isGuestMode, logout } = useAuth();
+  const { currentUser, isLoggedIn, isGuestMode, logout, updateUser } = useAuth();
   const navigate = useNavigate();
 
   // Redirect to login if user is not logged in or is a guest
@@ -276,13 +276,6 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  // Méthode de mise à jour utilisateur
-  const updateUser = (updatedUser: Partial<any>) => {
-    // Mettre à jour le contexte d'authentification
-    // Vous devrez probablement ajouter cette méthode dans votre AuthContext
-    updateUser(updatedUser);
-  };
-
   // Formater la date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -414,8 +407,6 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* The rest of the component remains the same */}
-        
         {/* BLOC 2: Statistiques de l'utilisateur */}
         <div className="profile-block stats-block">
           <h2 className="block-title">User Statistics</h2>
