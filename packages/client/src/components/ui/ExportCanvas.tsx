@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import '../../styles/ui/ExportCanvas.css';
 import Button from './Button';
 import { PixelGridRef } from '../features/PixelGrid';
+import { PixelData } from '../features/PixelForm';
 
 interface ExportCanvasProps {
 	getCanvasData: () => HTMLCanvasElement | null;
@@ -25,7 +26,7 @@ const ExportCanvas: React.FC<ExportCanvasProps> = ({
 	const [transparent, setTransparent] = useState(true);
 	const [isOpen, setIsOpen] = useState(false);
 	const dialogRef = useRef<HTMLDivElement>(null);
-	const [pixels, setPixels] = useState<any[]>([]);
+	const [pixels, setPixels] = useState<PixelData[]>([]);
 
 	// When export type changes, reset custom size for PNG
 	useEffect(() => {

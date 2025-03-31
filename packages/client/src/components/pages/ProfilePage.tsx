@@ -37,7 +37,7 @@ const TemporaryProfilePage: React.FC = () => {
 						<p>Please check back later for your full profile details.</p>
 
 						<div className="message info">
-							We're currently updating our profile system. Thanks for your patience!
+							We&apos;re currently updating our profile system. Thanks for your patience!
 						</div>
 					</div>
 				</div>

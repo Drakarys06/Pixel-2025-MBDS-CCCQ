@@ -3,7 +3,6 @@ import { Link, NavLink } from 'react-router-dom';
 import ThemeToggle from '../ui/ThemeToggle';
 import Button from '../ui/Button';
 import { useAuth } from '../auth/AuthContext';
-import usePermissions from '../auth/usePermissions';
 import PermissionGate from '../auth/PermissionGate';
 import { PERMISSIONS } from '../auth/permissions';
 import '../../styles/layout/Navbar.css';

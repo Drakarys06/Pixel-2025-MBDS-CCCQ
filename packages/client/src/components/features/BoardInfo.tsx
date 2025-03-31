@@ -40,15 +40,6 @@ const BoardInfo: React.FC<BoardInfoProps> = ({
 		});
 	};
 
-	// Calculate if board is expired
-	const isExpired = React.useMemo(() => {
-		if (closeTime) return true;
-
-		const creation = new Date(creationTime);
-		const end = new Date(creation.getTime() + duration * 60 * 1000);
-		return new Date() > end;
-	}, [creationTime, duration, closeTime]);
-
 	return (
 		<div className="board-info">
 			<div className="board-header">

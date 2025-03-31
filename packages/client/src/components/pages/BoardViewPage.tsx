@@ -55,7 +55,7 @@ const BoardViewPage: React.FC = () => {
 	const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 	const [showGridLines, setShowGridLines] = useState<boolean>(false);
 	const [showHeatmap, setShowHeatmap] = useState<boolean>(false);
-	const [showTimelapse, setShowTimelapse] = useState<boolean>(false)
+	const [showTimelapse, setShowTimelapse] = useState<boolean>(false);
 	const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
 	const pixelGridRef = useRef<PixelGridRef>(null);
 	const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);

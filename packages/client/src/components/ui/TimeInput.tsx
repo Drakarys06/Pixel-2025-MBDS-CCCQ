@@ -23,7 +23,6 @@ const TimeInput: React.FC<TimeInputProps> = ({
 	required = false,
 	id,
 	name,
-	placeholder,
 	includeDays = false
 }) => {
 	// Constantes pour les conversions

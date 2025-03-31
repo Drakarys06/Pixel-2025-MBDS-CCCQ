@@ -54,6 +54,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 	showGridLines = false,
 	showHeatmap = false
 }, ref) => {
+	PixelGrid.displayName = 'PixelGrid';
 	const { currentUser, isGuestMode } = useAuth();
 	const permissions = usePermissions();
 	const canCreatePixel = useCallback(() => {
@@ -749,7 +750,7 @@ const PixelGrid = forwardRef<PixelGridRef, PixelGridProps>(({
 			{!canCreatePixel && !showHeatmap && editable && (
 				<div className="pixel-grid-permission-overlay">
 					<div className="permission-message">
-						You don't have permission to place pixels. Please log in or request access.
+						You don&apos;t have permission to place pixels. Please log in or request access.
 					</div>
 				</div>
 			)}
