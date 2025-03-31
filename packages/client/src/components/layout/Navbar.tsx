@@ -2,7 +2,6 @@ import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import ThemeToggle from '../ui/ThemeToggle';
 import Button from '../ui/Button';
-import RoleBadge from '../ui/RoleBadge';
 import { useAuth } from '../auth/AuthContext';
 import usePermissions from '../auth/usePermissions';
 import PermissionGate from '../auth/PermissionGate';
@@ -15,11 +14,9 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ logoText = 'PixelBoard' }) => {
 	const { isLoggedIn, currentUser, logout, isGuestMode } = useAuth();
-	const permissions = usePermissions();
 
 	const handleLogout = () => {
 		logout();
-		// La redirection est gérée dans la fonction logout
 	};
 
 	// Get first letter of username for avatar
@@ -38,7 +35,7 @@ const Navbar: React.FC<NavbarProps> = ({ logoText = 'PixelBoard' }) => {
 
 				{/* Navigation links */}
 				<div className="navbar-links">
-					<NavLink to="/explore" className={({isActive}) =>
+					<NavLink to="/explore" className={({ isActive }) =>
 						isActive ? "navbar-link active" : "navbar-link"
 					}>
 						Explore
@@ -46,7 +43,7 @@ const Navbar: React.FC<NavbarProps> = ({ logoText = 'PixelBoard' }) => {
 
 					{/* Conditionnellement afficher le lien Create si l'utilisateur a la permission */}
 					<PermissionGate permission={PERMISSIONS.BOARD_CREATE}>
-						<NavLink to="/create" className={({isActive}) =>
+						<NavLink to="/create" className={({ isActive }) =>
 							isActive ? "navbar-link active" : "navbar-link"
 						}>
 							Create
@@ -55,7 +52,7 @@ const Navbar: React.FC<NavbarProps> = ({ logoText = 'PixelBoard' }) => {
 
 					{/* Lien My Boards toujours visible pour les utilisateurs connectés */}
 					{isLoggedIn && (
-						<NavLink to="/boards" className={({isActive}) =>
+						<NavLink to="/boards" className={({ isActive }) =>
 							isActive ? "navbar-link active" : "navbar-link"
 						}>
 							My Boards

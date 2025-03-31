@@ -12,7 +12,7 @@ export interface Contributor {
 
 interface BoardContributorsProps {
 	boardId: string;
-	refreshTrigger?: number; // Nouvelle prop pour déclencher le rafraîchissement
+	refreshTrigger?: number;
 }
 
 const BoardContributors: React.FC<BoardContributorsProps> = ({ boardId, refreshTrigger = 0 }) => {
@@ -70,7 +70,7 @@ const BoardContributors: React.FC<BoardContributorsProps> = ({ boardId, refreshT
 	// Rafraîchissement des contributeurs au chargement initial et quand refreshTrigger change
 	useEffect(() => {
 		fetchContributors();
-	}, [boardId, API_URL, refreshTrigger]); // Ajouter refreshTrigger aux dépendances
+	}, [boardId, API_URL, refreshTrigger]);
 
 	// Calculer le total des pixels placés
 	const totalPixels = contributors.reduce((sum, contributor) => sum + contributor.pixelsCount, 0);

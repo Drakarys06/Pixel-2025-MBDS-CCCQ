@@ -1,41 +1,41 @@
 :root {
-    /* Light theme colors */
-    --bg-primary: #F5F7FA;
-    --bg-secondary: #FFFFFF;
-    --bg-tertiary: #f9f9f9;
-    --text-primary: #333333;
-    --text-secondary: #666666;
-    --border-color: #EEEEEE;
-    --accent-color: #4285f4;
-    --accent-hover: #3367d6;
-    --hover-color: #f1f3f4;
-    --input-bg: #FFFFFF;
-    --input-border: #DDDDDD;
-    --error-bg: #ffebee;
-    --error-color: #d32f2f;
-    --success-bg: #e8f5e9;
-    --success-color: #2e7d32;
-    --header-bg: #FFFFFF;
-    --shadow-color: rgba(0, 0, 0, 0.1);
-  }
-  
-  [data-theme="dark"] {
-    /* Dark theme colors */
-    --bg-primary: #121212;
-    --bg-secondary: #1E1E1E;
-    --bg-tertiary: #2D2D2D;
-    --text-primary: #E0E0E0;
-    --text-secondary: #A0A0A0;
-    --border-color: #333333;
-    --accent-color: #4285f4;
-    --accent-hover: #5C9CFF;
-    --hover-color: #2D2D2D;
-    --input-bg: #2D2D2D;
-    --input-border: #444444;
-    --error-bg: #350909;
-    --error-color: #FF5252;
-    --success-bg: #0D2E14;
-    --success-color: #66BB6A;
-    --header-bg: #1E1E1E;
-    --shadow-color: rgba(0, 0, 0, 0.4);
-  }
+  /* Light theme colors */
+  --bg-primary: #F5F7FA;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #f9f9f9;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --border-color: #EEEEEE;
+  --accent-color: #4285f4;
+  --accent-hover: #3367d6;
+  --hover-color: #f1f3f4;
+  --input-bg: #FFFFFF;
+  --input-border: #DDDDDD;
+  --error-bg: #ffebee;
+  --error-color: #d32f2f;
+  --success-bg: #e8f5e9;
+  --success-color: #2e7d32;
+  --header-bg: #FFFFFF;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+  /* Dark theme colors */
+  --bg-primary: #121212;
+  --bg-secondary: #1E1E1E;
+  --bg-tertiary: #2D2D2D;
+  --text-primary: #E0E0E0;
+  --text-secondary: #A0A0A0;
+  --border-color: #333333;
+  --accent-color: #4285f4;
+  --accent-hover: #5C9CFF;
+  --hover-color: #2D2D2D;
+  --input-bg: #2D2D2D;
+  --input-border: #444444;
+  --error-bg: #350909;
+  --error-color: #FF5252;
+  --success-bg: #0D2E14;
+  --success-color: #66BB6A;
+  --header-bg: #1E1E1E;
+  --shadow-color: rgba(0, 0, 0, 0.4);
+}

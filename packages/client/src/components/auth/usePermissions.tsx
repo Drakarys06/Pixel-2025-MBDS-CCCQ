@@ -1,11 +1,7 @@
-// usePermissions.tsx
 import { useAuth } from './AuthContext';
 import { PERMISSIONS, ROLES } from './permissions';
 
-/**
- * Un hook personnalisé qui fournit des fonctions utilitaires pour vérifier les permissions
- * et les rôles de l'utilisateur courant.
- */
+/** Hook pour vérifier les permissions et rôles de l'utilisateur. */
 export function usePermissions() {
 	const { hasPermission, hasRole, currentUser, isGuestMode } = useAuth();
 
@@ -26,15 +22,11 @@ export function usePermissions() {
 		getUserId: () => currentUser?.id,
 		getUsername: () => currentUser?.username,
 
-		// Helper pour vérifier si l'utilisateur est le créateur d'une ressource
 		isCreator: (creatorId: string) => currentUser?.id === creatorId,
 
-		// Permission conditionnelle (si créateur OU permission spécifique)
+		// Permission conditionnelle
 		canModifyResource: (creatorId: string, permission: string) =>
 			(currentUser?.id === creatorId) || hasPermission(permission),
-
-		// Fonction spécifique pour vérifier si l'utilisateur peut voir les paramètres d'un board
-		// Un utilisateur peut toujours modifier son propre board même sans la permission BOARD_UPDATE
 		canUpdateOwnBoard: (creatorId: string) =>
 			(currentUser?.id === creatorId) || hasPermission(PERMISSIONS.BOARD_UPDATE)
 	};
