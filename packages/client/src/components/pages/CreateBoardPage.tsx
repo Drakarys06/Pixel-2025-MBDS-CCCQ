@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../layout/Layout';
 import CreateBoardForm, { BoardFormData } from '../features/CreateBoardForm';
 import Alert from '../ui/Alert';
@@ -590,13 +590,8 @@ const CreateBoardPage: React.FC = () => {
 									<li><strong>Time limit:</strong> Set 30 minutes for small boards, longer for larger creations.</li>
 									<li><strong>Cooldown:</strong> Add a cooldown to prevent rapid consecutive placements and give everyone a chance.</li>
 									<li><strong>Redraw option:</strong> Allow users to place pixels over existing ones for evolving creations.</li>
-									<li><strong>Visitor mode:</strong> Enable viewing after the board's active time expires to showcase your community's work.</li>
+									<li><strong>Visitor mode:</strong> Enable viewing after the board&apos;s active time expires to showcase your community&apos;s work.</li>
 								</ul>
-
-								<div className="help-section">
-									<h4>Need help?</h4>
-									<p>Check out our <a href="/guide" className="help-link">board creation guide</a> for more tips and examples.</p>
-								</div>
 							</div>
 						</Card>
 					</div>
@@ -800,32 +795,6 @@ const CreateBoardPage: React.FC = () => {
 					</Card>
 				</div>
 			)}
-
-			<div className="create-board-container">
-				<div className="create-board-main">
-					<CreateBoardForm
-						onSubmit={handleSubmit}
-						loading={loading}
-					/>
-				</div>
-
-				<div className="create-board-info">
-					<Card>
-						<div className="card-header">
-							<h3 className="info-title">Board Guidelines</h3>
-						</div>
-						<div className="card-body">
-							<ul className="guidelines-list">
-								<li>Choose dimensions that suit your artistic vision but consider that larger boards may take longer to fill.</li>
-								<li>Set an appropriate time limit - we recommend 30 minutes for small boards and longer for larger ones.</li>
-								<li>Set a cooldown limit to prevent rapid consecutive pixel placements.</li>
-								<li>The &quot;Allow Redraw&quot; option lets users place pixels over existing ones.</li>
-								<li>Visitor mode allows viewing after the board&apos;s active time has expired.</li>
-							</ul>
-						</div>
-					</Card>
-				</div>
-			</div>
 		</Layout>
 	);
 };

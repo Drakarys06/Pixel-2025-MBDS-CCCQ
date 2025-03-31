@@ -5,7 +5,42 @@ import PixelBoard from '../models/pixelboard';
 
 const router = express.Router();
 
-// Get homepage statistics
+/**
+ * @swagger
+ * tags:
+ *   name: Statistics
+ *   description: Application statistics
+ */
+
+/**
+ * @swagger
+ * /api/stats/home:
+ *   get:
+ *     summary: Get homepage statistics
+ *     tags: [Statistics]
+ *     responses:
+ *       200:
+ *         description: Homepage statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 userCount:
+ *                   type: number
+ *                 boardCount:
+ *                   type: number
+ *                 activeBoards:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 completedBoards:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       500:
+ *         description: Server error
+ */
 router.get('/home', async (_req: Request, res: Response) => {
 	try {
 		const userCount = await User.countDocuments();

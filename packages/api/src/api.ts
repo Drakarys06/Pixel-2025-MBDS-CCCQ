@@ -68,10 +68,8 @@ api.use('/pixelboards', pixelBoardAPI);
 api.use('/pixels', pixelAPI);
 
 // Routes protégées (nécessitant une authentification complète)
-api.use('/articles', auth, articleAPI);
 api.use('/admin', auth, adminAPI);
 api.use('/users', auth, userRoutes);
-
 
 
 // Route pour vérifier l'authentification de l'utilisateur

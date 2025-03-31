@@ -30,7 +30,7 @@ const ExplorePage: React.FC = () => {
 	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState<string>('');
-	const [sortBy, setSortBy] = useState<string>('newest');
+	const [sortBy, setSortBy] = useState<string>('closing-soon');
 	const [filterBy, setFilterBy] = useState<string>('all');
 	const { isLoggedIn, isGuestMode } = useAuth();
 	const navigate = useNavigate();
@@ -107,7 +107,7 @@ const ExplorePage: React.FC = () => {
 	// Sort and filter the boards
 	const filteredAndSortedBoards = React.useMemo(() => {
 		let result = [...pixelBoards];
-
+	
 		// Filter by search term
 		if (searchTerm) {
 			result = result.filter(board =>
@@ -117,12 +117,12 @@ const ExplorePage: React.FC = () => {
 					board.creator.toLowerCase().includes(searchTerm.toLowerCase()))
 			);
 		}
-
+	
 		// Apply status filter
 		if (filterBy !== 'all') {
 			result = result.filter(board => {
 				const isExpired = isBoardExpired(board);
-
+	
 				if (filterBy === 'active') {
 					return !isExpired;
 				} else if (filterBy === 'expired') {
@@ -131,12 +131,12 @@ const ExplorePage: React.FC = () => {
 				return true;
 			});
 		}
-
-		// Filtrer les tableaux qui nécessitent une authentification pour les visiteurs
+	
+		// Filter boards that require authentication for visitors
 		if (!isLoggedIn) {
 			result = result.filter(board => board.visitor);
 		}
-
+	
 		// Tag each board with its active status and remaining time
 		const now = new Date();
 		const taggedResults = result.map(board => {
@@ -144,14 +144,14 @@ const ExplorePage: React.FC = () => {
 			const endTime = creationTime + (board.time * 60 * 1000);
 			const isExpired = board.closeTime !== null || endTime < now.getTime();
 			const timeRemaining = isExpired ? 0 : endTime - now.getTime();
-
+	
 			return {
 				board,
 				isActive: !isExpired,
 				timeRemaining
 			};
 		});
-
+	
 		// Sort the boards
 		let sortedResults;
 		switch (sortBy) {
@@ -176,12 +176,13 @@ const ExplorePage: React.FC = () => {
 				);
 				break;
 			case 'closing-soon':
+				// For closing-soon, first sort by active status, then by time remaining
 				sortedResults = taggedResults.sort((a, b) => {
-					// Closed boards go to the end
+					// First separate active from inactive boards
 					if (!a.isActive && b.isActive) return 1;
 					if (a.isActive && !b.isActive) return -1;
 					if (!a.isActive && !b.isActive) return 0;
-
+	
 					// Sort active boards by time remaining (ascending)
 					return a.timeRemaining - b.timeRemaining;
 				});
@@ -189,22 +190,7 @@ const ExplorePage: React.FC = () => {
 			default:
 				sortedResults = taggedResults;
 		}
-
-		// Always sort by time remaining first (active boards only)
-		sortedResults.sort((a, b) => {
-			// First separate active from inactive boards
-			if (!a.isActive && b.isActive) return 1;
-			if (a.isActive && !b.isActive) return -1;
-
-			// If both are active, sort by remaining time (ascending)
-			if (a.isActive && b.isActive) {
-				return a.timeRemaining - b.timeRemaining;
-			}
-
-			// If both are inactive, keep current order
-			return 0;
-		});
-
+	
 		// Return just the boards without the tags
 		return sortedResults.map(item => item.board);
 	}, [pixelBoards, searchTerm, sortBy, filterBy, isLoggedIn]);

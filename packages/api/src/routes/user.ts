@@ -7,7 +7,42 @@ import Pixel from '../models/pixel';
 
 const router = express.Router();
 
-// Endpoint pour changer le mot de passe
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: User management
+ */
+
+/**
+ * @swagger
+ * /api/users/password:
+ *   put:
+ *     summary: Change user password
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password updated successfully
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Current password is incorrect
+ *       403:
+ *         description: Guest users cannot change passwords
+ */
 router.put('/password', auth, async (req: Request, res: Response) => {
     try {
       // Si l'utilisateur est un invité, il ne peut pas changer de mot de passe
@@ -74,7 +109,30 @@ router.put('/password', auth, async (req: Request, res: Response) => {
     }
   });
 
-// Obtenir les statistiques d'un utilisateur
+/**
+ * @swagger
+ * /api/users/{id}/stats:
+ *   get:
+ *     summary: Get user statistics
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User statistics
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Can only view own stats
+ *       404:
+ *         description: User not found
+ */
 router.get('/:id/stats', auth, async (req: Request, res: Response) => {
   try {
     // Vérifier si l'utilisateur demande ses propres stats
@@ -130,7 +188,30 @@ router.get('/:id/stats', auth, async (req: Request, res: Response) => {
   }
 });
 
-// Obtenir l'activité récente d'un utilisateur
+/**
+ * @swagger
+ * /api/users/{id}/activity:
+ *   get:
+ *     summary: Get user recent activity
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User recent activity
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Can only view own activity
+ *       404:
+ *         description: User not found
+ */
 router.get('/:id/activity', auth, async (req: Request, res: Response) => {
   try {
     // Vérifier si l'utilisateur demande sa propre activité
@@ -176,7 +257,43 @@ router.get('/:id/activity', auth, async (req: Request, res: Response) => {
   }
 });
 
-// Mettre à jour les informations du profil utilisateur (username et email)
+/**
+ * @swagger
+ * /api/users/{id}/profile:
+ *   put:
+ *     summary: Update user profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *       400:
+ *         description: Invalid input or username/email already taken
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Can only update own profile
+ *       404:
+ *         description: User not found
+ */
 router.put('/:id/profile', auth, async (req: Request, res: Response) => {
     try {
       // Vérifier si l'utilisateur met à jour son propre profil

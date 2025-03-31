@@ -19,18 +19,34 @@ app.use(express.json());
 
 app.use('/api', api);
 
-const options = {
+const swaggerOptions = {
 	definition: {
 	  openapi: '3.0.0',
 	  info: {
-		title: 'Pixelboard API',
+		title: 'PixelBoard API',
 		version: '1.0.0',
+		description: 'A collaborative pixel art application API'
 	  },
+	  servers: [
+		{
+		  url: 'http://localhost:8000',
+		  description: 'Development server'
+		}
+	  ],
+	  components: {
+		securitySchemes: {
+		  bearerAuth: {
+			type: 'http',
+			scheme: 'bearer',
+			bearerFormat: 'JWT'
+		  }
+		}
+	  }
 	},
-	apis: ['./src/routes/*.js'],
+	apis: ['./src/routes/*.ts'],
   };
 
-const swaggerSpec = swaggerJsdoc(options);
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
