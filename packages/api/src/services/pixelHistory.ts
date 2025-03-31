@@ -1,4 +1,3 @@
-// packages/api/src/services/pixelHistory.ts
 import PixelHistory, { IPixelHistory } from '../models/pixelHistory';
 import mongoose from 'mongoose';
 
@@ -86,7 +85,6 @@ export const getBoardSnapshots = async (
 	numberOfSnapshots: number
 ): Promise<{ timestamp: Date; count: number }[]> => {
 	try {
-		// Obtenir la première et la dernière entrée pour déterminer la plage de temps
 		const [firstEntry] = await PixelHistory.find({ boardId })
 			.sort({ timestamp: 1 })
 			.limit(1);
@@ -103,13 +101,11 @@ export const getBoardSnapshots = async (
 		const endTime = lastEntry.timestamp;
 		const totalTime = endTime.getTime() - startTime.getTime();
 
-		// Calculer les intervalles pour les snapshots
 		const snapshots = [];
 		for (let i = 0; i < numberOfSnapshots; i++) {
 			const ratio = i / (numberOfSnapshots - 1);
 			const snapshotTime = new Date(startTime.getTime() + totalTime * ratio);
 
-			// Compter les pixels jusqu'à ce point dans le temps
 			const count = await PixelHistory.countDocuments({
 				boardId,
 				timestamp: { $lte: snapshotTime }
@@ -131,7 +127,6 @@ export const getBoardStateAtTime = async (
 	timestamp: Date
 ): Promise<IPixelHistory[]> => {
 	try {
-		// Pour chaque position (x,y), on récupère l'entrée la plus récente avant le timestamp donné
 		const pipeline = [
 			{ $match: { boardId: new mongoose.Types.ObjectId(boardId), timestamp: { $lte: timestamp } } },
 			{ $sort: { timestamp: 1 } },

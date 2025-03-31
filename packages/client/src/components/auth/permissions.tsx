@@ -25,33 +25,33 @@ export const ROLE_MANAGE = 'role:manage';
 
 // Regroupement des permissions
 export const PERMISSIONS = {
-  // Permissions utilisateur
-  USER_VIEW,
-  USER_CREATE,
-  USER_UPDATE,
-  USER_DELETE,
-  
-  // Permissions de tableau
-  BOARD_VIEW,
-  BOARD_CREATE,
-  BOARD_UPDATE,
-  BOARD_DELETE,
-  
-  // Permissions de pixel
-  PIXEL_VIEW,
-  PIXEL_CREATE,
-  PIXEL_UPDATE,
-  PIXEL_DELETE,
-  
-  // Permissions administratives
-  ADMIN_ACCESS,
-  ROLE_MANAGE
+	// Permissions utilisateur
+	USER_VIEW,
+	USER_CREATE,
+	USER_UPDATE,
+	USER_DELETE,
+
+	// Permissions de tableau
+	BOARD_VIEW,
+	BOARD_CREATE,
+	BOARD_UPDATE,
+	BOARD_DELETE,
+
+	// Permissions de pixel
+	PIXEL_VIEW,
+	PIXEL_CREATE,
+	PIXEL_UPDATE,
+	PIXEL_DELETE,
+
+	// Permissions administratives
+	ADMIN_ACCESS,
+	ROLE_MANAGE
 };
 
 // Rôles prédéfinis
 export const ROLES = {
-  ADMIN: 'admin',
-  MODERATOR: 'moderator',
-  USER: 'user',
-  GUEST: 'guest'
+	ADMIN: 'admin',
+	MODERATOR: 'moderator',
+	USER: 'user',
+	GUEST: 'guest'
 };

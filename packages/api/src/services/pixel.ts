@@ -1,20 +1,16 @@
-// packages/api/src/services/pixel.ts - Version corrigée
 import Pixel, { IPixel } from '../models/pixel';
 import PixelBoard from '../models/pixelboard';
 import mongoose from 'mongoose';
-// Importez correctement le service d'historique des pixels
 import * as pixelHistoryService from './pixelHistory';
 
 // Create a new pixel
 export const createPixel = async (pixelData: Partial<IPixel>): Promise<IPixel> => {
 	try {
-		// Check if board exists
 		const boardExists = await PixelBoard.exists({ _id: pixelData.boardId });
 		if (!boardExists) {
 			throw new Error('PixelBoard not found');
 		}
 
-		// Assurer que modificationCount est initialisé à 1 pour les nouveaux pixels
 		if (!pixelData.modificationCount) {
 			pixelData.modificationCount = 1;
 		}
@@ -61,12 +57,10 @@ export const getPixelByPosition = async (boardId: string, x: number, y: number):
 // Update a pixel
 export const updatePixel = async (id: string, updates: Partial<IPixel>, userId: string): Promise<IPixel | null> => {
 	try {
-		// Start a session for transaction
 		const session = await mongoose.startSession();
 		session.startTransaction();
 
 		try {
-			// Find the existing pixel first
 			const existingPixel = await Pixel.findById(id).session(session);
 			if (!existingPixel) {
 				await session.abortTransaction();
@@ -74,7 +68,6 @@ export const updatePixel = async (id: string, updates: Partial<IPixel>, userId: 
 				return null;
 			}
 
-			// Add the user to modifiedBy if not already present
 			if (!existingPixel.modifiedBy.includes(userId)) {
 				if (!updates.modifiedBy) {
 					updates.modifiedBy = [...existingPixel.modifiedBy, userId];
@@ -83,16 +76,13 @@ export const updatePixel = async (id: string, updates: Partial<IPixel>, userId: 
 				}
 			}
 
-			// Incrémenter le compteur de modifications
 			updates.modificationCount = (existingPixel.modificationCount || 1) + 1;
 
-			// Update the lastModifiedDate
 			updates.lastModifiedDate = new Date();
 
-			// Perform the update
 			const pixel = await Pixel.findByIdAndUpdate(id, updates, {
-				new: true, // Return the updated document
-				runValidators: true, // Validate the updates
+				new: true,
+				runValidators: true,
 				session
 			});
 
@@ -117,26 +107,22 @@ export const placePixel = async (
 	y: number,
 	color: string,
 	userId: string,
-	username: string = "Unknown User" // Default username
+	username: string = "Unknown User"
 ): Promise<IPixel> => {
 	try {
-		// Vérifier si le tableau existe
 		const board = await PixelBoard.findById(boardId);
 		if (!board) {
 			throw new Error('PixelBoard not found');
 		}
 
-		// Vérifier si les coordonnées sont valides
 		if (x < 0 || x >= board.width || y < 0 || y >= board.length) {
 			throw new Error('Coordinates are outside the board boundaries');
 		}
 
-		// Démarrer une session pour la transaction
 		const session = await mongoose.startSession();
 		session.startTransaction();
 
 		try {
-			// Créer une entrée d'historique pour ce placement de pixel
 			await pixelHistoryService.createPixelHistoryEntry({
 				boardId,
 				x,
@@ -147,23 +133,19 @@ export const placePixel = async (
 				timestamp: new Date()
 			});
 
-			// Chercher un pixel existant à ces coordonnées
 			let pixel = await Pixel.findOne({ boardId, x, y }).session(session);
 
 			if (pixel) {
-				// Mettre à jour le pixel existant
 				if (!pixel.modifiedBy.includes(userId)) {
 					pixel.modifiedBy.push(userId);
 				}
 
-				// Incrémenter le compteur de modifications
 				pixel.modificationCount = (pixel.modificationCount || 1) + 1;
 
 				pixel.color = color;
 				pixel.lastModifiedDate = new Date();
 				await pixel.save({ session });
 			} else {
-				// Créer un nouveau pixel
 				pixel = new Pixel({
 					boardId,
 					x,
@@ -171,7 +153,7 @@ export const placePixel = async (
 					color,
 					modifiedBy: [userId],
 					lastModifiedDate: new Date(),
-					modificationCount: 1 // Initialiser à 1 pour un nouveau pixel
+					modificationCount: 1
 				});
 				await pixel.save({ session });
 			}

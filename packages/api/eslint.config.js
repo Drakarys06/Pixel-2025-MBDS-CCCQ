@@ -1,3 +1,4 @@
+/* eslint-disable */
 const js = require('@eslint/js');
 const globals = require('globals');
 const typescript = require('@typescript-eslint/eslint-plugin');
@@ -6,6 +7,9 @@ const parser = require('@typescript-eslint/parser');
 module.exports = [
   js.configs.recommended,
   {
+    ignores: [
+      'eslint.config.js',
+    ],
     languageOptions: {
       parser: parser,
       parserOptions: {
@@ -27,3 +31,4 @@ module.exports = [
     },
   },
 ];
+/* eslint-enable */

@@ -22,14 +22,7 @@ const CreateBoardPage: React.FC = () => {
 	const [success, setSuccess] = useState<string | null>(null);
 	const navigate = useNavigate();
 	const { currentUser } = useAuth();
-
-	// Mode de création actif
 	const [creationMode, setCreationMode] = useState<'manual' | 'image'>('manual');
-
-	// États pour la création manuelle
-	const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
-	// États pour l'importation d'image
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 	const [boardTitle, setBoardTitle] = useState<string>('');
@@ -40,17 +33,16 @@ const CreateBoardPage: React.FC = () => {
 	const [message, setMessage] = useState<string | null>(null);
 	const [imageSize, setImageSize] = useState<{width: number, height: number}>({width: 0, height: 0});
 	const [finalImageSize, setFinalImageSize] = useState<{width: number, height: number}>({width: 0, height: 0});
-
-	// Options de configuration du board pour l'import d'image
-	const [boardDurationSeconds, setBoardDurationSeconds] = useState<number>(30 * 24 * 60 * 60); // 30 jours en secondes
+	const [boardDurationSeconds, setBoardDurationSeconds] = useState<number>(30 * 24 * 60 * 60);
 	const [allowRedraw, setAllowRedraw] = useState<boolean>(true);
 	const [enableVisitor, setEnableVisitor] = useState<boolean>(true);
-	const [pixelCooldownSeconds, setPixelCooldownSeconds] = useState<number>(0); // secondes
-
+	const [pixelCooldownSeconds, setPixelCooldownSeconds] = useState<number>(0);
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const previewCanvasRef = useRef<HTMLCanvasElement>(null);
 	const imageRef = useRef<HTMLImageElement | null>(null);
 
+	const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  
 	// Clear alerts when component unmounts
 	useEffect(() => {
 		return () => {
@@ -98,7 +90,8 @@ const CreateBoardPage: React.FC = () => {
 		}
 	}, [selectedFile]);
 
-	// Handle form submission pour création manuelle
+
+	// Handle form submission
 	const handleSubmit = async (formData: BoardFormData) => {
 		setLoading(true);
 		setError(null);
@@ -807,6 +800,32 @@ const CreateBoardPage: React.FC = () => {
 					</Card>
 				</div>
 			)}
+
+			<div className="create-board-container">
+				<div className="create-board-main">
+					<CreateBoardForm
+						onSubmit={handleSubmit}
+						loading={loading}
+					/>
+				</div>
+
+				<div className="create-board-info">
+					<Card>
+						<div className="card-header">
+							<h3 className="info-title">Board Guidelines</h3>
+						</div>
+						<div className="card-body">
+							<ul className="guidelines-list">
+								<li>Choose dimensions that suit your artistic vision but consider that larger boards may take longer to fill.</li>
+								<li>Set an appropriate time limit - we recommend 30 minutes for small boards and longer for larger ones.</li>
+								<li>Set a cooldown limit to prevent rapid consecutive pixel placements.</li>
+								<li>The &quot;Allow Redraw&quot; option lets users place pixels over existing ones.</li>
+								<li>Visitor mode allows viewing after the board&apos;s active time has expired.</li>
+							</ul>
+						</div>
+					</Card>
+				</div>
+			</div>
 		</Layout>
 	);
 };

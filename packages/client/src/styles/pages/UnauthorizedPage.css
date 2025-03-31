@@ -1,73 +1,73 @@
 .unauthorized-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 70vh;
-    padding: 2rem;
-  }
-  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh;
+  padding: 2rem;
+}
+
+.unauthorized-content {
+  max-width: 600px;
+  text-align: center;
+  background-color: var(--color-card-bg);
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.unauthorized-title {
+  color: var(--color-error);
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.unauthorized-icon {
+  color: var(--color-error);
+  margin-bottom: 1.5rem;
+}
+
+.unauthorized-message {
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  color: var(--color-text);
+}
+
+.permission-info {
+  background-color: var(--color-background-secondary);
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.permission-info code {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: monospace;
+  font-weight: bold;
+  color: var(--color-primary);
+}
+
+.unauthorized-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 640px) {
   .unauthorized-content {
-    max-width: 600px;
-    text-align: center;
-    background-color: var(--color-card-bg);
-    border-radius: 12px;
-    padding: 2.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
   }
-  
+
   .unauthorized-title {
-    color: var(--color-error);
-    font-size: 2.5rem;
-    margin-bottom: 1.5rem;
+    font-size: 2rem;
   }
-  
-  .unauthorized-icon {
-    color: var(--color-error);
-    margin-bottom: 1.5rem;
-  }
-  
-  .unauthorized-message {
-    font-size: 1.2rem;
-    margin-bottom: 1.5rem;
-    color: var(--color-text);
-  }
-  
-  .permission-info {
-    background-color: var(--color-background-secondary);
-    padding: 0.75rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-    color: var(--color-text-muted);
-  }
-  
-  .permission-info code {
-    background-color: rgba(0, 0, 0, 0.1);
-    padding: 0.2rem 0.4rem;
-    border-radius: 4px;
-    font-family: monospace;
-    font-weight: bold;
-    color: var(--color-primary);
-  }
-  
+
   .unauthorized-actions {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-top: 2rem;
+    flex-direction: column;
+    gap: 0.75rem;
   }
-  
-  @media (max-width: 640px) {
-    .unauthorized-content {
-      padding: 1.5rem;
-    }
-    
-    .unauthorized-title {
-      font-size: 2rem;
-    }
-    
-    .unauthorized-actions {
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-  }
+}

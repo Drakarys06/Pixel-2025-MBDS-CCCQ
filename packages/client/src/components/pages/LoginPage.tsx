@@ -145,7 +145,7 @@ const LoginPage: React.FC = () => {
 					</div>
 
 					<div className="login-footer">
-						<p>Don't have an account? <Link to="/signup">Sign up</Link></p>
+						<p>Don&apos;t have an account? <Link to="/signup">Sign up</Link></p>
 					</div>
 				</div>
 			</div>

@@ -57,7 +57,6 @@ export const getPixelBoardsByCreator = async (creatorId: string): Promise<IPixel
 // Get pixel boards where a user has contributed (placed at least one pixel)
 export const getPixelBoardsWithUserContribution = async (userId: string): Promise<IPixelBoard[]> => {
 	try {
-		// Utiliser l'array contributors qui a déjà été optimisé pour la recherche
 		const pixelBoards = await PixelBoard.find({
 			"contributors.userId": userId
 		});

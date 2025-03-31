@@ -9,10 +9,10 @@ export interface BoardFormData {
 	title: string;
 	length: number;
 	width: number;
-	time: number; // en minutes
+	time: number;
 	redraw: boolean;
 	visitor: boolean;
-	cooldown: number; // en secondes
+	cooldown: number;
 }
 
 interface CreateBoardFormProps {
@@ -31,7 +31,6 @@ const CreateBoardForm: React.FC<CreateBoardFormProps> = ({ onSubmit, loading }) 
 		cooldown: 0
 	});
 
-	// Constante pour la durée maximale en secondes (365 jours)
 	const MAX_DURATION_SECONDS = 365 * 24 * 60 * 60; // 365 jours en secondes
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,8 +45,6 @@ const CreateBoardForm: React.FC<CreateBoardFormProps> = ({ onSubmit, loading }) 
 	};
 
 	const handleTimeChange = (totalSeconds: number) => {
-		// Convertir les secondes en minutes pour le state
-		// Le TimeInput fonctionne en secondes mais on stocke en minutes
 		setFormData(prevState => ({
 			...prevState,
 			time: Math.floor(totalSeconds / 60)
@@ -115,9 +112,9 @@ const CreateBoardForm: React.FC<CreateBoardFormProps> = ({ onSubmit, loading }) 
 					{/* Board Duration TimeInput avec maximum 365 jours */}
 					<TimeInput
 						label="Board Duration"
-						value={formData.time * 60} // Convertir minutes en secondes pour le composant
+						value={formData.time * 60}
 						onChange={handleTimeChange}
-						maxTime={MAX_DURATION_SECONDS} // 365 jours en secondes
+						maxTime={MAX_DURATION_SECONDS}
 						minTime={1}
 						placeholder="How long will the board be active?"
 						name="time"
