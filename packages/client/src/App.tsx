@@ -10,7 +10,8 @@ import NotFoundPage from './components/pages/NotFoundPage';
 import LoginPage from './components/pages/LoginPage';
 import SignupPage from './components/pages/SignUpPage';
 import TemporaryProfilePage from './components/pages/ProfilePage';
-import UnauthorizedPage from './components/pages/UnauthorizedPage.tsx'; // Nouvelle page pour accès non autorisé
+import UnauthorizedPage from './components/pages/UnauthorizedPage';
+import ImageToPixelBoardPage from './components/pages/ImageToPixelBoardPage'; // Import our new component
 import { AuthProvider } from './components/auth/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import PermissionRoute from './components/auth/PermissionRoute';
@@ -51,7 +52,14 @@ const App: React.FC = () => {
 									<CreateBoardPage />
 								</PermissionRoute>
 							} />
-							
+
+							{/* New route for image to pixel board */}
+							<Route path="/create-from-image" element={
+								<PermissionRoute permission={PERMISSIONS.BOARD_CREATE}>
+									<ImageToPixelBoardPage />
+								</PermissionRoute>
+							} />
+
 							<Route path="/boards" element={
 								<ProtectedRoute>
 									<MyBoardsPage />
