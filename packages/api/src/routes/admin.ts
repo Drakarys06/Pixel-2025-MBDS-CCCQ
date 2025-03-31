@@ -11,9 +11,29 @@ const router = express.Router();
 // Middleware qui vérifie si l'utilisateur est administrateur
 const isAdmin = hasRole(DEFAULT_ROLES.ADMIN);
 
-// === Routes pour la gestion des utilisateurs ===
+/**
+ * @swagger
+ * tags:
+ *   name: Admin
+ *   description: Administrative operations
+ */
 
-// Récupérer tous les utilisateurs
+/**
+ * @swagger
+ * /api/admin/users:
+ *   get:
+ *     summary: Get all users
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all users
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
 router.get('/users',
   auth,
   hasPermission(PERMISSIONS.USER_VIEW),
@@ -30,7 +50,78 @@ router.get('/users',
     }
   });
 
-// Récupérer un utilisateur par son ID
+/**
+ * @swagger
+ * /api/admin/users/{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User details
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: User not found
+ *   put:
+ *     summary: Update user
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: User not found
+ *   delete:
+ *     summary: Delete user
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *       400:
+ *         description: Cannot delete own account
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: User not found
+ */
 router.get('/users/:id',
   auth,
   hasPermission(PERMISSIONS.USER_VIEW),
@@ -107,9 +198,49 @@ router.delete('/users/:id',
     }
   });
 
-// === Routes pour la gestion des rôles ===
-
-// Récupérer tous les rôles
+/**
+ * @swagger
+ * /api/admin/roles:
+ *   get:
+ *     summary: Get all roles
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all roles
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *   post:
+ *     summary: Create a new role
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               permissions:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       201:
+ *         description: Role created successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
 router.get('/roles',
   auth,
   hasPermission(PERMISSIONS.ROLE_MANAGE),
@@ -299,9 +430,22 @@ router.get('/roles/:roleId/users',
     }
   });
 
-// === Dashboard d'administration ===
-
-// Obtenir les statistiques pour le dashboard d'administration
+/**
+ * @swagger
+ * /api/admin/dashboard:
+ *   get:
+ *     summary: Get admin dashboard statistics
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dashboard statistics
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
 router.get('/dashboard',
   auth,
   hasPermission(PERMISSIONS.ADMIN_ACCESS),

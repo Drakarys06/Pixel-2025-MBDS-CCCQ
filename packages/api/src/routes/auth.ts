@@ -11,7 +11,38 @@ const router = express.Router();
 // JWT Secret (devrait être dans les variables d'environnement en production)
 const JWT_SECRET = 'pixelboard-secret-key-change-in-production';
 
-// Route d'inscription
+/**
+ * @swagger
+ * tags:
+ *   name: Authentication
+ *   description: User authentication endpoints
+ */
+
+/**
+ * @swagger
+ * /api/auth/signup:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *       400:
+ *         description: Email or username already in use
+ */
 router.post('/signup', async (req: Request, res: Response) => {
 	try {
 		const { username, email, password } = req.body;
@@ -75,7 +106,29 @@ router.post('/signup', async (req: Request, res: Response) => {
 	}
 });
 
-// Route de connexion
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Login with email and password
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       401:
+ *         description: Invalid credentials
+ */
 router.post('/login', async (req: Request, res: Response) => {
 	try {
 		const { email, password } = req.body;
@@ -137,7 +190,20 @@ router.post('/login', async (req: Request, res: Response) => {
 	}
 });
 
-// Route pour vérifier si un token est valide
+/**
+ * @swagger
+ * /api/auth/verify:
+ *   get:
+ *     summary: Verify user token
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Token is valid
+ *       401:
+ *         description: Invalid or expired token
+ */
 router.get('/verify', auth, async (req: Request, res: Response) => {
 	try {
 		// Trouver l'utilisateur avec ses rôles
@@ -185,7 +251,18 @@ router.get('/verify', auth, async (req: Request, res: Response) => {
 	}
 });
 
-// Route pour se connecter en tant que visiteur (optionnel, si implémenté côté serveur)
+/**
+ * @swagger
+ * /api/auth/guest-login:
+ *   post:
+ *     summary: Login as guest
+ *     tags: [Authentication]
+ *     responses:
+ *       200:
+ *         description: Guest login successful
+ *       500:
+ *         description: Server error
+ */
 router.post('/guest-login', async (req: Request, res: Response) => {
 	try {
 		// Trouver le rôle de visiteur

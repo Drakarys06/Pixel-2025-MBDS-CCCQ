@@ -8,8 +8,27 @@ import { DEFAULT_ROLES } from '../services/roleService';
 
 const router = express.Router();
 
-// Get boards created by the authenticated user (requires authentication)
-// Important: cette route doit être AVANT la route /:id pour éviter l'erreur
+/**
+ * @swagger
+ * tags:
+ *   name: PixelBoards
+ *   description: PixelBoard management
+ */
+
+/**
+ * @swagger
+ * /api/pixelboards/my-boards:
+ *   get:
+ *     summary: Get boards created by the logged in user
+ *     tags: [PixelBoards]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of user's boards
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/my-boards', auth, async (req: Request, res: Response) => {
 	try {
 		const userId = req.user._id;
@@ -24,7 +43,20 @@ router.get('/my-boards', auth, async (req: Request, res: Response) => {
 	}
 });
 
-// Get boards where the authenticated user has contributed (placed at least one pixel)
+/**
+ * @swagger
+ * /api/pixelboards/contributed-boards:
+ *   get:
+ *     summary: Get boards where the user has contributed
+ *     tags: [PixelBoards]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of boards the user has contributed to
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/contributed-boards', auth, async (req: Request, res: Response) => {
 	try {
 		const userId = req.user._id;
@@ -39,7 +71,66 @@ router.get('/contributed-boards', auth, async (req: Request, res: Response) => {
 	}
 });
 
-// Create a new pixel board (requires authentication and permission)
+/**
+ * @swagger
+ * /api/pixelboards/{id}:
+ *   get:
+ *     summary: Get a pixel board by ID
+ *     tags: [PixelBoards]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: The pixel board
+ *       404:
+ *         description: Board not found
+ *   put:
+ *     summary: Update a pixel board
+ *     tags: [PixelBoards]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Board updated successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Board not found
+ *   delete:
+ *     summary: Delete a pixel board
+ *     tags: [PixelBoards]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Board deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Board not found
+ */
 router.post('/',
 	auth,
 	hasPermission(PERMISSIONS.BOARD_CREATE),
@@ -65,8 +156,7 @@ router.post('/',
 			}
 		}
 	});
-
-// Get all pixel boards (optional authentication)
+	
 router.get('/', optionalAuth, async (req: Request, res: Response) => {
 	try {
 		const pixelBoards = await pixelBoardService.getAllPixelBoards();
@@ -80,7 +170,6 @@ router.get('/', optionalAuth, async (req: Request, res: Response) => {
 	}
 });
 
-// Get a pixel board by ID
 router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
 	try {
 		const pixelBoard = await pixelBoardService.getPixelBoardById(req.params.id);
@@ -118,8 +207,6 @@ router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
 	}
 });
 
-// Update a pixel board (requires authentication)
-// MODIFICATION: Supprimé la vérification hasPermission pour permettre aux créateurs de modifier leurs propres tableaux
 router.put('/:id',
 	auth,
 	isResourceCreator(
@@ -152,7 +239,6 @@ router.put('/:id',
 		}
 	});
 
-// Delete a pixel board (requires authentication and permission)
 router.delete('/:id',
 	auth,
 	hasPermission(PERMISSIONS.BOARD_DELETE),

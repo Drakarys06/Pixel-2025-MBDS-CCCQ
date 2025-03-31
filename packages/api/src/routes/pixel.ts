@@ -10,7 +10,30 @@ import PixelBoard from '../models/pixelboard';
 
 const router = express.Router();
 
-// Get all pixels (optional authentication)
+/**
+ * @swagger
+ * tags:
+ *   name: Pixels
+ *   description: Pixel management
+ */
+
+
+/**
+ * @swagger
+ * /api/pixels:
+ *   get:
+ *     summary: Get all pixels
+ *     tags: [Pixels]
+ *     parameters:
+ *       - in: query
+ *         name: boardId
+ *         schema:
+ *           type: string
+ *         description: Filter by board ID
+ *     responses:
+ *       200:
+ *         description: List of pixels
+ */
 router.get('/', optionalAuth, async (req: Request, res: Response) => {
 	try {
 		const boardId = req.query.boardId as string;
@@ -40,7 +63,42 @@ router.get('/', optionalAuth, async (req: Request, res: Response) => {
 	}
 });
 
-// Get a pixel by ID (optional authentication)
+/**
+ * @swagger
+ * /api/pixels/{id}:
+ *   get:
+ *     summary: Get a pixel by ID
+ *     tags: [Pixels]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: The pixel
+ *       404:
+ *         description: Pixel not found
+ *   delete:
+ *     summary: Delete a pixel
+ *     tags: [Pixels]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Pixel deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Pixel not found
+ */
 router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
 	try {
 		const pixel = await pixelService.getPixelById(req.params.id);
@@ -58,7 +116,45 @@ router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
 	}
 });
 
-// Place a pixel (create or update) at specific coordinates on a board (requires authentication)
+/**
+ * @swagger
+ * /api/pixels/board/{boardId}/place:
+ *   post:
+ *     summary: Place a pixel on a board
+ *     tags: [Pixels]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: boardId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               x:
+ *                 type: number
+ *               y:
+ *                 type: number
+ *               color:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Pixel placed successfully
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Board is closed or user doesn't have permission
+ *       429:
+ *         description: Too many requests (cooldown period)
+ */
 router.post('/board/:boardId/place',
 	auth,
 	async (req: Request, res: Response) => {
@@ -210,7 +306,32 @@ router.delete('/:id',
 		}
 	});
 
-// Récupérer l'historique des pixels pour un tableau spécifique
+/**
+ * @swagger
+ * /api/pixels/board/{boardId}/history:
+ *   get:
+ *     summary: Get pixel history for a board
+ *     tags: [Pixels]
+ *     parameters:
+ *       - in: path
+ *         name: boardId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: skip
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Pixel history for the board
+ *       404:
+ *         description: Board not found
+ */
 router.get('/board/:boardId/history', optionalAuth, async (req: Request, res: Response) => {
 	try {
 		const { boardId } = req.params;
@@ -257,7 +378,32 @@ router.get('/board/:boardId/history', optionalAuth, async (req: Request, res: Re
 	}
 });
 
-// Récupérer un instantané du tableau à un moment précis
+/**
+ * @swagger
+ * /api/pixels/board/{boardId}/snapshot:
+ *   get:
+ *     summary: Get board snapshot at a specific time
+ *     tags: [Pixels]
+ *     parameters:
+ *       - in: path
+ *         name: boardId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: timestamp
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *     responses:
+ *       200:
+ *         description: Board state at the requested time
+ *       400:
+ *         description: Invalid timestamp
+ *       404:
+ *         description: Board not found
+ */
 router.get('/board/:boardId/snapshot', optionalAuth, async (req: Request, res: Response) => {
 	try {
 		const { boardId } = req.params;
@@ -331,7 +477,24 @@ router.get('/board/:boardId/timelapse-points', optionalAuth, async (req: Request
 	}
 });
 
-// Ajouter les contributeurs à un tableau (route existante)
+/**
+ * @swagger
+ * /api/pixels/board/{boardId}/contributors:
+ *   get:
+ *     summary: Get board contributors
+ *     tags: [Pixels]
+ *     parameters:
+ *       - in: path
+ *         name: boardId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of board contributors
+ *       404:
+ *         description: Board not found
+ */
 router.get('/board/:boardId/contributors', optionalAuth, async (req: Request, res: Response) => {
 	try {
 		const { boardId } = req.params;
