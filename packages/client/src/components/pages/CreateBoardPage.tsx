@@ -592,11 +592,6 @@ const CreateBoardPage: React.FC = () => {
 									<li><strong>Redraw option:</strong> Allow users to place pixels over existing ones for evolving creations.</li>
 									<li><strong>Visitor mode:</strong> Enable viewing after the board's active time expires to showcase your community's work.</li>
 								</ul>
-
-								<div className="help-section">
-									<h4>Need help?</h4>
-									<p>Check out our <a href="/guide" className="help-link">board creation guide</a> for more tips and examples.</p>
-								</div>
 							</div>
 						</Card>
 					</div>
@@ -800,32 +795,6 @@ const CreateBoardPage: React.FC = () => {
 					</Card>
 				</div>
 			)}
-
-			<div className="create-board-container">
-				<div className="create-board-main">
-					<CreateBoardForm
-						onSubmit={handleSubmit}
-						loading={loading}
-					/>
-				</div>
-
-				<div className="create-board-info">
-					<Card>
-						<div className="card-header">
-							<h3 className="info-title">Board Guidelines</h3>
-						</div>
-						<div className="card-body">
-							<ul className="guidelines-list">
-								<li>Choose dimensions that suit your artistic vision but consider that larger boards may take longer to fill.</li>
-								<li>Set an appropriate time limit - we recommend 30 minutes for small boards and longer for larger ones.</li>
-								<li>Set a cooldown limit to prevent rapid consecutive pixel placements.</li>
-								<li>The &quot;Allow Redraw&quot; option lets users place pixels over existing ones.</li>
-								<li>Visitor mode allows viewing after the board&apos;s active time has expired.</li>
-							</ul>
-						</div>
-					</Card>
-				</div>
-			</div>
 		</Layout>
 	);
 };
