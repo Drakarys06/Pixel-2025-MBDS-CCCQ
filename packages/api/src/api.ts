@@ -8,6 +8,7 @@ import statsRoutes from './routes/stats';
 import { auth, optionalAuth } from './middleware/auth';
 import cors from 'cors';
 import * as roleService from './services/roleService';
+import userRoutes from './routes/user';
 
 export const api = express.Router();
 
@@ -69,6 +70,9 @@ api.use('/pixels', pixelAPI);
 // Routes protégées (nécessitant une authentification complète)
 api.use('/articles', auth, articleAPI);
 api.use('/admin', auth, adminAPI);
+api.use('/users', auth, userRoutes);
+
+
 
 // Route pour vérifier l'authentification de l'utilisateur
 api.get('/check-auth', optionalAuth, async (req: Request, res: Response) => {
