@@ -45,14 +45,12 @@ router.post('/',
 	hasPermission(PERMISSIONS.BOARD_CREATE),
 	async (req: Request, res: Response) => {
 		try {
-			// Ajouter l'ID ET le nom d'utilisateur du créateur
 			const pixelBoard = await pixelBoardService.createPixelBoard({
 				...req.body,
 				creator: req.user._id,
 				creatorUsername: req.user.username
 			});
 
-			// Incrémenter le compteur de tableaux créés par l'utilisateur (seulement si pas invité)
 			if (!req.isGuest && req.user.boardsCreated !== undefined) {
 				req.user.boardsCreated += 1;
 				await req.user.save();
@@ -90,7 +88,6 @@ router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
 			return res.status(404).json({ message: 'PixelBoard not found' });
 		}
 
-		// Si le tableau n'autorise pas les visiteurs et que l'utilisateur n'est pas authentifié
 		if (!pixelBoard.visitor && !req.user) {
 			return res.status(401).json({
 				message: 'Authentication required to view this board',
@@ -98,21 +95,16 @@ router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
 			});
 		}
 
-		// Par défaut, tous les utilisateurs peuvent voir le tableau
 		let readOnly = false;
 
-		// Si l'utilisateur n'est pas authentifié ou est en mode visiteur
 		if (!req.user || req.isGuest) {
-			// Vérifier si les visiteurs peuvent modifier ce tableau
 			if (!pixelBoard.visitor) {
 				readOnly = true;
 			}
 		} else {
-			// Tous les utilisateurs authentifiés peuvent modifier les tableaux
 			readOnly = false;
 		}
 
-		// Retourner le tableau avec l'indicateur readOnly
 		res.json({
 			...pixelBoard.toObject(),
 			readOnly
@@ -130,12 +122,11 @@ router.get('/:id', optionalAuth, async (req: Request, res: Response) => {
 // MODIFICATION: Supprimé la vérification hasPermission pour permettre aux créateurs de modifier leurs propres tableaux
 router.put('/:id',
 	auth,
-	// La vérification hasPermission(PERMISSIONS.BOARD_UPDATE) a été supprimée ici
 	isResourceCreator(
 		async (req) => {
 			return await pixelBoardService.getPixelBoardById(req.params.id);
 		},
-		PERMISSIONS.BOARD_UPDATE // Permettre de contourner la vérification du créateur si l'utilisateur a cette permission
+		PERMISSIONS.BOARD_UPDATE
 	),
 	async (req: Request, res: Response) => {
 		try {
@@ -144,11 +135,10 @@ router.put('/:id',
 				return res.status(404).json({ message: 'PixelBoard not found' });
 			}
 
-			// S'assurer que le nom d'utilisateur du créateur n'est pas modifié
 			const updatedData = {
 				...req.body,
-				creator: pixelBoard.creator, // Conserver l'ID du créateur
-				creatorUsername: pixelBoard.creatorUsername // Conserver le nom d'utilisateur
+				creator: pixelBoard.creator,
+				creatorUsername: pixelBoard.creatorUsername
 			};
 
 			const updatedBoard = await pixelBoardService.updatePixelBoard(req.params.id, updatedData);
@@ -170,7 +160,7 @@ router.delete('/:id',
 		async (req) => {
 			return await pixelBoardService.getPixelBoardById(req.params.id);
 		},
-		PERMISSIONS.BOARD_DELETE // Permettre de contourner la vérification du créateur si l'utilisateur a cette permission
+		PERMISSIONS.BOARD_DELETE
 	),
 	async (req: Request, res: Response) => {
 		try {
@@ -181,7 +171,6 @@ router.delete('/:id',
 
 			const deletedBoard = await pixelBoardService.deletePixelBoard(req.params.id);
 
-			// Décrémenter le compteur de tableaux créés par l'utilisateur (si pas invité)
 			if (!req.isGuest && req.user.boardsCreated !== undefined) {
 				req.user.boardsCreated -= 1;
 				if (req.user.boardsCreated < 0) req.user.boardsCreated = 0;

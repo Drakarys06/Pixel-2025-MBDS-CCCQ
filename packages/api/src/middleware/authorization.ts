@@ -14,9 +14,7 @@ export const hasPermission = (permission: string) => {
 		}
 
 		try {
-			// Vérifier si l'utilisateur est en mode visiteur
 			if (req.isGuest) {
-				// Récupérer le rôle visiteur et ses permissions
 				const guestRole = await Role.findOne({ name: DEFAULT_ROLES.GUEST });
 				if (!guestRole) {
 					return res.status(403).json({
@@ -25,7 +23,6 @@ export const hasPermission = (permission: string) => {
 					});
 				}
 
-				// Vérifier si le rôle visiteur a la permission requise
 				if (!guestRole.permissions.includes(permission)) {
 					return res.status(403).json({
 						success: false,
@@ -37,7 +34,6 @@ export const hasPermission = (permission: string) => {
 				return next();
 			}
 
-			// Pour les utilisateurs authentifiés, vérifier les permissions via la méthode du modèle
 			const hasPermission = await req.user.hasPermission(permission);
 
 			if (!hasPermission) {
@@ -72,9 +68,7 @@ export const hasRole = (role: string | string[]) => {
 		}
 
 		try {
-			// Vérifier si l'utilisateur est en mode visiteur
 			if (req.isGuest) {
-				// Vérifier si le rôle visiteur est dans la liste des rôles autorisés
 				if (!roles.includes(DEFAULT_ROLES.GUEST)) {
 					return res.status(403).json({
 						success: false,
@@ -86,7 +80,6 @@ export const hasRole = (role: string | string[]) => {
 				return next();
 			}
 
-			// Pour les utilisateurs authentifiés, vérifier les rôles
 			let hasRequiredRole = false;
 
 			for (const roleName of roles) {
@@ -126,7 +119,6 @@ export const isResourceCreator = (getResourceFn: (req: Request) => Promise<any>,
 		}
 
 		try {
-			// Obtenir la ressource
 			const resource = await getResourceFn(req);
 
 			if (!resource) {
@@ -136,18 +128,14 @@ export const isResourceCreator = (getResourceFn: (req: Request) => Promise<any>,
 				});
 			}
 
-			// Si une permission de contournement est spécifiée et que l'utilisateur l'a, autoriser
 			if (bypassPermission && await req.user.hasPermission(bypassPermission)) {
 				return next();
 			}
 
-			// Vérifier si l'utilisateur est le créateur
 			if (resource.creator && resource.creator.toString() === req.user._id.toString()) {
-				// C'est le créateur, autoriser l'accès
 				return next();
 			}
 
-			// Si l'utilisateur n'est ni le créateur ni n'a la permission bypass
 			return res.status(403).json({
 				success: false,
 				message: 'Forbidden: You are not the creator of this resource'

@@ -1,4 +1,3 @@
-// packages/api/src/models/pixelHistory.ts
 import mongoose, { Schema, Document } from 'mongoose';
 
 // Interface représentant un document d'historique de pixel

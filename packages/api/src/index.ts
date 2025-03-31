@@ -15,7 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/', (_req: Request, res: Response) => {
-  res.json('Hello World!');
+	res.json('Hello World!');
 });
 app.use('/api', api);
 
@@ -23,40 +23,40 @@ const httpServer = createServer(app);
 
 // Create Socket.IO server
 const io = new Server(httpServer, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-    credentials: true,
-    allowedHeaders: ["Authorization", "Content-Type"]
-  },
-  transports: ['websocket', 'polling']
+	cors: {
+		origin: "*",
+		methods: ["GET", "POST"],
+		credentials: true,
+		allowedHeaders: ["Authorization", "Content-Type"]
+	},
+	transports: ['websocket', 'polling']
 });
 
 // WebSocket event handlers
 io.on("connection", (socket) => {
-  console.log('A user connected:', socket.id);
+	console.log('A user connected:', socket.id);
 
-  // Handle board room joining
-  socket.on('joinBoard', (boardId: string) => {
-    socket.join(`board-${boardId}`);
-    console.log(`User ${socket.id} joined board ${boardId}`);
-  });
+	// Handle board room joining
+	socket.on('joinBoard', (boardId: string) => {
+		socket.join(`board-${boardId}`);
+		console.log(`User ${socket.id} joined board ${boardId}`);
+	});
 
-  // Handle board room leaving
-  socket.on('leaveBoard', (boardId: string) => {
-    socket.leave(`board-${boardId}`);
-    console.log(`User ${socket.id} left board ${boardId}`);
-  });
+	// Handle board room leaving
+	socket.on('leaveBoard', (boardId: string) => {
+		socket.leave(`board-${boardId}`);
+		console.log(`User ${socket.id} left board ${boardId}`);
+	});
 
-  // Handle disconnection
-  socket.on('disconnect', () => {
-    console.log('A user disconnected:', socket.id);
-  });
+	// Handle disconnection
+	socket.on('disconnect', () => {
+		console.log('A user disconnected:', socket.id);
+	});
 });
 
 export { io };
 
 httpServer.listen(port, () => {
-  console.log(`Server listening on ${port}`);
-  console.log(`WebSocket server initialized`);
+	console.log(`Server listening on ${port}`);
+	console.log(`WebSocket server initialized`);
 });
