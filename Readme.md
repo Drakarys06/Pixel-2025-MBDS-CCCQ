@@ -15,6 +15,10 @@ Ceci est un projet mono-repo pour le projet PixelBoard MBDS 2025. Il contient le
 
 Cette structure permet une organisation claire et une gestion centralisée des dépendances.
 
+## Déploiement
+
+L'application est déployée et accessible à l'adresse suivante: http://2.15.254.45:5173/
+
 ## Installation et lancement
 
 Pour installer et lancer le projet en mode développement, exécutez les commandes suivantes dans le répertoire racine :
@@ -121,6 +125,7 @@ npm run lint
 - **Authentification**: JWT (JSON Web Tokens)
 - **Temps réel**: Socket.io pour WebSockets
 - **Structure API**: RESTful
+- **Swagger**: Documentation de l'API
 
 ### Frontend
 - **Framework**: React avec TypeScript
@@ -129,6 +134,10 @@ npm run lint
 - **Gestion d'état**: React Context API
 - **Style**: Modules CSS avec support de thème
 - **Client temps réel**: Socket.io-client
+
+### Husky
+
+Nous avons tenté d'intégrer Husky pour automatiser le linting en pre-commit, mais cette implémentation n'a pas fonctionné comme prévu. Visual Studio parvenait à contourner les hooks de pre-commit, rendant l'outil inefficace.
 
 ## Structure du projet
 ```
