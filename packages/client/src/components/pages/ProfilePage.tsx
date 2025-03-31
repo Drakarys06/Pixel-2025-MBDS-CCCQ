@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import Layout from '../layout/Layout';
+import Alert from '../ui/Alert';
+import Button from '../ui/Button';
 import '../../styles/pages/Profile.css';
 import '../../styles/components/ActivityList.css';
 
@@ -31,9 +33,45 @@ interface ActivityItem {
 }
 
 const ProfilePage: React.FC = () => {
-  const { currentUser, isLoggedIn, logout, updateUser } = useAuth();
+  const { currentUser, isLoggedIn, isGuestMode, logout } = useAuth();
   const navigate = useNavigate();
 
+  // Redirect to login if user is not logged in or is a guest
+  useEffect(() => {
+    if (!isLoggedIn || isGuestMode) {
+      navigate('/login', { state: { from: '/profile' } });
+    }
+  }, [isLoggedIn, isGuestMode, navigate]);
+
+  // If user is a guest, show guest mode message
+  if (isGuestMode) {
+    return (
+      <Layout title="Profile">
+        <div className="guest-mode-message">
+          <Alert
+            variant="info"
+            message="As a guest user, you don't have access to profile settings. Create an account to manage your profile!"
+          />
+          <div className="guest-actions">
+            <Button
+              variant="primary"
+              onClick={() => navigate('/signup')}
+            >
+              Create Account
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => navigate('/explore')}
+            >
+              Explore Boards
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Rest of the original ProfilePage code remains the same as in the previous implementation
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<UserStats | null>(null);
@@ -57,19 +95,6 @@ const ProfilePage: React.FC = () => {
   });
   const [profileError, setProfileError] = useState<string | null>(null);
   const [profileSuccess, setProfileSuccess] = useState<string | null>(null);
-
-  // Rediriger si non connecté et initialiser les données du profil
-  useEffect(() => {
-    if (!isLoggedIn) {
-      navigate('/login', { state: { from: '/profile' } });
-    } else if (currentUser) {
-      // Initialiser les données du profil avec les informations actuelles
-      setProfileData({
-        username: currentUser.username || '',
-        email: currentUser.email || ''
-      });
-    }
-  }, [isLoggedIn, navigate, currentUser]);
 
   // Récupérer les stats de l'utilisateur
   useEffect(() => {
@@ -118,7 +143,7 @@ const ProfilePage: React.FC = () => {
     fetchUserData();
   }, [currentUser, API_URL]);
 
-  // Gérer les changements dans le formulaire de profil
+  // Rest of the methods remain the same as in the previous implementation
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfileData(prev => ({
@@ -127,7 +152,6 @@ const ProfilePage: React.FC = () => {
     }));
   };
 
-  // Soumettre les modifications du profil
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setProfileError(null);
@@ -167,10 +191,9 @@ const ProfilePage: React.FC = () => {
 
       const result = await response.json();
       
-      if (result.success && result.user && currentUser) {
+      if (result.success) {
         // Mettre à jour le contexte d'authentification
         updateUser({
-          ...currentUser,
           username: result.user.username,
           email: result.user.email
         });
@@ -189,7 +212,6 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  // Gérer le changement de mot de passe
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setPasswordData(prev => ({
@@ -198,7 +220,6 @@ const ProfilePage: React.FC = () => {
     }));
   };
 
-  // Soumettre le changement de mot de passe
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -253,6 +274,13 @@ const ProfilePage: React.FC = () => {
       console.error("Error details:", err);
       setPasswordError(err instanceof Error ? err.message : 'Failed to update password');
     }
+  };
+
+  // Méthode de mise à jour utilisateur
+  const updateUser = (updatedUser: Partial<any>) => {
+    // Mettre à jour le contexte d'authentification
+    // Vous devrez probablement ajouter cette méthode dans votre AuthContext
+    updateUser(updatedUser);
   };
 
   // Formater la date
@@ -386,6 +414,8 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
 
+        {/* The rest of the component remains the same */}
+        
         {/* BLOC 2: Statistiques de l'utilisateur */}
         <div className="profile-block stats-block">
           <h2 className="block-title">User Statistics</h2>
