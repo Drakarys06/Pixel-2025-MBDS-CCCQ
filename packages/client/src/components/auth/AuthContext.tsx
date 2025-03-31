@@ -22,7 +22,7 @@ type AuthContextType = {
   loginAsGuest: () => Promise<void>;
   logout: () => void;
   loading: boolean;
-  updateUser: (updatedUser: Partial<UserType>) => void; // Nouvelle fonction
+  updateUser: (updatedUser: Partial<UserType>) => void;
 };
 
 // Création du contexte
